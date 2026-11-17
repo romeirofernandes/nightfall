@@ -17,6 +17,7 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
         let win = gtk::Window::new(gtk::WindowType::Toplevel);
         win.set_title("Nightfall snow");
         win.set_app_paintable(true);
+        win.set_accept_focus(false);
         if let Some(v) = gtk::prelude::WidgetExt::screen(&win).and_then(|s| s.rgba_visual()) {
             win.set_visual(Some(&v));
         }
@@ -36,6 +37,7 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
         });
         let area = gtk::DrawingArea::new();
         win.add(&area);
+        area.set_can_focus(true);
         let winter = std::rc::Rc::new(std::cell::RefCell::new(Winter::new(
             geo.width() as f64,
             geo.height() as f64,
@@ -79,10 +81,11 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
         );
         let model = winter.clone();
         let config = settings.clone();
-        area.connect_button_press_event(move |_, e| {
+        area.connect_button_press_event(move |widget, e| {
             let (x, y) = e.position();
             let mut s = config.lock().unwrap();
             if s.interactive {
+                widget.grab_focus();
                 if y < 60. && x < 520. {
                     s.interactive = false;
                 } else {
@@ -157,7 +160,11 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
                     cairo::Region::create()
                 };
                 window.input_shape_combine_region(&region, 0, 0);
+                if let Some(child) = area.window() {
+                    child.input_shape_combine_region(&region, 0, 0);
+                }
             }
+            win.set_accept_focus(s.interactive && s.enabled);
             win.set_keyboard_mode(if s.interactive && s.enabled {
                 gtk_layer_shell::KeyboardMode::OnDemand
             } else {

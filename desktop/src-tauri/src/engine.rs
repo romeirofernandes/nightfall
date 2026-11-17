@@ -95,22 +95,33 @@ pub struct Flake {
     pub speed: f64,
     pub phase: f64,
 }
+impl Flake {
+    // A stable random phase keeps the same ten percent in front of windows.
+    pub fn foreground(&self) -> bool { self.phase < std::f64::consts::TAU * 0.1 }
+}
+
 #[derive(Clone, Serialize)]
 pub struct Ledge {
     pub id: String,
     pub x: f64,
     pub y: f64,
     pub width: f64,
+    pub height: f64,
     pub age: f64,
     pub bank: Vec<f64>,
 }
 impl Ledge {
+    pub fn with_height(mut self, height: f64) -> Self {
+        self.height = height.max(0.);
+        self
+    }
     pub fn new(id: String, x: f64, y: f64, width: f64) -> Self {
         Self {
             id,
             x,
             y,
             width,
+            height: 0.,
             age: 0.,
             bank: vec![0.; (width.max(1.) / 8.).ceil() as usize],
         }
@@ -143,6 +154,12 @@ pub struct Winter {
     next_plow: f64,
 }
 impl Winter {
+    pub fn visible_flakes(&self) -> impl Iterator<Item = &Flake> {
+        self.flakes.iter().filter(|f| f.foreground() || !self.ledges.iter().any(|l| {
+            l.height > 0. && f.x >= l.x && f.x < l.x + l.width
+                && f.y >= l.y && f.y < l.y + l.height
+        }))
+    }
     pub fn new(width: f64, height: f64) -> Self {
         Self {
             width,
@@ -374,7 +391,7 @@ impl Winter {
                     .iter()
                     .enumerate()
                     .filter_map(|(n, l)| {
-                        if f.x < l.x || f.x >= l.x + l.width {
+                        if (f.foreground() && l.height > 0.) || f.x < l.x || f.x >= l.x + l.width {
                             return None;
                         }
                         let i = (((f.x - l.x) / 8.) as usize).min(l.bank.len() - 1);
@@ -597,6 +614,31 @@ mod tests {
         w.surfaces(vec![Ledge::new("a".into(), 20., 50., 100.)]);
         assert_eq!(w.ledges[0].bank[0], 0.);
         assert!(!w.flakes.is_empty());
+    }
+    #[test]
+    fn only_ten_percent_of_flakes_cover_windows() {
+        let mut w = Winter::new(800., 600.);
+        w.surfaces(vec![Ledge::new("window".into(), 100., 100., 300.).with_height(300.)]);
+        w.flakes = (0..100).map(|i| Flake {
+            x: 200., y: 200., r: 1., speed: 40.,
+            phase: (i as f64 + 0.5) * std::f64::consts::TAU / 100.,
+        }).collect();
+        assert_eq!(w.visible_flakes().count(), 10);
+        // Filtering does not delete particles: all remain visible off the window.
+        for f in &mut w.flakes { f.x = 500.; }
+        assert_eq!(w.visible_flakes().count(), 100);
+    }
+    #[test]
+    fn foreground_flakes_cross_window_ledges() {
+        let mut w = Winter::new(800., 600.);
+        w.surfaces(vec![Ledge::new("window".into(), 100., 100., 300.).with_height(300.)]);
+        w.flakes = vec![
+            Flake { x: 200., y: 99., r: 1., speed: 60., phase: 0.1 },
+            Flake { x: 200., y: 99., r: 1., speed: 60., phase: 3. },
+        ];
+        w.step(0.05, &Settings::default());
+        assert_eq!(w.flakes.iter().filter(|f| f.y > 100.).count(), 1);
+        assert!(w.ledges[0].bank.iter().any(|depth| *depth > 0.));
     }
     #[test]
     fn settings_bounds() {

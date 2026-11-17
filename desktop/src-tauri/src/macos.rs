@@ -57,7 +57,7 @@ pub fn surfaces(ox: f64, oy: f64, width: f64, height: f64) -> Option<Vec<Ledge>>
         }
         let left = (x - ox).max(0.);
         let right = (x - ox + w).min(width);
-        if right > left && y >= oy && y < oy + height {
+        if right > left && y + h > oy && y < oy + height {
             let Some(id) = number(&dict, "kCGWindowNumber") else {
                 continue;
             };
@@ -70,7 +70,7 @@ pub fn surfaces(ox: f64, oy: f64, width: f64, height: f64) -> Option<Vec<Ledge>>
                 left,
                 y - oy,
                 right - left,
-            ));
+            ).with_height(if dock { 0. } else { h }));
         }
     }
     Some(ledges)

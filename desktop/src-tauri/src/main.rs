@@ -85,7 +85,7 @@ fn frame(
     world.step(dt, &state.settings.lock().unwrap());
     let settings = state.settings.lock().unwrap();
     Ok(
-        serde_json::json!({"scene":scene::scene(world, &settings),"flakes":world.flakes,"time":world.time}),
+        serde_json::json!({"scene":scene::scene(world, &settings),"flakes":world.visible_flakes().collect::<Vec<_>>(),"time":world.time}),
     )
 }
 #[tauri::command]

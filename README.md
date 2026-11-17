@@ -1,91 +1,116 @@
-<img src="assets/icon.svg" width="64" height="64" alt="">
+<img src="assets/icon.svg" width="64" height="64" alt="Nightfall">
 
 # Nightfall
 
-An independent desktop snow app for macOS and Arch Linux / Hyprland.
-Native transparent overlays, falling flakes, soft snow banks, window ledges,
-icicles, a small snowman, and a snowplow. No license server, network requests,
-copied commercial code, or commercial assets.
+A little winter for your desktop. A native **Rust + Tauri 2** application with
+a warm, rounded settings UI and a festive interactive landing page.
 
-## Run
+## Get started
 
-Requires Python 3.11+. On Arch, from this directory:
+Requires Rust stable, Node.js 20+, and npm. macOS also needs Xcode Command Line
+Tools (`xcode-select --install`).
+
+```sh
+git clone https://github.com/romeirofernandes/nightfall.git
+cd nightfall
+```
+
+**Arch Linux + Hyprland**
 
 ```sh
 ./scripts/install-arch.sh
-.venv/bin/nightfall
+~/.local/bin/nightfall
 ```
 
-Run inside your Hyprland session (not with sudo). GTK layer shell uses the
-overlay layer, an empty input region, no exclusive zone, and no keyboard focus.
-Window positions come from read-only `hyprctl -j` queries. Each connected
-monitor gets an overlay using logical coordinates.
+Or install the dependencies and build manually:
 
-On macOS, with Python 3 installed:
+```sh
+sudo pacman -S --needed rust nodejs npm base-devel \
+  webkit2gtk-4.1 gtk3 gtk-layer-shell librsvg \
+  libappindicator-gtk3 patchelf
+npm ci
+npm run build -- --no-bundle
+./src-tauri/target/release/nightfall
+```
+
+Run from a Wayland Hyprland session, without sudo. On X11 or unsupported
+compositors, the settings window still works and logs why the overlay is
+unavailable.
+
+**macOS**
 
 ```sh
 ./scripts/install-macos.sh
-.venv/bin/nightfall
 ```
 
-The snowflake menu offers pause/resume, intensity, plow, and quit. AppKit
-overlays join Spaces and ignore mouse input. Quartz supplies on-screen window
-geometry. Depending on macOS privacy settings, window discovery may require
-Screen Recording permission for the terminal/Python launcher; falling snow
-still works without window geometry. No screen pixels or window text are read.
+Or `npm ci && npm run build -- --bundles app`, then open
+`src-tauri/target/release/bundle/macos/Nightfall.app`.
+Local builds are unsigned. Signed/notarized distribution isn't configured.
 
-## Interactive simulation
+## Use
+
+Choose Flurry, Snow day, or Blizzard; adjust the breeze; toggle snowbanks,
+icicles, snowman, and periodic plow. Settings save locally and atomically.
+The tray menu reopens settings and quits the app. Closing settings hides the
+window; choose **Quit** to stop all snow.
+
+Hyprland autostart: add
+`exec-once = /home/YOU/.local/bin/nightfall`
+to your Hyprland config. macOS users can add their locally built app to Login
+Items manually.
+
+## Development
 
 ```sh
-python3 -m nightfall --preview --intensity blizzard
+npm ci
+npm run dev
+cargo test --manifest-path src-tauri/Cargo.toml --locked
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
 ```
 
-Linux preview requires GTK3, PyGObject, and Pycairo but no Wayland compositor.
-It shows sample ledges and supports clicking/dragging through snow. Its header
-has intensity, pause, and plow controls. Desktop overlays always pass clicks
-through. Stop with Ctrl+C from the terminal (or Quit in the Mac menu).
+Landing page: `npm run web` → http://localhost:5173.
+Buildless files are in `website/dist/`; the font is bundled locally.
+The landing page detects the platform, offers a manual OS switch, and copies
+the corresponding source-build commands. The live mountain desktop is an
+illustrative browser demo, not a recording of the native overlay.
 
-Options: `--intensity light|normal|blizzard`, `--fps 15|30|60`,
-`--no-snowman`, `--no-icicles`, `--no-plow`.
+## Architecture and performance
 
-On Linux, send SIGUSR1 to the process to toggle pause and SIGUSR2 to send the
-plow. For example, `pkill -USR1 -f '^/absolute/path/to/.venv/bin/python.*nightfall'`.
-Use the exact process PID with `kill` if several instances are running.
+- **Rust simulation:** at most 900 flakes per monitor; bounded 20 px banks,
+  smooth drift, settling, icicle growth, periodic snowplow.
+- **Linux:** native GTK3 + Cairo surfaces through Wayland layer shell; empty
+  input regions and no keyboard focus. Read-only Hyprland window geometry is
+  queried on worker threads every 500 ms. No full-screen browser on Linux.
+- **macOS:** transparent click-through Tauri windows, one per monitor; Rust
+  simulation rendered to canvas through sequential IPC, with no overlapping
+  frame requests.
+- **Settings:** one small system webview. No bundled Chromium, frontend
+  framework, remote fonts, analytics, account, or background network requests.
+- **Release:** size optimization, thin dependency surface, LTO, one codegen
+  unit, stripped symbols, panic abort. Default 30 fps, optional 60 fps.
+  Actual release binary size is measured separately; no unmeasured memory or
+  battery claims.
 
-## Start at login
+## Verification and limitations
 
-Hyprland: add `exec-once = /absolute/path/to/nightfall/.venv/bin/nightfall`
-to your Hyprland configuration. Remove the line to disable.
+Rust tests cover pause, long-storm bounds, moved-window bank resets, and input
+validation. Linux compilation and native Tauri startup have been verified on
+the development VM. Landing-page desktop/mobile layout and OS switching have
+been checked in a browser.
 
-macOS: add a launcher for the installed command through your preferred login
-launcher. An app bundle and automatic Login Items registration are not provided.
+**macOS and a real Hyprland session still need runtime verification.**
+The macOS adapter currently accumulates at the screen bottom; window discovery
+has not yet been ported from the earlier Python prototype. Icon/Dock discovery,
+global shoveling, window occlusion, snowball fights, animated snowman, display
+hotplug, and automatic login registration are not implemented. Fullscreen,
+screen-lock, scaled multi-monitor behavior and tray availability need target
+desktop testing. The app uses a frame timer; it does not claim zero idle CPU.
+The settings preview intentionally animates independently of the native
+overlay and honors reduced-motion preferences.
 
-## Verification and current limits
+Python prototype history remains available before commit b3f0854; the current
+app has no Python runtime dependency.
 
-```sh
-python3 -m unittest discover -s tests -v
-python3 -m compileall -q nightfall
-```
-
-The simulation is tested for landing, moved-window clearing, pause, plowing,
-shoveling, finite output, and bounded particles/accumulation through a long
-blizzard. Linux GTK preview has been run on the development VM.
-
-This is an early implementation, **not a verified 1:1 replacement**. Native
-macOS and Hyprland overlays need testing on the actual target desktops.
-Unimplemented: desktop icon and Dock discovery, snowball fights, snowman
-animation, global mouse shoveling, persistent preferences, automatic login
-setup, and packaged installers. The plow currently clears the screen bottom.
-Overlapping window edges are not occlusion-filtered. Display hotplug requires
-restart. The simulation uses a fixed frame timer; it does not claim zero idle
-CPU or measured battery performance. Fullscreen/lock-screen behavior needs
-target-system validation.
-
-## Implementation evidence
-
-The feature brief came from the public description at
-https://snowfallmac.com/ on 2026-11-17. No original executable was downloaded,
-decompiled, or run. The native adapters are original implementations using
-AppKit/Quartz and GTK layer shell. REA setup was run with Node 24 and the REA
-skill installed for Codex; no native analysis provider is configured. Public
-marketing claims are not evidence of runtime equivalence.
+The public feature brief came from https://snowfallmac.com/. No original code,
+assets, executable, or license mechanism was copied or modified. REA was set up
+and its skill consulted; no binary analysis was performed.

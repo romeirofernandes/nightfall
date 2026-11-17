@@ -8,14 +8,14 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
  useEffect(()=>{config.current={density,wind,paused,obstacle,onCount};},[density,wind,paused,obstacle,onCount]);
  useEffect(()=>{
   const el=canvas.current,ctx=el.getContext('2d');let w=1,h=1,raf,last=0,t=0,frame=0,bank=Array(70).fill(1),lastObstacle=null,visible=true;
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const flakes=Array.from({length:95},()=>({x:Math.random(),y:Math.random(),z:Math.random(),p:Math.random()*6.28}));
   const resize=()=>{const r=el.getBoundingClientRect();w=r.width;h=r.height;const d=Math.min(devicePixelRatio||1,1.5);el.width=w*d;el.height=h*d;ctx.setTransform(d,0,0,d,0,0);};
   const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const io=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting});io.observe(el);
   const loop=now=>{
    raf=requestAnimationFrame(loop);if(now-last<32||!visible||document.hidden)return;
-   const dt=Math.min((now-last)/1000,.05);last=now;const c=config.current;const stopped=c.paused||reduced;const target=[65,145,310][c.density];
+   const dt=Math.min((now-last)/1000,.05);last=now;const c=config.current;const stopped=c.paused||reduced.matches;const target=[65,145,310][c.density];
    if(!stopped){t+=dt;if(flakes.length<target)for(let i=0;i<3;i++)flakes.push({x:Math.random(),y:-.01,z:Math.random(),p:Math.random()*6.28});if(flakes.length>target)flakes.length=target;}
    let ob=c.obstacle;if(ob&&lastObstacle&&(Math.abs(ob.x-lastObstacle.x)+Math.abs(ob.y-lastObstacle.y)>.001))bank.fill(1);lastObstacle=ob;
    ctx.clearRect(0,0,w,h);
@@ -38,10 +38,10 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
 export function DesktopDemo({theme='alpine',compact=false,className='',initialDensity=1,hero=false}){
  const host=useRef(null),drag=useRef(null);
  const [density,setDensity]=useState(initialDensity),[paused,setPaused]=useState(false),[open,setOpen]=useState(true),[pos,setPos]=useState(hero?{x:.60,y:.36}:{x:.12,y:.24}),[wind,setWind]=useState(12),[count,setCount]=useState(95);
- const [narrow,setNarrow]=useState(false);
- useEffect(()=>{const ro=new ResizeObserver(([e])=>setNarrow(e.contentRect.width<570));ro.observe(host.current);return()=>ro.disconnect()},[]);
- useEffect(()=>{if(hero)setPos(narrow?{x:.10,y:.57}:{x:.60,y:.36});},[narrow,hero]);
- const width=narrow ? .78 : hero ? .32 : .49,obstacle=open?{...pos,width}:null;
+ const [hostWidth,setHostWidth]=useState(1200); const narrow=hostWidth<570;
+ useEffect(()=>{const ro=new ResizeObserver(([e])=>setHostWidth(e.contentRect.width));ro.observe(host.current);return()=>ro.disconnect()},[]);
+ useEffect(()=>{if(hero)setPos(hostWidth<=540?{x:.20,y:.61}:hostWidth<=800?{x:.48,y:.49}:{x:.60,y:.36});},[hostWidth,hero]);
+ const width=hero?(hostWidth<=540?.72:hostWidth<=800?.45:.32):narrow?.78:.49,obstacle=open?{...pos,width}:null;
  const move=(dx,dy)=>setPos(p=>({x:Math.max(.02,Math.min(.98-width,p.x+dx)),y:Math.max(.12,Math.min(.64,p.y+dy))}));
  const pointerDown=e=>{if(e.target.closest('button'))return;const r=host.current.getBoundingClientRect();drag.current={x:e.clientX,y:e.clientY,pos,w:r.width,h:r.height};e.currentTarget.setPointerCapture(e.pointerId)};
  const pointerMove=e=>{const d=drag.current;if(!d)return;setPos({x:Math.max(.02,Math.min(.98-width,d.pos.x+(e.clientX-d.x)/d.w)),y:Math.max(.12,Math.min(.64,d.pos.y+(e.clientY-d.y)/d.h))})};

@@ -5,7 +5,7 @@ repository. `Casks/nightfall.rb` is the canonical cask; the copy here is kept
 in sync for distribution tooling. The former homebrew-nightfall repository
 is a compatibility archive.
 
-Release 0.2.1 contains Apple Silicon and Intel macOS applications and a Linux
+Release 0.3.0 contains Apple Silicon and Intel macOS applications and a Linux
 x64 archive. SHA256SUMS records the distributed bytes. Run the macOS release
 workflow for future builds, publish their checksummed archives here, update
 the casks, and run the Homebrew installation workflow on both architectures.

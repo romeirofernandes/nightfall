@@ -6,6 +6,8 @@ a little snow on your desktop. a tiny snowman. a very good excuse to stay in.
 
 built with Rust + Tauri for macOS and Hyprland.
 
+Santa does the sweeping. you bring the snowmen, trees, lights, and snowballs.
+
 ![a snow day on your desktop](assets/readme/desktop.jpg)
 
 ### get it on your Mac

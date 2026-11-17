@@ -98,6 +98,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           pattern: release-*
@@ -117,4 +118,4 @@ jobs:
           test -s "Nightfall-$version-x64.zip"
           sha256sum Nightfall-* > SHA256SUMS
           sha256sum -c SHA256SUMS
-          gh release create "$GITHUB_REF_NAME" Nightfall-* SHA256SUMS --verify-tag --title "Nightfall $version" --notes 'Terminal controls with Linux x64/ARM64 and Apple Silicon / Intel Mac. Linux needs GTK 3, WebKitGTK 4.1, gtk-layer-shell and AppIndicator; Hyprland is the primary target. Mac downloads are ad-hoc signed, not notarized. See the README for install and controls.'
+          gh release create "$GITHUB_REF_NAME" Nightfall-* SHA256SUMS --verify-tag --title "Nightfall $version" --notes-file ../distribution/RELEASE-NOTES.md

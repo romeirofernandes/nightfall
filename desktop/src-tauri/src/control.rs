@@ -71,13 +71,6 @@ pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
                         "Nightfall running, snow {}\n",
                         if s.enabled { "enabled" } else { "disabled" }
                     )),
-                    "show" => {
-                        if let Some(w) = handle.get_webview_window("main") {
-                            let _ = w.show();
-                            let _ = w.set_focus();
-                        }
-                        Ok("Settings opened\n".into())
-                    }
                     "quit" => {
                         let _ = stream.write_all(b"Nightfall stopped\n");
                         handle.exit(0);

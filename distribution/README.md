@@ -55,7 +55,7 @@ See [Homebrew recovery](HOMEBREW-RECOVERY.md).
 
 ## Build from source
 
-Install Rust, Node 22 and native development dependencies. On Arch use
+Install Go (the version in `cli/go.mod`), Rust, Node 22 and native development dependencies. On Arch use
 `scripts/install-arch.sh`; on macOS use `scripts/install-macos.sh`.
 For Debian/Ubuntu install `libwebkit2gtk-4.1-dev libgtk-3-dev
 libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf`
@@ -72,8 +72,8 @@ NIGHTFALL_RENDERER="$PWD/../desktop/src-tauri/target/release/nightfall-renderer"
 ## Release
 
 Push a matching `vMAJOR.MINOR.PATCH` tag. The release workflow tests and builds
-Linux x64 plus Apple Silicon and Intel Mac apps, verifies Mac signatures,
-and publishes all three archives with SHA256SUMS only after every build passes.
+Linux x64/ARM64 plus Apple Silicon and Intel Mac apps, verifies Mac signatures,
+and publishes all four archives with SHA256SUMS only after every build passes.
 The separate macOS dispatch workflow supports optional Developer ID signing.
 Ad-hoc releases require app-specific Gatekeeper approval; never disable it.
 The Homebrew cask is updated only after published asset hashes are available.

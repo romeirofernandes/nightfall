@@ -31,3 +31,11 @@
 .editorial-statement .eyebrow{color:#30261d}.install-os button:focus-visible{outline-offset:-4px}
 
 @media(max-width:540px){.demo-compact .demo-dock{display:none}}
+
+.obs-code>span{color:#91a974}.install-os button[aria-selected=true]:focus-visible{outline-color:var(--action-ink)}
+@media(max-width:800px){.desktop-demo .weather-presets button{min-height:44px}.scope-readout label{min-height:32px}.scope-readout{font-size:10px}}
+
+@media(max-width:540px){.alpine-hero-foot{display:none}}
+.demo-window-body input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:540px){.demo-observatory .demo-window-body p{display:none}}
+@media(max-width:540px){.demo-observatory .demo-window-body label{display:none}}

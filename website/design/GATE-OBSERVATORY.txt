@@ -1,0 +1,88 @@
+gate: checking website/dist/observatory/index.html (software); this takes a few minutes on a CPU Chrome
+gate: rounds used up; 26 FAIL open
+  FAIL flush            div.variant.variant-observatory > main > section.observatory-hero.hero > svg.contour-map.o  [1440, 390]
+       its last line sits 0px above the lower edge of section.observatory-hero.hero, where the ground changes to section.observatory-engine.section
+       fix: give the section its padding at the edge where the ground changes (the closing call keeps a clear gap above the footer)
+  FAIL no-visual        div#main-content > div.variant.variant-observatory > main > section.observatory-engine.sec  [1440, 390]
+       no picture, effect or mock in this section; a feature section needs a visual
+       fix: give the section a visual: a UI fragment on a ground, real icons, or a photograph that fits
+  FAIL text-only        section#install "Forecast: installed."  [1440, 390]
+       the closing section is only text: no picture, icon, mock or effect in it
+       fix: give the section a visual: a photograph that fits, the real icons, or a UI fragment on a ground
+  FAIL cta              section#install "Forecast: installed."  [1440, 390]
+       the last section before the footer ends with no button
+       fix: add the action: a button in the hero, one on every priced item, one in the closing section
+  FAIL heading-scale    main > section.observatory-engine.section > div.site-shell > h2 "Snow, with sensible limit  [1440]
+       an h2 at 60px, as large as the h1 (60.5px) or larger (and 1 more like it: "Forecast: installed.")
+       fix: size headings by level: the h1 largest, one size per level, each level below the one above
+  FAIL heading-scale    div.site-shell > div.obs-engine-grid > div.obs-stat:nth-of-type(1) > strong "900max"  [1440, 390]
+       the figure "900max" is set at 100px, larger than the h1 (60.5px) (and 1 more like it: "30fps")
+       fix: set figures below the h1: a stat reads as data, not as the headline
+  FAIL text-contrast    div.site-shell > div.obs-engine-grid > div.obs-code > span "System webview. No bundled Chr  [1440, 390]
+       a caption, label or muted line in #69824f on #10180d reads 4.24:1 (needs 4.5:1)
+       fix: body text in the ink at 7:1 or more; grey (4.5:1 or more) only for captions and labels
+  FAIL field-label      div.desktop-demo.demo-observatory:nth-of-type(6) > div.scope-readout:nth-of-type(6) > labe  [1440]
+       a input[type=range] without a label you can see: its <label> is hidden
+       fix: put a <label for> with the field's name above it (references/system.md, Forms); a placeholder is no label
+  FAIL focus-visible    button#observatory-mac "macOS"  [1440]
+       Tab stop 13, button "macOS": the focus lands on something you cannot see
+       fix: keep the kit's ring (system.css :focus-visible, 2px in --action, there at once); a control that hides itself shows on focus
+  FAIL section-height   div#main-content > div.variant.variant-observatory > footer.site-shell.observatory-footer   [1440]
+       the section is 333px tall (0.4 screens), 567px short of one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)
+       fix: set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit
+  FAIL section-height   section#install "04 / Deploy a little winterForecast:inst"  [1440]
+       the section is 1234px tall (1.4 screens), 334px over one screen (900px): every section after the hero is one screen or two, 2px either way (SR-2)
+       fix: set the section to one screen or two (height: calc(var(--h,1) * 100vh), --h 1 or 2) and cut or split its content to fit
+  FAIL one-section      section#install "04 / Deploy a little winterForecast:inst"  [1440]
+       the screen at scroll 1800px (stride 2) shows 339px of section 4 and the content of 2 sections, over 24px each beside section 3: a screen shows one section (another may peek 8px, 24px WARN) (SR-4)
+       fix: make each section exactly one screen or two, so a screen shows one section and no neighbour peeks
+  FAIL one-section      div.variant.variant-observatory > footer.site-shell.observatory-footer > div:nth-of-type(1  [1440]
+       the screen at scroll 3028px (the top of section 5) shows 333px of section 5 and the heading of section 5 whole and the content of 2 sections, over 24px each beside section 4: a screen shows one section (another may peek 
+       fix: make each section exactly one screen or two, so a screen shows one section and no neighbour peeks
+  FAIL container-edges  div#root "Skip to contentNIGHTFALLDesktop atmosphe"  [1440]
+       a <div> at the top of the page, outside header.nav, main, footer.closing and nav.actionbar (SR-6)
+       fix: build the page as header.nav, a main of sections (each one in-flow .wrap plus background layers) and footer.closing
+  FAIL container-edges  div#main-content > div.variant.variant-observatory > main > section.observatory-hero.hero   [1440]
+       the section needs exactly one in-flow child .wrap (it has 1 in-flow child, 0 .wrap) (SR-6)
+       fix: build the page as header.nav, a main of sections (each one in-flow .wrap plus background layers) and footer.closing
+  FAIL container-edges  div.variant.variant-observatory > main > section.observatory-hero.hero > svg.contour-map.o  [1440]
+       a child of section 1 beside its .wrap is no valid background layer: not img, picture, video or canvas; does not span the screen from 0 to 1440px; z-index auto, not 0 (and 4 more like it: "02 / Under the hoodSnow,", "03 /
+       fix: build the page as header.nav, a main of sections (each one in-flow .wrap plus background layers) and footer.closing
+  FAIL container-edges  div.variant.variant-observatory > footer.site-shell.observatory-footer > div:nth-of-type(1  [1440]
+       2 text blocks start on a left line at x 208, 128px from the container's left: text starts on the container's left, or on one split line (x 623, 732, 841) (also "End of transmission. Start of sn") (SR-6)
+       fix: start the text on the container's left, or on the one split line every split shares
+  FAIL container-edges  div.site-shell > div.install-box.install-observatory > div.terminal-heading > span:nth-of-  [1440]
+       1 text block starts on a left line at x 142, 62px from the container's left: text starts on the container's left, or on one split line (x 623, 732, 841) (SR-6)
+       fix: start the text on the container's left, or on the one split line every split shares
+  FAIL split-pair       main > section.observatory-hero.hero > div.site-shell > div.observatory-hero-grid "Your pe  [1440]
+       the two columns of the split start 45px apart at the top (centred on each other): a split's columns are top-aligned, 8px either way (SR-8)
+       fix: top-align both columns of the split (align-items: start)
+  FAIL tap-size         div.desktop-demo.demo-observatory > div.demo-controls > div.weather-presets > button:nth-o  [390, 320]
+       a 48x30px tap target (and 1 more like it on this screen): 2px from the next one ("Snow day"), so a thumb lands on the wrong one
+       fix: make every link and control outside running text 44px tall on a phone: display: inline-flex; align-items: center; min-height: 44px (a footer list then needs no gap), a 44px small button, or a transparent ::before laid pa
+  FAIL tap-size         div.desktop-demo.demo-observatory > div.demo-controls > div.weather-presets > button.activ  [390, 320]
+       a 59x30px tap target: 2px from the next one ("Flurry"), so a thumb lands on the wrong one
+       fix: make every link and control outside running text 44px tall on a phone: display: inline-flex; align-items: center; min-height: 44px (a footer list then needs no gap), a 44px small button, or a transparent ::before laid pa
+  FAIL heading-scale    section#install > div.site-shell > div.obs-install-heading > h2 "Forecast: installed."  [390]
+       an h2 at 55px, as large as the h1 (44px) or larger
+       fix: size headings by level: the h1 largest, one size per level, each level below the one above
+  FAIL right-edge       div.variant.variant-observatory > main > section.observatory-hero.hero > svg.contour-map.o  [390]
+       its right edge runs 20px past the content's right edge (370px, where 3 boxes end)
+       fix: end it on the content's right edge, like the other blocks of its section
+  FAIL section-tile     div#main-content > div.variant.variant-observatory > main > section.observatory-engine.sec  [390]
+       the section is 723px tall (0.86 screens at 390x844), shorter than the screen: its tile (the screen from its top) shows 723px of it and 121px of the next section, its heading "Snow on top. Your apps underne" on screen
+       fix: set every section after the hero to one screen or two (height: calc(var(--h,1) * 100vh)) and fit its content above --padb
+  FAIL collide          div.desktop-demo.demo-observatory > div.demo-window > div.demo-window-body > p "Put the ke  [320]
+       the words "Put the kettle on. Leave the wor" lie over "145 particles": two lines in one place
+       fix: on a phone nothing lies on anything else: let the section grow with its content (min-height for its screens, never a fixed height; --hm: 2 when it needs two) or cut what it holds; keep pictures and cards off the buttons;
+  FAIL container        page  [1440, 390]
+       no .wrap
+       fix: put the content in one .wrap
+  waiver ignored (matches no open finding): no-visual "section#install"
+  waiver ignored (matches no open finding): text-only "section#questions"
+  waiver ignored (matches no open finding): hero-lines "section.hero h1"
+  waiver ignored (matches no open finding): edge-left "#weather p"
+  waiver ignored (matches no open finding): edge-left "#install p"
+  16 WARN (not blocking), first: scroll-reveal main > section.observatory-statement.sec; copy-headings section#install > div.site-shell > div.o; copy-actions (the page); heading-scale section#install > div.site-shell > div.o; hole div#main-content > div.variant.variant-o
+Stop fixing: put these open FAILs and the waivers in your report, then finish.
+GATE: OPEN 26 (rounds used up)

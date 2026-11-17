@@ -59,6 +59,6 @@ export function DesktopDemo({theme='alpine',compact=false,className='',initialDe
    <div className="weather-presets" aria-label="Preview intensity">{['Flurry','Snow day','Blizzard'].map((name,i)=><button key={name} aria-pressed={density===i} className={density===i?'active':''} onClick={()=>setDensity(i)}>{name}</button>)}</div>
    <button className="pause-weather" onClick={()=>setPaused(!paused)} aria-label={paused?'Resume preview':'Pause preview'}>{paused?<Play size={15}/>:<Pause size={15}/>}</button>
   </div>
-  {theme==='observatory'&&!compact&&<div className="scope-readout"><span>{String(count).padStart(3,'0')} particles</span><label><Wind size={14}/><input type="range" min="-70" max="70" value={wind} onChange={e=>setWind(Number(e.target.value))} aria-label="Preview wind"/></label></div>}
+  {theme==='observatory'&&!compact&&<div className="scope-readout"><span>{String(count).padStart(3,'0')} particles</span><label><Wind size={14}/><span>Wind</span><input type="range" min="-70" max="70" value={wind} onChange={e=>setWind(Number(e.target.value))} aria-label="Preview wind"/></label></div>}
  </div>;
 }

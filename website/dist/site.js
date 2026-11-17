@@ -23,3 +23,11 @@ function platformDetails(os){
 }
 document.querySelectorAll('[data-os]').forEach(b=>b.addEventListener('click',()=>platformDetails(b.dataset.os)));
 platformDetails(/Linux/i.test(platform)?'linux':'mac');
+for(const button of document.querySelectorAll('[data-pause-for]')){
+ const id=button.dataset.pauseFor,scene=document.getElementById(id)||document.querySelector('.'+id);
+ if(scene?.paused){button.textContent='▶';button.setAttribute('aria-label','Resume snow');}
+}
+new MutationObserver(()=>{
+ const selected=document.querySelector('[data-os][aria-selected="true"]');
+ if(selected)platformDetails(selected.dataset.os);
+}).observe(document.querySelector('.install-tabs'),{subtree:true,attributes:true,attributeFilter:['aria-selected']});

@@ -9,8 +9,10 @@ export function Button({children='Get Nightfall',href='#install',secondary=false
 export function useTaste(moment){
  useEffect(()=>{
   document.documentElement.dataset.ready='1';
-  const motionPath='/taste/motion/motion.js'; import(/* @vite-ignore */ motionPath);
-  const momentsPath='/taste/moments/moments.js'; if(moment)import(/* @vite-ignore */ momentsPath);
+  // Public modules are served as plain assets, not imported into Vite's graph.
+  const load=(id,src)=>{if(document.getElementById(id))return;const script=document.createElement('script');script.id=id;script.type='module';script.src=src;document.head.append(script);};
+  load('nightfall-motion','/taste/motion/motion.js');
+  if(moment)load('nightfall-moments','/taste/moments/moments.js');
  },[moment]);
 }
 export function Install({style='alpine'}){

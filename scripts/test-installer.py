@@ -12,7 +12,13 @@ INSTALLER = Path(__file__).resolve().parents[1] / 'distribution/install.sh'
 
 
 class Installer(unittest.TestCase):
-    def test_install_and_reject_bad_downloads(self):
+    def test_x64_install_and_reject_bad_downloads(self):
+        self.check_install('x86_64', 'linux-x64')
+
+    def test_arm64_install_and_reject_bad_downloads(self):
+        self.check_install('aarch64', 'linux-arm64')
+
+    def check_install(self, arch, platform):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             home = root / 'home with spaces'
@@ -22,12 +28,12 @@ class Installer(unittest.TestCase):
             binary = root / 'nightfall'
             binary.write_text('#!/bin/sh\necho fixture\n')
             binary.chmod(0o755)
-            asset = root / 'Nightfall-0.4.0-linux-x64.tar.gz'
+            asset = root / f'Nightfall-0.4.0-{platform}.tar.gz'
             with tarfile.open(asset, 'w:gz') as archive:
                 archive.add(binary, arcname='nightfall')
             sums = root / 'SHA256SUMS'
             sums.write_text(f'{hashlib.sha256(asset.read_bytes()).hexdigest()}  {asset.name}\n')
-            (tools / 'uname').write_text('#!/bin/sh\ncase "$1" in -s) echo Linux;; -m) echo x86_64;; esac\n')
+            (tools / 'uname').write_text(f'#!/bin/sh\ncase "$1" in -s) echo Linux;; -m) echo {arch};; esac\n')
             (tools / 'curl').write_text('#!/bin/bash\nset -eu\ncp "$FIXTURE/${2##*/}" "$4"\n')
             for tool in tools.iterdir():
                 tool.chmod(0o755)

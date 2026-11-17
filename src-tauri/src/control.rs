@@ -19,10 +19,36 @@ fn path() -> PathBuf {
         .unwrap_or_else(|| PathBuf::from(home).join(".config"));
     base.join("app.nightfall.desktop/control.sock")
 }
+pub fn request(command: &str) -> std::io::Result<String> {
+    let mut stream = UnixStream::connect(path())?;
+    stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+    stream.set_write_timeout(Some(Duration::from_secs(5)))?;
+    stream.write_all(command.as_bytes())?;
+    stream.shutdown(std::net::Shutdown::Write)?;
+    let mut reply = String::new();
+    stream.read_to_string(&mut reply)?;
+    if reply.starts_with("error:") { return Err(std::io::Error::other(reply)); }
+    Ok(reply)
+}
 pub fn client() {
     let command = std::env::args().nth(1);
+    if command.is_none() || command.as_deref() == Some("tui") {
+        let result = crate::tui::run();
+        if let Err(e) = &result { eprintln!("{e}"); }
+        std::process::exit(if result.is_ok() { 0 } else { 1 });
+    }
+    if command.as_deref() == Some("--daemon") { return; }
+    if command.as_deref() == Some("--version") {
+        println!("nightfall {}", env!("CARGO_PKG_VERSION"));
+        std::process::exit(0);
+    }
+    if command.as_deref() == Some("enable") {
+        let result = crate::tui::ensure_renderer().and_then(|_| request("enable"));
+        match &result { Ok(reply) => print!("{reply}"), Err(e) => eprintln!("{e}") }
+        std::process::exit(if result.is_ok() { 0 } else { 1 });
+    }
     if matches!(command.as_deref(), Some("--help" | "-h")) {
-        println!("nightfall [enable|disable|toggle|status|quit]\nRun without arguments to open settings. enable starts the app if stopped.");
+        println!("nightfall [tui|enable|disable|toggle|status|quit]\nRun without arguments for terminal controls. q closes controls; x stops snow.");
         std::process::exit(0);
     }
     if let Some(c) = &command {
@@ -72,7 +98,7 @@ pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
             let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
             let mut command = String::new();
             if std::io::Read::by_ref(&mut stream)
-                .take(64)
+                .take(4096)
                 .read_to_string(&mut command)
                 .is_err()
             {
@@ -83,7 +109,14 @@ pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
             let _ = app.run_on_main_thread(move || {
                 let state = handle.state::<crate::State>();
                 let mut s = state.settings.lock().unwrap().clone();
-                let result = match command.as_str() {
+                let result = if let Some(json) = command.strip_prefix("set ") {
+                    serde_json::from_str::<crate::Settings>(json)
+                        .map_err(|e| e.to_string())
+                        .and_then(|s| crate::save_settings(handle.clone(), s, state))
+                        .map(|_| "Saved".to_owned())
+                } else { match command.as_str() {
+                    "get" => serde_json::to_string(&s).map_err(|e| e.to_string()),
+                    "sweep" => { crate::send_plow(state); Ok("Cleanup requested".into()) },
                     "enable" | "disable" | "toggle" => {
                         s.enabled = match command.as_str() {
                             "enable" => true,
@@ -110,7 +143,7 @@ pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
                         return;
                     }
                     _ => Err("Unknown command".into()),
-                };
+                }};
                 let reply = result.unwrap_or_else(|e| format!("error: {e}\n"));
                 let _ = stream.write_all(reply.as_bytes());
             });

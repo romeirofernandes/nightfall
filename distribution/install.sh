@@ -4,13 +4,14 @@ set -euo pipefail
 repo=romeirofernandes/nightfall
 case "$(uname -s):$(uname -m)" in
   Linux:x86_64) platform=linux-x64; suffix=tar.gz ;;
+  Linux:aarch64|Linux:arm64) platform=linux-arm64; suffix=tar.gz ;;
   Darwin:arm64) platform=arm64; suffix=zip ;;
   Darwin:x86_64) platform=x64; suffix=zip ;;
-  *) echo 'Supported downloads: Linux x86_64, macOS Apple Silicon and Intel.' >&2; exit 1 ;;
+  *) echo 'Supported downloads: Linux x86_64/ARM64, macOS Apple Silicon and Intel.' >&2; exit 1 ;;
 esac
 for tool in curl tar awk; do command -v "$tool" >/dev/null || { echo "Missing $tool" >&2; exit 1; }; done
 command -v sha256sum >/dev/null || command -v shasum >/dev/null || { echo "Missing sha256sum or shasum" >&2; exit 1; }
-if [[ $platform == linux-x64 ]]; then
+if [[ $platform == linux-* ]]; then
   echo 'Requires GTK 3, WebKitGTK 4.1, gtk-layer-shell and AppIndicator. See distribution/README.md.'
 fi
 tag=${NIGHTFALL_TAG:-}
@@ -31,7 +32,7 @@ if command -v sha256sum >/dev/null; then actual=$(sha256sum "$work/$asset"); els
 [[ ${actual%% *} == "$expected" ]] || { echo 'Checksum mismatch' >&2; exit 1; }
 bin=${XDG_BIN_HOME:-$HOME/.local/bin}
 mkdir -p "$bin"
-if [[ $platform == linux-x64 ]]; then
+if [[ $platform == linux-* ]]; then
   tar -xzf "$work/$asset" -C "$work"
   install -m755 "$work/nightfall" "$bin/nightfall"
   apps=${XDG_DATA_HOME:-$HOME/.local/share}/applications
@@ -43,7 +44,7 @@ Type=Application
 Name=Nightfall
 Comment=A little winter for your desktop
 Exec="$bin/nightfall"
-Terminal=false
+Terminal=true
 Categories=Utility;
 DESKTOP
 else

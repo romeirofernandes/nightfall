@@ -7,7 +7,9 @@ use std::{
 };
 pub fn start(settings: Arc<Mutex<Settings>>) {
     let display = gdk::Display::default().expect("Graphical display required");
-    if !gtk_layer_shell::is_supported() {
+    let layer_shell = gtk_layer_shell::is_supported();
+    let x11 = display.type_().name() == "GdkX11Display";
+    if !layer_shell && !x11 {
         eprintln!("Nightfall: desktop overlay requires a Wayland layer-shell compositor. Settings remain available.");
         return;
     }
@@ -21,14 +23,25 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
         if let Some(v) = gtk::prelude::WidgetExt::screen(&win).and_then(|s| s.rgba_visual()) {
             win.set_visual(Some(&v));
         }
-        win.init_layer_shell();
-        win.set_namespace("nightfall");
-        win.set_monitor(&monitor);
-        win.set_layer(Layer::Overlay);
-        win.set_keyboard_mode(gtk_layer_shell::KeyboardMode::None);
-        win.set_exclusive_zone(-1);
-        for e in [Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
-            win.set_anchor(e, true)
+        if layer_shell {
+            win.init_layer_shell();
+            win.set_namespace("nightfall");
+            win.set_monitor(&monitor);
+            win.set_layer(Layer::Overlay);
+            win.set_keyboard_mode(gtk_layer_shell::KeyboardMode::None);
+            win.set_exclusive_zone(-1);
+            for e in [Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
+                win.set_anchor(e, true)
+            }
+        } else {
+            // Composited X11 desktops use a borderless, sticky overlay window.
+            win.set_decorated(false);
+            win.set_keep_above(true);
+            win.set_skip_taskbar_hint(true);
+            win.set_skip_pager_hint(true);
+            win.stick();
+            win.move_(geo.x(), geo.y());
+            win.set_default_size(geo.width(), geo.height());
         }
         win.connect_realize(|w| {
             if let Some(window) = w.window() {
@@ -167,11 +180,11 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
                 }
             }
             win.set_accept_focus(s.interactive && s.enabled);
-            win.set_keyboard_mode(if s.interactive && s.enabled {
+            if layer_shell { win.set_keyboard_mode(if s.interactive && s.enabled {
                 gtk_layer_shell::KeyboardMode::OnDemand
             } else {
                 gtk_layer_shell::KeyboardMode::None
-            });
+            }); }
             m.step(dt, &s);
             drop(m);
             area.queue_draw();

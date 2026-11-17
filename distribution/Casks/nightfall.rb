@@ -1,9 +1,9 @@
 cask "nightfall" do
   arch arm: "arm64", intel: "x64"
 
-  version "0.3.1"
-  sha256 arm:   "23f7b1737430bfc50ce97190197a9d750398920fc45928b7b350179e95ca8723",
-         intel: "99e22f86317c50f11ef47d59599fa8eb24004687a634810be0a642efa7568361"
+  version "0.4.0"
+  sha256 arm:   "0c050cee09ccf701640f83cc81d98d288dcd7454d3436cf7541e8366ceec06da",
+         intel: "4225e6968ca7e2c7b3e1d9cba7c313cec2979bcdefd0fc6359cde2b70f7be9d3"
 
   url "https://github.com/romeirofernandes/nightfall/releases/download/v#{version}/Nightfall-#{version}-#{arch}.zip"
   name "Nightfall"
@@ -13,6 +13,7 @@ cask "nightfall" do
   depends_on macos: :big_sur
 
   app "Nightfall.app"
+  binary "#{appdir}/Nightfall.app/Contents/MacOS/nightfall", target: "nightfall"
 
   uninstall quit: "app.nightfall.desktop"
 

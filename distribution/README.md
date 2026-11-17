@@ -6,7 +6,7 @@ asset against SHA256SUMS before installing per user. Override the release with
 downloads; they are served from the same GitHub release, not a separate signature.
 It never installs system packages or enables autostart.
 
-Linux x86_64 dependencies:
+Linux x86_64 / ARM64 dependencies:
 
 ```sh
 # Arch
@@ -17,17 +17,23 @@ sudo apt install libwebkit2gtk-4.1-0 libgtk-3-0 libgtk-layer-shell0 librsvg2-2 l
 sudo dnf install webkit2gtk4.1 gtk3 gtk-layer-shell librsvg2 libappindicator-gtk3
 ```
 
-The Linux archive is built on Ubuntu 22.04. Older glibc systems are not supported.
+Linux x86_64 is built on Ubuntu 22.04; ARM64 on Ubuntu 24.04.
+Older glibc systems and musl distributions such as Alpine are not supported
+by these downloads. Building from source requires the listed native libraries.
 Hyprland is tested on the owner's laptop. Other layer-shell compositors are
-protocol-compatible but not independently tested. GNOME, KDE and X11 have no
-overlay support; settings can still open. Monitor additions require restart.
+protocol-compatible but not independently tested. Composited X11 has an
+experimental overlay fallback that has not been runtime-tested. Native GNOME
+and KDE Wayland sessions lack layer-shell; settings can still open there.
+Monitor additions require restart.
 Window ledges use `hyprctl`; other compositors show desktop snow only.
 
 `nightfall disable` clears snow and releases pointer capture. `nightfall enable`
 re-enables it, starting the app when stopped. `nightfall toggle`, `status`, and
 `quit` control the current user's app through a private local Unix socket.
 Commands against a stopped app return a nonzero status, except `enable`, which starts it.
-Closing settings hides them; use Quit or `nightfall quit` to exit.
+Run `nightfall` for terminal controls. Use arrows to select/change settings,
+`q` to close controls while snow continues, and `x` to stop Nightfall.
+The desktop launcher opens a terminal; the tray toggles snow or quits.
 
 Linux installs `~/.local/bin/nightfall` and a desktop launcher. macOS installs
 `~/Applications/Nightfall.app` and a CLI symlink in `~/.local/bin`.
@@ -35,6 +41,16 @@ Linux installs `~/.local/bin/nightfall` and a desktop launcher. macOS installs
 No autostart entry is created. To uninstall, quit and remove those installed
 files. Settings remain in `$XDG_CONFIG_HOME/app.nightfall.desktop` on Linux
 or `~/Library/Application Support/app.nightfall.desktop` on macOS.
+
+## Homebrew on macOS
+
+```sh
+brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofernandes/nightfall
+brew install --cask romeirofernandes/nightfall/nightfall
+```
+
+The cask installs the app and the `nightfall` CLI. Existing tap history conflict?
+See [Homebrew recovery](HOMEBREW-RECOVERY.md).
 
 ## Build from source
 

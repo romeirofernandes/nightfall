@@ -1,6 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 mod control;
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+mod tui;
 mod engine;
 #[cfg(target_os = "linux")]
 mod linux;
@@ -184,7 +186,7 @@ fn main() {
                 menu::{Menu, MenuItem},
                 tray::TrayIconBuilder,
             };
-            let show = MenuItem::with_id(app, "show", "Nightfall settings", true, None::<&str>)?;
+            let show = MenuItem::with_id(app, "show", "Toggle snow", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit Nightfall", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show, &quit])?;
             TrayIconBuilder::new()
@@ -192,9 +194,11 @@ fn main() {
                 .menu(&menu)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => {
-                        if let Some(w) = app.get_webview_window("main") {
-                            let _ = w.show();
-                            let _ = w.set_focus();
+                        let state = app.state::<State>();
+                        let mut s = state.settings.lock().unwrap().clone();
+                        s.enabled = !s.enabled;
+                        if let Err(error) = save_settings(app.clone(), s, state) {
+                            eprintln!("Nightfall: {error}");
                         }
                     }
                     "quit" => app.exit(0),

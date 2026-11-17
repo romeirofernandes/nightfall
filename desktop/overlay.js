@@ -4,7 +4,7 @@ const exit=document.createElement('button');exit.textContent='Snowball mode · d
 exit.onclick=()=>invoke('end_interaction');onkeydown=e=>{if(e.key==='Escape')invoke('end_interaction')};
 let previous=performance.now(),dragging=false,queue=Promise.resolve();
 function pointer(phase,e){if(!settings.interactive)return;const now=performance.now(),dt=(now-previous)/1000;previous=now;const payload={phase,x:e.clientX,y:e.clientY,dt};queue=queue.catch(console.error).then(()=>invoke('snow_pointer',payload));}
-c.onpointerdown=e=>{if(settings.interactive){dragging=true;c.setPointerCapture(e.pointerId);pointer('down',e)}};
+c.onpointerdown=e=>{if(settings.interactive && e.button===0){dragging=true;c.setPointerCapture(e.pointerId);pointer('down',e)}};
 let pending=null; c.onpointermove=e=>{if(dragging)pending=e};
 c.onpointerup=e=>{if(dragging){if(pending){pointer('move',pending);pending=null;}pointer('up',e);dragging=false;}};
 c.onpointercancel=e=>{pointer('up',e);dragging=false;pending=null};
@@ -15,3 +15,5 @@ function draw(m,s){
 }
 let settings={},count=0,last=performance.now();
 async function loop(){const start=performance.now();try{if(count++%15===0){settings=await invoke('get_settings');exit.hidden=!settings.interactive;c.style.cursor=settings.interactive?'grab':'default';}if(pending){pointer('move',pending);pending=null;}const now=performance.now();const frame=await invoke('frame',{width:innerWidth,height:innerHeight,dt:Math.min((now-last)/1000,.05)});last=now;draw(frame,settings)}catch(e){console.error(e)}setTimeout(loop,Math.max(0,1000/(settings.fps||30)-(performance.now()-start)))}loop();
+
+c.oncontextmenu=e=>{if(settings.interactive)e.preventDefault()};

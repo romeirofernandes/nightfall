@@ -24,3 +24,5 @@ document.getElementById('send-santa').onclick=async()=>{try{if(invoke)await invo
 document.getElementById('play-mode').onclick=()=>{settings.interactive=!settings.interactive;if(settings.interactive)settings.enabled=true;save()};
 // Reflect Escape/overlay exit without overwriting settings while a save is queued.
 setInterval(async()=>{if(invoke&&editVersion===savedVersion&&document.visibilityState==='visible'){try{const remote=await invoke('get_settings');if(remote.interactive!==settings.interactive){settings.interactive=remote.interactive;paint();}}catch{}}},1000);
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&settings.interactive){e.preventDefault();settings.interactive=false;save();}});

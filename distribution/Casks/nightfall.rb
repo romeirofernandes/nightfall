@@ -10,7 +10,7 @@ cask "nightfall" do
   desc "Falling snow over your desktop windows"
   homepage "https://github.com/romeirofernandes/nightfall"
 
-  depends_on macos: ">= :big_sur"
+  depends_on macos: :big_sur
 
   app "Nightfall.app"
 

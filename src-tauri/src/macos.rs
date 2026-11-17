@@ -21,7 +21,12 @@ pub fn surfaces(ox: f64, oy: f64, width: f64, height: f64) -> Option<Vec<Ledge>>
     let descriptions = create_description_from_array(ids)?;
     let mut ledges = vec![];
     for dict in descriptions.iter() {
-        if number(&dict, "kCGWindowLayer") != Some(0.)
+        let dock = dict
+            .find(&CFString::new("kCGWindowOwnerName"))
+            .and_then(|v| v.downcast::<CFString>())
+            .map(|v| v.to_string() == "Dock")
+            .unwrap_or(false);
+        if (!dock && number(&dict, "kCGWindowLayer") != Some(0.))
             || number(&dict, "kCGWindowOwnerPID") == Some(std::process::id() as f64)
         {
             continue;
@@ -46,13 +51,26 @@ pub fn surfaces(ox: f64, oy: f64, width: f64, height: f64) -> Option<Vec<Ledge>>
         let Some(w) = number(&bounds, "Width") else {
             continue;
         };
+        let h = number(&bounds, "Height").unwrap_or(0.);
+        if dock && (w < 40. || h < 15. || h > height * 0.4 || y < oy + height * 0.45) {
+            continue;
+        }
         let left = (x - ox).max(0.);
         let right = (x - ox + w).min(width);
         if right > left && y >= oy && y < oy + height {
             let Some(id) = number(&dict, "kCGWindowNumber") else {
                 continue;
             };
-            ledges.push(Ledge::new(format!("{id}"), left, y - oy, right - left));
+            ledges.push(Ledge::new(
+                if dock {
+                    format!("dock-{id}")
+                } else {
+                    format!("{id}")
+                },
+                left,
+                y - oy,
+                right - left,
+            ));
         }
     }
     Some(ledges)

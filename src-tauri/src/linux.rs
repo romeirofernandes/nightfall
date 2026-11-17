@@ -57,58 +57,62 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
                 cr.arc(f.x, f.y, f.r, 0., std::f64::consts::TAU);
                 let _ = cr.fill();
             }
-            for l in &m.ledges {
-                cr.set_source_rgba(0.94, 0.97, 1., 0.97);
-                cr.move_to(l.x, l.y + 1.);
-                for (i, h) in l.bank.iter().enumerate() {
-                    cr.line_to(l.x + i as f64 * 8., l.y - h);
-                }
-                cr.line_to(l.x + l.width, l.y + 1.);
-                cr.close_path();
-                let _ = cr.fill();
-                if s.icicles && l.id != "ground" {
-                    for i in (3..l.bank.len()).step_by(11) {
-                        let x = l.x + i as f64 * 8.;
-                        let length = (l.age / 7.).min(18.) * (l.bank[i] / 3.).min(1.);
-                        cr.set_source_rgba(0.8, 0.91, 0.97, 0.65);
-                        cr.move_to(x, l.y);
-                        cr.line_to(x + 4., l.y);
-                        cr.line_to(x + 2., l.y + length);
-                        cr.close_path();
-                        let _ = cr.fill();
-                    }
+            for shape in crate::scene::scene(&m,&s) {
+                if shape.points.is_empty(){continue;}
+                cr.set_source_rgba(shape.color[0],shape.color[1],shape.color[2],shape.color[3]);
+                cr.move_to(shape.points[0][0],shape.points[0][1]);
+                for p in &shape.points[1..]{cr.line_to(p[0],p[1]);}
+                if shape.stroke {cr.set_line_width(shape.width);let _=cr.stroke();}
+                else {cr.close_path();let _=cr.fill();}
+            }
+            if s.interactive {
+                cr.set_source_rgba(0.07,0.17,0.15,0.96);cr.rectangle(16.,16.,500.,40.);let _=cr.fill();
+                cr.set_source_rgb(0.95,0.97,0.92);cr.set_font_size(13.);cr.move_to(28.,41.);
+                let _=cr.show_text("Snowball mode: drag snow from a ledge, flick to throw. Esc / click here to exit");
+            }
+            glib::Propagation::Proceed
+        });
+        area.add_events(
+            gdk::EventMask::BUTTON_PRESS_MASK
+                | gdk::EventMask::BUTTON_RELEASE_MASK
+                | gdk::EventMask::POINTER_MOTION_MASK,
+        );
+        let model = winter.clone();
+        let config = settings.clone();
+        area.connect_button_press_event(move |_, e| {
+            let (x, y) = e.position();
+            let mut s = config.lock().unwrap();
+            if s.interactive {
+                if y < 60. && x < 520. {
+                    s.interactive = false;
+                } else {
+                    model.borrow_mut().pointer("down", x, y, 0.016);
                 }
             }
-            if s.snowman {
-                let x = m.width - 70.;
-                let y = m.height - 5.;
-                for (r, cy) in [(18., y - 18.), (14., y - 43.), (10., y - 64.)] {
-                    cr.set_source_rgb(0.94, 0.97, 1.);
-                    cr.arc(x, cy, r, 0., 6.29);
-                    let _ = cr.fill();
-                }
-                cr.set_source_rgb(0.7, 0.19, 0.24);
-                cr.rectangle(x - 14., y - 55., 28., 5.);
-                let _ = cr.fill();
-                cr.set_source_rgb(0.13, 0.23, 0.24);
-                cr.rectangle(x - 14., y - 75., 28., 4.);
-                cr.rectangle(x - 9., y - 87., 18., 14.);
-                let _ = cr.fill();
-                for dx in [-4., 4.] {
-                    cr.arc(x + dx, y - 66., 1.5, 0., 6.29);
-                    let _ = cr.fill();
-                }
-                cr.set_source_rgb(0.96, 0.46, 0.13);
-                cr.move_to(x, y - 63.);
-                cr.line_to(x + 12., y - 61.);
-                cr.line_to(x, y - 59.);
-                cr.close_path();
-                let _ = cr.fill();
+            glib::Propagation::Stop
+        });
+        let model = winter.clone();
+        let config = settings.clone();
+        let previous = std::rc::Rc::new(std::cell::Cell::new(Instant::now()));
+        area.connect_motion_notify_event(move |_, e| {
+            let now = Instant::now();
+            let dt = now.duration_since(previous.replace(now)).as_secs_f64();
+            if config.lock().unwrap().interactive {
+                let (x, y) = e.position();
+                model.borrow_mut().pointer("move", x, y, dt);
             }
-            if let Some(x) = m.plow_x {
-                cr.set_source_rgb(0.86, 0.47, 0.15);
-                cr.rectangle(x - 20., m.height - 28., 40., 22.);
-                let _ = cr.fill();
+            glib::Propagation::Stop
+        });
+        let model = winter.clone();
+        area.connect_button_release_event(move |_, e| {
+            let (x, y) = e.position();
+            model.borrow_mut().pointer("up", x, y, 0.016);
+            glib::Propagation::Stop
+        });
+        let config = settings.clone();
+        win.connect_key_press_event(move |_, e| {
+            if e.keyval() == gdk::keys::constants::Escape {
+                config.lock().unwrap().interactive = false;
             }
             glib::Propagation::Proceed
         });
@@ -140,6 +144,25 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
             if let Ok(surfaces) = rx.try_recv() {
                 m.surfaces(surfaces)
             }
+            // GTK input regions stay empty except during explicit snowball mode.
+            if let Some(window) = win.window() {
+                let region = if s.interactive && s.enabled {
+                    cairo::Region::create_rectangle(&cairo::RectangleInt::new(
+                        0,
+                        0,
+                        geo.width(),
+                        geo.height(),
+                    ))
+                } else {
+                    cairo::Region::create()
+                };
+                window.input_shape_combine_region(&region, 0, 0);
+            }
+            win.set_keyboard_mode(if s.interactive && s.enabled {
+                gtk_layer_shell::KeyboardMode::OnDemand
+            } else {
+                gtk_layer_shell::KeyboardMode::None
+            });
             m.step(dt, &s);
             drop(m);
             area.queue_draw();
@@ -187,6 +210,46 @@ fn surfaces(ox: i32, oy: i32, width: i32, height: i32) -> Option<Vec<Ledge>> {
                 y,
                 right - left,
             ));
+        }
+    }
+    if let Some(layers) = read("layers") {
+        if let Some(monitors) = layers.as_object() {
+            for monitor in monitors.values() {
+                if let Some(levels) = monitor["levels"].as_object() {
+                    for list in levels.values() {
+                        if let Some(entries) = list.as_array() {
+                            for layer in entries {
+                                let ns = layer["namespace"].as_str().unwrap_or("");
+                                if ns == "nightfall"
+                                    || !(ns.contains("dock")
+                                        || ns.contains("waybar")
+                                        || ns.contains("panel"))
+                                {
+                                    continue;
+                                }
+                                if let (Some(x), Some(y), Some(w)) = (
+                                    layer["x"].as_f64(),
+                                    layer["y"].as_f64(),
+                                    layer["w"].as_f64(),
+                                ) {
+                                    let x = x - ox as f64;
+                                    let y = y - oy as f64;
+                                    let left = x.max(0.);
+                                    let right = (x + w).min(width as f64);
+                                    if y >= 0. && y < height as f64 && right > left {
+                                        result.push(Ledge::new(
+                                            format!("panel-{}", layer["address"]),
+                                            left,
+                                            y,
+                                            right - left,
+                                        ));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     Some(result)

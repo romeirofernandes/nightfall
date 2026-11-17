@@ -4,6 +4,7 @@ mod engine;
 mod linux;
 #[cfg(target_os = "macos")]
 mod macos;
+mod scene;
 use engine::{Settings, Winter};
 use std::{
     collections::HashMap,
@@ -21,12 +22,30 @@ fn get_settings(state: tauri::State<State>) -> Settings {
     state.settings.lock().unwrap().clone()
 }
 #[tauri::command]
-fn save_settings(mut settings: Settings, state: tauri::State<State>) -> Result<(), String> {
+fn save_settings(
+    app: tauri::AppHandle,
+    mut settings: Settings,
+    state: tauri::State<State>,
+) -> Result<(), String> {
     settings.validate();
+    settings.cleanup_request = state.settings.lock().unwrap().cleanup_request;
     let json = serde_json::to_vec_pretty(&settings).map_err(|e| e.to_string())?;
     fs::write(state.path.with_extension("tmp"), json).map_err(|e| e.to_string())?;
     fs::rename(state.path.with_extension("tmp"), &state.path).map_err(|e| e.to_string())?;
+    let capture = settings.interactive && settings.enabled;
     *state.settings.lock().unwrap() = settings;
+    #[cfg(target_os = "macos")]
+    for (label, w) in app.webview_windows() {
+        if label.starts_with("snow-") {
+            w.set_ignore_cursor_events(!capture)
+                .map_err(|e| e.to_string())?;
+            if capture {
+                let _ = w.set_focus();
+            }
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    let _ = (app, capture);
     Ok(())
 }
 #[tauri::command]
@@ -62,13 +81,39 @@ fn frame(
         }
     }
     world.step(dt, &state.settings.lock().unwrap());
-    serde_json::to_value(world).map_err(|e| e.to_string())
+    let settings = state.settings.lock().unwrap();
+    Ok(
+        serde_json::json!({"scene":scene::scene(world, &settings),"flakes":world.flakes,"time":world.time}),
+    )
 }
 #[tauri::command]
 fn send_plow(state: tauri::State<State>) {
-    for w in state.worlds.lock().unwrap().values_mut() {
-        w.plow_x = Some(-60.);
+    let mut s = state.settings.lock().unwrap();
+    s.cleanup_request = s.cleanup_request.wrapping_add(1);
+}
+#[tauri::command]
+fn snow_pointer(
+    window: tauri::WebviewWindow,
+    state: tauri::State<State>,
+    phase: String,
+    x: f64,
+    y: f64,
+    dt: f64,
+) {
+    let s = state.settings.lock().unwrap();
+    if !s.interactive || !s.enabled || !window.label().starts_with("snow-") {
+        return;
     }
+    drop(s);
+    if let Some(w) = state.worlds.lock().unwrap().get_mut(window.label()) {
+        w.pointer(&phase, x, y, dt);
+    }
+}
+#[tauri::command]
+fn end_interaction(app: tauri::AppHandle, state: tauri::State<State>) -> Result<(), String> {
+    let mut s = state.settings.lock().unwrap().clone();
+    s.interactive = false;
+    save_settings(app, s, state)
 }
 #[tauri::command]
 fn quit(app: tauri::AppHandle) {
@@ -81,6 +126,8 @@ fn main() {
             save_settings,
             frame,
             send_plow,
+            snow_pointer,
+            end_interaction,
             quit
         ])
         .setup(|app| {
@@ -92,6 +139,7 @@ fn main() {
                 .and_then(|b| serde_json::from_slice(&b).ok())
                 .unwrap_or_default();
             settings.validate();
+            settings.interactive = false;
             let settings = Arc::new(Mutex::new(settings));
             app.manage(State {
                 settings: settings.clone(),

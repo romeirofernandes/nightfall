@@ -5,10 +5,10 @@ cask "nightfall" do
   sha256 arm:   "480a54542f11a5884208d74bddedcbde057064feb1a21b55d9613507c07ec19b",
          intel: "c8bbcacc3b246d97814d84ed3d02173b2b18891abba532956d7829080596480b"
 
-  url "https://github.com/romeirofernandes/homebrew-nightfall/releases/download/v#{version}/Nightfall-#{version}-#{arch}.zip"
+  url "https://github.com/romeirofernandes/nightfall/releases/download/v#{version}/Nightfall-#{version}-#{arch}.zip"
   name "Nightfall"
   desc "Falling snow over your desktop windows"
-  homepage "https://github.com/romeirofernandes/homebrew-nightfall"
+  homepage "https://github.com/romeirofernandes/nightfall"
 
   depends_on macos: ">= :big_sur"
 

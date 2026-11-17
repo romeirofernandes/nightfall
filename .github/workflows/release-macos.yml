@@ -1,6 +1,11 @@
 name: macOS release
 on:
   workflow_dispatch:
+    inputs:
+      notarize:
+        description: Sign with Developer ID and notarize (requires Apple secrets)
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -28,11 +33,48 @@ jobs:
           workspaces: src-tauri
       - run: npm ci
       - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+      - name: Prepare Developer ID signing
+        if: inputs.notarize
+        env:
+          CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          API_KEY: ${{ secrets.APPLE_API_KEY }}
+          API_PRIVATE_KEY: ${{ secrets.APPLE_API_PRIVATE_KEY_BASE64 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in CERTIFICATE CERTIFICATE_PASSWORD SIGNING_IDENTITY API_ISSUER API_KEY API_PRIVATE_KEY; do
+            if [ -z "${!key}" ]; then echo "::error::Missing Apple signing secret: $key"; exit 1; fi
+          done
+          KEYCHAIN="$RUNNER_TEMP/nightfall-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
+          echo "::add-mask::$KEYCHAIN_PASSWORD"
+          printf '%s' "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/nightfall.p12"
+          printf '%s' "$API_PRIVATE_KEY" | base64 --decode > "$RUNNER_TEMP/AuthKey.p8"
+          chmod 600 "$RUNNER_TEMP/nightfall.p12" "$RUNNER_TEMP/AuthKey.p8"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/nightfall.p12" -k "$KEYCHAIN" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
+          echo "APPLE_SIGNING_IDENTITY=$SIGNING_IDENTITY" >> "$GITHUB_ENV"
+          echo "APPLE_API_ISSUER=$API_ISSUER" >> "$GITHUB_ENV"
+          echo "APPLE_API_KEY=$API_KEY" >> "$GITHUB_ENV"
+          echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
       - run: npm run build -- --bundles app
       - name: Verify and archive application
         run: |
           APP=src-tauri/target/release/bundle/macos/Nightfall.app
-          codesign --force --deep --sign - "$APP"
+          if [ "${{ inputs.notarize }}" = "true" ]; then
+            xcrun stapler validate "$APP"
+            spctl --assess --type execute --verbose "$APP"
+          else
+            codesign --force --deep --sign - "$APP"
+            echo 'Ad-hoc build: first launch requires app-specific Gatekeeper approval.' >> "$GITHUB_STEP_SUMMARY"
+          fi
           codesign --verify --deep --strict "$APP"
           /usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP/Contents/Info.plist"
           file "$APP/Contents/MacOS/nightfall"
@@ -43,3 +85,9 @@ jobs:
           name: Nightfall-${{ matrix.arch }}
           path: Nightfall-0.2.1-${{ matrix.arch }}.zip
           retention-days: 7
+      - name: Remove signing material
+        if: always() && inputs.notarize
+        shell: bash
+        run: |
+          security delete-keychain "$RUNNER_TEMP/nightfall-signing.keychain-db" || true
+          rm -f "$RUNNER_TEMP/nightfall.p12" "$RUNNER_TEMP/AuthKey.p8"

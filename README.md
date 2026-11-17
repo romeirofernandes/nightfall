@@ -11,6 +11,7 @@ built with Rust + Tauri for macOS and Hyprland.
 ### get it on your Mac
 
 ```sh
+brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofernandes/nightfall
 brew install --cask romeirofernandes/nightfall/nightfall
 ```
 
@@ -22,10 +23,10 @@ the Mac app isn't Apple-notarized yet, so the first launch may need
 
 ### on Arch + Hyprland
 
-grab the [Linux installer](https://github.com/romeirofernandes/homebrew-nightfall/blob/main/install-linux.sh).
+grab the [Linux installer](https://github.com/romeirofernandes/nightfall/blob/main/distribution/install-linux.sh).
 it downloads and verifies the prebuilt app. no repo to clone.
 
-[downloads](https://github.com/romeirofernandes/homebrew-nightfall/releases/latest) ·
-[Homebrew tap](https://github.com/romeirofernandes/homebrew-nightfall)
+[downloads](https://github.com/romeirofernandes/nightfall/releases/latest) ·
+[Homebrew tap](https://github.com/romeirofernandes/nightfall/tree/main/Casks)
 
 enjoy the snow, mate. ❄

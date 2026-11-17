@@ -1,0 +1,22 @@
+name: Verify single-repository Homebrew installation
+on: workflow_dispatch
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Tap the application repository
+        run: brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofernandes/nightfall
+      - name: Install the prebuilt application
+        run: brew install --cask romeirofernandes/nightfall/nightfall
+      - name: Verify application
+        run: |
+          test -d /Applications/Nightfall.app
+          codesign --verify --deep --strict /Applications/Nightfall.app
+          test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' /Applications/Nightfall.app/Contents/Info.plist)" = 0.2.1
+          brew list --cask nightfall
+      - name: Uninstall
+        run: brew uninstall --cask nightfall

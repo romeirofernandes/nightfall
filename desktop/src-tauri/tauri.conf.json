@@ -4,7 +4,7 @@
   "version": "0.4.1",
   "identifier": "app.nightfall.desktop",
   "build": {
-    "frontendDist": "../desktop"
+    "frontendDist": "../ui"
   },
   "app": {
     "withGlobalTauri": true,
@@ -31,5 +31,6 @@
     "macOS": {
       "minimumSystemVersion": "11.0"
     }
-  }
+  },
+  "mainBinaryName": "nightfall-renderer"
 }

@@ -3,7 +3,7 @@ use std::{
     io::{Read, Write},
     os::unix::{
         fs::PermissionsExt,
-        net::{UnixListener, UnixStream},
+        net::UnixListener,
     },
     path::PathBuf,
     time::Duration,
@@ -18,65 +18,6 @@ fn path() -> PathBuf {
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(home).join(".config"));
     base.join("app.nightfall.desktop/control.sock")
-}
-pub fn request(command: &str) -> std::io::Result<String> {
-    let mut stream = UnixStream::connect(path())?;
-    stream.set_read_timeout(Some(Duration::from_secs(5)))?;
-    stream.set_write_timeout(Some(Duration::from_secs(5)))?;
-    stream.write_all(command.as_bytes())?;
-    stream.shutdown(std::net::Shutdown::Write)?;
-    let mut reply = String::new();
-    stream.read_to_string(&mut reply)?;
-    if reply.starts_with("error:") { return Err(std::io::Error::other(reply)); }
-    Ok(reply)
-}
-pub fn client() {
-    let command = std::env::args().nth(1);
-    if command.is_none() || command.as_deref() == Some("tui") {
-        let result = crate::tui::run();
-        if let Err(e) = &result { eprintln!("{e}"); }
-        std::process::exit(if result.is_ok() { 0 } else { 1 });
-    }
-    if command.as_deref() == Some("--daemon") { return; }
-    if command.as_deref() == Some("--version") {
-        println!("nightfall {}", env!("CARGO_PKG_VERSION"));
-        std::process::exit(0);
-    }
-    if command.as_deref() == Some("enable") {
-        let result = crate::tui::ensure_renderer().and_then(|_| request("enable"));
-        match &result { Ok(reply) => print!("{reply}"), Err(e) => eprintln!("{e}") }
-        std::process::exit(if result.is_ok() { 0 } else { 1 });
-    }
-    if matches!(command.as_deref(), Some("--help" | "-h")) {
-        println!("nightfall [tui|enable|disable|toggle|status|quit]\nRun without arguments for terminal controls. q closes controls; x stops snow.");
-        std::process::exit(0);
-    }
-    if let Some(c) = &command {
-        if !["enable", "disable", "toggle", "status", "quit"].contains(&c.as_str()) {
-            eprintln!("Unknown command: {c}. See nightfall --help");
-            std::process::exit(2);
-        }
-    }
-    match UnixStream::connect(path()) {
-        Ok(mut stream) => {
-            let _ = stream.set_read_timeout(Some(Duration::from_secs(5)));
-            stream
-                .write_all(command.as_deref().unwrap_or("show").as_bytes())
-                .unwrap();
-            let _ = stream.shutdown(std::net::Shutdown::Write);
-            let mut reply = String::new();
-            stream
-                .read_to_string(&mut reply)
-                .expect("Control response timed out");
-            print!("{reply}");
-            std::process::exit(if reply.starts_with("error:") { 1 } else { 0 });
-        }
-        Err(_) if command.as_deref().is_some_and(|c| c != "enable") => {
-            println!("Nightfall is stopped");
-            std::process::exit(1);
-        }
-        Err(_) => {}
-    }
 }
 pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
     let socket = path();

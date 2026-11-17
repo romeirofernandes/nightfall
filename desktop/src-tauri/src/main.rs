@@ -1,8 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 mod control;
-#[cfg(any(target_os = "linux", target_os = "macos"))]
-mod tui;
 mod engine;
 #[cfg(target_os = "linux")]
 mod linux;
@@ -124,8 +122,6 @@ fn quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 fn main() {
-    #[cfg(any(target_os = "linux", target_os = "macos"))]
-    control::client();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_settings,

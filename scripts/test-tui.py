@@ -57,7 +57,9 @@ with tempfile.TemporaryDirectory(prefix='nightfall-tui-') as config:
         deadline = time.monotonic() + 5
         while time.monotonic() < deadline and cli('status').returncode == 0:
             time.sleep(0.05)
-        assert 'stopped' in cli('status').stdout
+        stopped = cli('status')
+        assert stopped.returncode != 0
+        assert 'stopped' in stopped.stdout + stopped.stderr
         print('PASS: TUI toggle, close without stopping snow, reopen and quit')
     finally:
         cli('quit')

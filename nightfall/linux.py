@@ -4,6 +4,7 @@ import math
 import os
 import subprocess
 import time
+import signal
 from concurrent.futures import ThreadPoolExecutor
 from .engine import Winter, Surface
 
@@ -55,6 +56,22 @@ def run(options):
             for edge in (Layer.Edge.TOP,Layer.Edge.BOTTOM,Layer.Edge.LEFT,Layer.Edge.RIGHT):
                 Layer.set_anchor(win,edge,True)
             win.connect("realize",lambda w:w.get_window().input_shape_combine_region(cairo.Region(),0,0))
+        if options.preview:
+            header = Gtk.HeaderBar(title="Nightfall", subtitle="A little winter, wherever you work")
+            header.set_show_close_button(True)
+            win.set_titlebar(header)
+            for title, callback in [
+                ("Pause", lambda b, m=model: setattr(m, "paused", not m.paused)),
+                ("Plow", lambda b, m=model: m.send_plow()),
+            ]:
+                button = Gtk.Button(label=title)
+                button.connect("clicked", callback)
+                header.pack_end(button)
+            choice = Gtk.ComboBoxText()
+            for value in ("light", "normal", "blizzard"): choice.append_text(value)
+            choice.set_active(("light", "normal", "blizzard").index(options.intensity))
+            choice.connect("changed", lambda c, m=model: setattr(m, "intensity", c.get_active_text()))
+            header.pack_start(choice)
         area = Gtk.DrawingArea()
         win.add(area)
         def draw(widget, cr, m=model):
@@ -62,6 +79,21 @@ def run(options):
             cr.set_source_rgba(*((.055,.09,.14,1) if options.preview else (0,0,0,0)))
             cr.paint()
             cr.set_operator(cairo.OPERATOR_OVER)
+            if options.preview:
+                for x,y,w,h,title in [(150,230,430,260,"FIELD NOTES"),(620,390,260,170,"WINTER FORECAST")]:
+                    cr.set_source_rgb(.10,.16,.23)
+                    cr.rectangle(x,y,w,h); cr.fill()
+                    cr.set_source_rgb(.17,.26,.34)
+                    cr.rectangle(x,y,w,40); cr.fill()
+                    cr.set_source_rgb(.77,.86,.93)
+                    cr.select_font_face("sans-serif",0,0); cr.set_font_size(12)
+                    cr.move_to(x+20,y+25); cr.show_text(title)
+                    cr.set_font_size(17); cr.move_to(x+20,y+80)
+                    cr.show_text("Let the quiet settle.")
+                cr.set_source_rgb(.72,.82,.9)
+                cr.set_font_size(40); cr.move_to(60,90); cr.show_text("A little winter.")
+                cr.set_font_size(15); cr.move_to(62,125)
+                cr.show_text("Snow gathers on ledges. Drag through a bank to scatter it.")
             for kind,coords,color in m.shapes():
                 cr.set_source_rgba(*color)
                 if kind == "oval":
@@ -114,6 +146,15 @@ def run(options):
         for model,area in zip(models,windows):
             model.update(dt); area.queue_draw()
         return True
+    def toggle():
+        for model in models: model.paused = not model.paused
+        return True
+    def plow():
+        for model in models: model.send_plow()
+        return True
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, toggle)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR2, plow)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, lambda: (Gtk.main_quit(), False)[1])
     GLib.timeout_add(round(1000/options.fps),tick)
     try:
         Gtk.main()

@@ -2,6 +2,8 @@
 mod engine;
 #[cfg(target_os = "linux")]
 mod linux;
+#[cfg(target_os = "macos")]
+mod macos;
 use engine::{Settings, Winter};
 use std::{
     collections::HashMap,
@@ -45,6 +47,20 @@ fn frame(
     let world = worlds
         .entry(window.label().into())
         .or_insert_with(|| Winter::new(width.clamp(1., 16000.), height.clamp(1., 16000.)));
+    #[cfg(target_os = "macos")]
+    if world.time - world.geometry_time >= 0.5 {
+        world.geometry_time = world.time;
+        let scale = window.scale_factor().map_err(|e| e.to_string())?;
+        let pos = window.outer_position().map_err(|e| e.to_string())?;
+        if let Some(surfaces) = macos::surfaces(
+            pos.x as f64 / scale,
+            pos.y as f64 / scale,
+            world.width,
+            world.height,
+        ) {
+            world.surfaces(surfaces);
+        }
+    }
     world.step(dt, &state.settings.lock().unwrap());
     serde_json::to_value(world).map_err(|e| e.to_string())
 }

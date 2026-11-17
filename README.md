@@ -99,8 +99,8 @@ the development VM. Landing-page desktop/mobile layout and OS switching have
 been checked in a browser.
 
 **macOS and a real Hyprland session still need runtime verification.**
-The macOS adapter currently accumulates at the screen bottom; window discovery
-has not yet been ported from the earlier Python prototype. Icon/Dock discovery,
+macOS reads Quartz window geometry at 500 ms intervals; privacy settings may
+limit the returned window list. No screen images or window titles are read. Icon/Dock discovery,
 global shoveling, window occlusion, snowball fights, animated snowman, display
 hotplug, and automatic login registration are not implemented. Fullscreen,
 screen-lock, scaled multi-monitor behavior and tray availability need target

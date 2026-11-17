@@ -74,6 +74,9 @@ pub struct Winter {
     pub flakes: Vec<Flake>,
     pub ledges: Vec<Ledge>,
     pub time: f64,
+    #[serde(skip)]
+    #[allow(dead_code)]
+    pub geometry_time: f64,
     pub plow_x: Option<f64>,
     #[serde(skip)]
     rng: SmallRng,
@@ -90,6 +93,7 @@ impl Winter {
             flakes: vec![],
             ledges: vec![Ledge::new("ground".into(), 0., height - 4., width)],
             time: 0.,
+            geometry_time: 0.,
             plow_x: None,
             rng: SmallRng::seed_from_u64(2048),
             spawn: 0.,

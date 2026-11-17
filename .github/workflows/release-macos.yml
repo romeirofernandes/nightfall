@@ -1,0 +1,45 @@
+name: macOS release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bundle:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+      - run: npm run build -- --bundles app
+      - name: Verify and archive application
+        run: |
+          APP=src-tauri/target/release/bundle/macos/Nightfall.app
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep --strict "$APP"
+          /usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP/Contents/Info.plist"
+          file "$APP/Contents/MacOS/nightfall"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "Nightfall-0.2.1-${{ matrix.arch }}.zip"
+          shasum -a 256 "Nightfall-0.2.1-${{ matrix.arch }}.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Nightfall-${{ matrix.arch }}
+          path: Nightfall-0.2.1-${{ matrix.arch }}.zip
+          retention-days: 7

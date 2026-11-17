@@ -114,3 +114,11 @@ app has no Python runtime dependency.
 The public feature brief came from https://snowfallmac.com/. No original code,
 assets, executable, or license mechanism was copied or modified. REA was set up
 and its skill consulted; no binary analysis was performed.
+
+### Latest local build
+
+The optimized Linux executable is **4,877,576 bytes (4.65 MiB)**, excluding
+system libraries. This is executable size, not resident memory. Four Rust tests
+pass. The native settings UI was exercised to save Blizzard intensity, quit,
+and relaunch with that preference restored. A macOS CI compilation and release
+build passed; actual macOS overlay behavior remains unverified.

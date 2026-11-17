@@ -103,3 +103,7 @@ footer.closing>.wrap>div{align-self:stretch;width:100%;max-width:none}
 .hero--collage .hero__art{min-height:180px}
 .hero .hero__lead{line-height:1.4}
 }
+.hero-desktop{inset:0!important;width:auto!important;height:auto!important}
+@media(max-width:639px){.section-head h2{font-size:30px}.close-head h2{font-size:34px}.hero--collage .hero__art{height:calc(100svh - 500px);flex:1 1 0;min-height:200px}}
+@media(min-width:1024px){.hero--collage .hero__art{margin-top:30px;height:calc(100% - 30px)}}
+@media(max-width:1023px){.hero .hero__grid{align-items:stretch}.hero--collage .hero__art{width:100%}}

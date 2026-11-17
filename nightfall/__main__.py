@@ -24,6 +24,8 @@ def main():
         else:
             parser.error("Supported platforms: macOS and Linux/Hyprland")
         run(options)
+    except KeyboardInterrupt:
+        pass
     except (ImportError, ValueError, RuntimeError) as exc:
         parser.exit(1, f"Nightfall: {exc}\nSee README.md for platform dependencies.\n")
 

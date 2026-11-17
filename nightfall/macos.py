@@ -68,7 +68,7 @@ def run(options):
     for screen in A.NSScreen.screens():
         frame = screen.frame()
         if options.preview:
-            frame = A.NSMakeRect(100,100,1000,650)
+            frame = A.NSMakeRect(100,100,860,620)
         style = A.NSWindowStyleMaskTitled|A.NSWindowStyleMaskClosable if options.preview else A.NSWindowStyleMaskBorderless
         win = A.NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(frame,style,A.NSBackingStoreBuffered,False)
         win.setTitle_("Nightfall")
@@ -82,7 +82,7 @@ def run(options):
         model = Winter(frame.size.width,frame.size.height)
         options.apply(model)
         if options.preview:
-            model.set_surfaces([Surface("demo",150,230,430),Surface("demo2",620,390,260)])
+            model.set_surfaces([Surface("demo",150,230,430),Surface("demo2",580,370,240)])
         view = SnowView.alloc().initWithFrame_(A.NSMakeRect(0,0,frame.size.width,frame.size.height))
         view.model = model
         win.setContentView_(view)

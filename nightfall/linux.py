@@ -36,7 +36,7 @@ def run(options):
     for index in range(1 if options.preview else display.get_n_monitors()):
         monitor = display.get_monitor(index)
         geo = monitor.get_geometry()
-        width,height = (1000,650) if options.preview else (geo.width,geo.height)
+        width,height = (860,620) if options.preview else (geo.width,geo.height)
         model = Winter(width,height)
         options.apply(model)
         win = Gtk.Window(title="Nightfall")
@@ -80,7 +80,7 @@ def run(options):
             cr.paint()
             cr.set_operator(cairo.OPERATOR_OVER)
             if options.preview:
-                for x,y,w,h,title in [(150,230,430,260,"FIELD NOTES"),(620,390,260,170,"WINTER FORECAST")]:
+                for x,y,w,h,title in [(150,230,430,260,"FIELD NOTES"),(580,370,240,170,"WINTER FORECAST")]:
                     cr.set_source_rgb(.10,.16,.23)
                     cr.rectangle(x,y,w,h); cr.fill()
                     cr.set_source_rgb(.17,.26,.34)
@@ -108,7 +108,7 @@ def run(options):
             return False
         area.connect("draw",draw)
         if options.preview:
-            model.set_surfaces([Surface("demo",150,230,430),Surface("demo2",620,390,260)])
+            model.set_surfaces([Surface("demo",150,230,430),Surface("demo2",580,370,240)])
             area.add_events(Gdk.EventMask.BUTTON_PRESS_MASK|Gdk.EventMask.BUTTON1_MOTION_MASK)
             area.connect("button-press-event",lambda w,e,m=model:m.shovel(e.x,e.y))
             area.connect("motion-notify-event",lambda w,e,m=model:m.shovel(e.x,e.y))

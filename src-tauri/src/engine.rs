@@ -118,6 +118,27 @@ impl Winter {
                 ledge.age = old.age;
             }
         }
+        for old in &self.ledges {
+            let stable = ledges.iter().any(|l| {
+                l.id == old.id
+                    && (l.x - old.x).abs() < 2.
+                    && (l.y - old.y).abs() < 2.
+                    && (l.width - old.width).abs() < 2.
+            });
+            if !stable {
+                for (i, depth) in old.bank.iter().enumerate().step_by(2) {
+                    if *depth > 1. && self.flakes.len() < 900 {
+                        self.flakes.push(Flake {
+                            x: old.x + i as f64 * 8.,
+                            y: old.y - depth,
+                            r: (depth / 3.).clamp(1., 3.),
+                            speed: 70.,
+                            phase: self.rng.gen_range(0.0..6.28),
+                        });
+                    }
+                }
+            }
+        }
         self.ledges = ledges;
     }
     pub fn step(&mut self, dt: f64, s: &Settings) {
@@ -238,6 +259,7 @@ mod tests {
         w.ledges[0].bank[0] = 10.;
         w.surfaces(vec![Ledge::new("a".into(), 20., 50., 100.)]);
         assert_eq!(w.ledges[0].bank[0], 0.);
+        assert!(!w.flakes.is_empty());
     }
     #[test]
     fn settings_bounds() {

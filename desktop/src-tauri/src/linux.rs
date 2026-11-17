@@ -70,7 +70,7 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
                 return glib::Propagation::Proceed;
             }
             cr.set_source_rgba(0.96, 0.98, 1., 0.9);
-            for f in m.visible_flakes() {
+            for f in &m.flakes {
                 cr.arc(f.x, f.y, f.r, 0., std::f64::consts::TAU);
                 let _ = cr.fill();
             }
@@ -223,16 +223,15 @@ fn surfaces(ox: i32, oy: i32, width: i32, height: i32) -> Option<Vec<Ledge>> {
         let x = c["at"][0].as_f64()? - ox as f64;
         let y = c["at"][1].as_f64()? - oy as f64;
         let w = c["size"][0].as_f64()?;
-        let h = c["size"][1].as_f64()?;
         let left = x.max(0.);
         let right = (x + w).min(width as f64);
-        if y + h > 0. && y < height as f64 && right > left {
+        if y >= 0. && y < height as f64 && right > left {
             result.push(Ledge::new(
                 c["address"].as_str()?.into(),
                 left,
                 y,
                 right - left,
-            ).with_height(h));
+            ));
         }
     }
     if let Some(layers) = read("layers") {

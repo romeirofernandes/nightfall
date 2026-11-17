@@ -26,9 +26,6 @@ experimental overlay fallback that has not been runtime-tested. Native GNOME
 and KDE Wayland sessions lack layer-shell; settings can still open there.
 Monitor additions require restart.
 Window ledges use `hyprctl`; other compositors show desktop snow only.
-On Hyprland and macOS, window geometry keeps most falling snow behind windows.
-A stable random ten percent of flakes crosses in front; snow outside windows
-and the bottom-edge decorations keep their usual appearance.
 
 `nightfall disable` clears snow and releases pointer capture. `nightfall enable`
 re-enables it, starting the app when stopped. `nightfall toggle`, `status`, and

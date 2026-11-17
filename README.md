@@ -4,36 +4,41 @@
 
 a little snow on your desktop. a tiny snowman. a very good excuse to stay in.
 
-built with Rust + Tauri for macOS and Hyprland.
+Rust + Tauri, with a native GTK overlay on Linux and desktop windows on macOS.
 
-Santa does the sweeping. you bring the snowmen, trees, lights, and snowballs.
+![a snowy desktop with T3 Code](assets/readme/desktop.jpg)
 
-![a snow day on your desktop](assets/readme/desktop.jpg)
+*Generated, sanitized desktop illustration. Fictional T3 Code content.*
 
-### get it on your Mac
+### install
+
+Linux x86_64, Apple Silicon Mac, or Intel Mac:
 
 ```sh
-brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofernandes/nightfall
-brew update-reset "$(brew --repository romeirofernandes/nightfall)"
-brew install --cask romeirofernandes/nightfall/nightfall
+curl -fsSL https://raw.githubusercontent.com/romeirofernandes/nightfall/main/distribution/install.sh -o /tmp/nightfall-install.sh
+bash /tmp/nightfall-install.sh
 ```
 
-already used the old tap? [repair it once](distribution/HOMEBREW-RECOVERY.md).
+Add `~/.local/bin` to your PATH, then:
 
-open **Nightfall** from Applications, pick your weather, and carry on.
-clicks go right through the snow.
+```sh
+nightfall          # open settings
+nightfall disable # clear the desktop, keep settings open
+nightfall enable  # bring back the snow, or start the app
+nightfall status
+nightfall quit    # stop the app
+```
 
-already have it? `brew upgrade --cask nightfall`.
+Linux needs GTK 3, WebKitGTK 4.1, gtk-layer-shell and AppIndicator.
+Hyprland is the primary Linux target, including snow on window ledges.
+Other Wayland compositors need the layer-shell protocol; window ledges are
+Hyprland-specific. GNOME, KDE and X11 overlays are not supported.
+Reconnect a monitor? Restart Nightfall to create its overlay.
 
-the Mac app isn't Apple-notarized yet, so the first launch may need
-**Open Anyway** in Privacy & Security.
+On Mac, open `~/Applications/Nightfall.app` once and approve it in
+Privacy & Security if Gatekeeper asks. Downloads are ad-hoc signed, not
+Apple-notarized. Keep Gatekeeper enabled.
 
-### on Arch + Hyprland
-
-grab the [Linux installer](https://github.com/romeirofernandes/nightfall/blob/main/distribution/install-linux.sh).
-it downloads and verifies the prebuilt app. no repo to clone.
-
-[downloads](https://github.com/romeirofernandes/nightfall/releases/latest) ·
-[Homebrew tap](https://github.com/romeirofernandes/nightfall/tree/main/Casks)
-
-enjoy the snow, mate. ❄
+The [Homebrew install](distribution/HOMEBREW-RECOVERY.md) remains available.
+[Platform dependencies, source builds and uninstall](distribution/README.md) ·
+[downloads](https://github.com/romeirofernandes/nightfall/releases/latest)

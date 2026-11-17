@@ -19,6 +19,7 @@ jobs:
           workspaces: src-tauri
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf
+      - run: python3 scripts/test-installer.py
       - run: npm ci
       - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
       - run: npm run build -- --no-bundle

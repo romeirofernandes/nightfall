@@ -78,12 +78,12 @@ jobs:
           codesign --verify --deep --strict "$APP"
           /usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP/Contents/Info.plist"
           file "$APP/Contents/MacOS/nightfall"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" "Nightfall-0.3.1-${{ matrix.arch }}.zip"
-          shasum -a 256 "Nightfall-0.3.1-${{ matrix.arch }}.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "Nightfall-0.4.0-${{ matrix.arch }}.zip"
+          shasum -a 256 "Nightfall-0.4.0-${{ matrix.arch }}.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: Nightfall-${{ matrix.arch }}
-          path: Nightfall-0.3.1-${{ matrix.arch }}.zip
+          path: Nightfall-0.4.0-${{ matrix.arch }}.zip
           retention-days: 7
       - name: Remove signing material
         if: always() && inputs.notarize

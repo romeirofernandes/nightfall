@@ -5,7 +5,26 @@
 A little winter for your desktop. A native **Rust + Tauri 2** application with
 a warm, rounded settings UI and a festive interactive landing page.
 
-## Get started
+## Install on macOS with Homebrew
+
+```sh
+brew install --cask romeirofernandes/nightfall/nightfall
+```
+
+Open **Nightfall** from Applications. Homebrew selects and checksum-verifies the
+prebuilt Apple Silicon or Intel app; Rust and Node are not required. Downloads
+and the cask are public at
+https://github.com/romeirofernandes/homebrew-nightfall/releases/latest.
+
+The prebuilt app is ad-hoc signed, not Apple-notarized. If macOS blocks the
+first launch, use the app-specific Open Anyway option in Privacy & Security
+after trying to launch it. Keep Gatekeeper enabled.
+
+Linux x64 binaries and SHA256SUMS are also available on that Releases page.
+The desktop overlay requires Hyprland or another supported layer-shell
+compositor; see the landing page's Arch tab for dependency and install commands.
+
+## Build from source
 
 Requires Rust stable, Node.js 20+, and npm. macOS also needs Xcode Command Line
 Tools (`xcode-select --install`).
@@ -71,7 +90,7 @@ cargo fmt --manifest-path src-tauri/Cargo.toml --check
 Landing page: `npm run web` → http://localhost:5173.
 Buildless files are in `website/dist/`; the font is bundled locally.
 The landing page detects the platform, offers a manual OS switch, and copies
-the corresponding source-build commands. The live mountain desktop is an
+the corresponding Homebrew or prebuilt-Linux install commands. The live mountain desktop is an
 illustrative browser demo, not a recording of the native overlay.
 
 ## Architecture and performance

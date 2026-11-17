@@ -16,3 +16,10 @@ document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener
  setTimeout(()=>{button.innerHTML='Copy <span>⧉</span>';status.textContent='';},2200);
 }));
 document.documentElement.dataset.ready='1';
+function platformDetails(os){
+ const linux=os==='linux';document.getElementById('platform-title').textContent=linux?'Nightfall for Hyprland':'Nightfall for Mac';
+ document.getElementById('platform-requirements').innerHTML=linux?'Linux x64<br>Arch + Hyprland':'Apple Silicon & Intel<br>macOS 11 or newer';
+ document.getElementById('platform-note').textContent=linux?'The overlay requires Wayland layer shell. Install the system libraries shown in the terminal, then run Nightfall inside your Hyprland session.':'This release is ad-hoc signed, not Apple-notarized. macOS may ask you to allow the first launch in System Settings → Privacy & Security.';
+}
+document.querySelectorAll('[data-os]').forEach(b=>b.addEventListener('click',()=>platformDetails(b.dataset.os)));
+platformDetails(/Linux/i.test(platform)?'linux':'mac');

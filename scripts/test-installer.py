@@ -18,7 +18,10 @@ class Installer(unittest.TestCase):
     def test_arm64_install_and_reject_bad_downloads(self):
         self.check_install('aarch64', 'linux-arm64')
 
-    def check_install(self, arch, platform):
+    def test_legacy_single_binary_install(self):
+        self.check_install('x86_64', 'linux-x64', False)
+
+    def check_install(self, arch, platform, split=True):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             home = root / 'home with spaces'
@@ -31,6 +34,8 @@ class Installer(unittest.TestCase):
             asset = root / f'Nightfall-0.4.0-{platform}.tar.gz'
             with tarfile.open(asset, 'w:gz') as archive:
                 archive.add(binary, arcname='nightfall')
+                if split:
+                    archive.add(binary, arcname='nightfall-renderer')
             sums = root / 'SHA256SUMS'
             sums.write_text(f'{hashlib.sha256(asset.read_bytes()).hexdigest()}  {asset.name}\n')
             (tools / 'uname').write_text(f'#!/bin/sh\ncase "$1" in -s) echo Linux;; -m) echo {arch};; esac\n')
@@ -49,6 +54,9 @@ class Installer(unittest.TestCase):
             launcher = home / '.local/share/applications/nightfall.desktop'
             self.assertIn(f'Exec="{installed}"', launcher.read_text())
             self.assertFalse((home / '.config/autostart/nightfall.desktop').exists())
+            self.assertIn('Terminal=true', launcher.read_text())
+            if split:
+                self.assertTrue((home / '.local/lib/nightfall/nightfall-renderer').is_file())
             installed.write_text('existing user binary')
             sums.write_text(f'{"0" * 64}  {asset.name}\n')
             self.assertNotEqual(run().returncode, 0)

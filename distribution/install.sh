@@ -34,7 +34,14 @@ bin=${XDG_BIN_HOME:-$HOME/.local/bin}
 mkdir -p "$bin"
 if [[ $platform == linux-* ]]; then
   tar -xzf "$work/$asset" -C "$work"
-  install -m755 "$work/nightfall" "$bin/nightfall"
+  # Old releases contain one binary; new releases separate terminal controls.
+  if [[ -f $work/nightfall-renderer ]]; then
+    mkdir -p "$bin/../lib/nightfall"
+    install -m755 "$work/nightfall-renderer" "$bin/../lib/nightfall/.nightfall-renderer.$$"
+    mv -f "$bin/../lib/nightfall/.nightfall-renderer.$$" "$bin/../lib/nightfall/nightfall-renderer"
+  fi
+  install -m755 "$work/nightfall" "$bin/.nightfall.$$"
+  mv -f "$bin/.nightfall.$$" "$bin/nightfall"
   apps=${XDG_DATA_HOME:-$HOME/.local/share}/applications
   mkdir -p "$apps"
   [[ $bin != *$'\n'* && $bin != *$'\r'* && $bin != *'"'* && $bin != *'%'* && $bin != *'`'* && $bin != *'$'* && $bin != *'\\'* ]] || { echo 'Unsupported launcher path' >&2; exit 1; }
@@ -58,6 +65,13 @@ else
   fi
   rm -rf "$HOME/Applications/Nightfall.app"
   mv "$work/Nightfall.app" "$HOME/Applications/Nightfall.app"
-  ln -sfn "$HOME/Applications/Nightfall.app/Contents/MacOS/nightfall" "$bin/nightfall"
+  if [[ -f $work/nightfall ]]; then
+    # Replace an old CLI symlink without overwriting its target inside the app.
+    rm -f "$bin/nightfall"
+    install -m755 "$work/nightfall" "$bin/.nightfall.$$"
+  mv -f "$bin/.nightfall.$$" "$bin/nightfall"
+  else
+    ln -sfn "$HOME/Applications/Nightfall.app/Contents/MacOS/nightfall" "$bin/nightfall"
+  fi
 fi
 printf 'Installed %s. Add %s to PATH.\nRun: nightfall\nDisable snow: nightfall disable\nStop: nightfall quit\n' "$tag" "$bin"

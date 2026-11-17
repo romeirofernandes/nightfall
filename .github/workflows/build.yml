@@ -13,16 +13,24 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: cli/go.mod
+          cache-dependency-path: cli/go.sum
+      - run: go test ./...
+        working-directory: cli
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: desktop/src-tauri
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf
       - run: python3 scripts/test-installer.py
       - run: npm ci
-      - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
-      - run: npm run build -- --no-bundle
+        working-directory: desktop
+      - run: cargo test --manifest-path desktop/src-tauri/Cargo.toml --locked
+      - run: npm --prefix desktop run build -- --no-bundle
   website:
     runs-on: ubuntu-latest
     steps:

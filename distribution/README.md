@@ -38,7 +38,8 @@ The desktop launcher opens a terminal; the tray toggles snow or quits.
 Linux installs `~/.local/bin/nightfall` and a desktop launcher. macOS installs
 `~/Applications/Nightfall.app` and a CLI symlink in `~/.local/bin`.
 `XDG_BIN_HOME` overrides the CLI directory. Existing settings are preserved.
-No autostart entry is created. To uninstall, quit and remove those installed
+The Go CLI lives in `~/.local/bin`; the Linux renderer lives in
+`~/.local/lib/nightfall`. No autostart entry is created. To uninstall, quit and remove those installed
 files. Settings remain in `$XDG_CONFIG_HOME/app.nightfall.desktop` on Linux
 or `~/Library/Application Support/app.nightfall.desktop` on macOS.
 
@@ -61,10 +62,11 @@ libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf`
 plus a C compiler, then run:
 
 ```sh
-npm ci
-cargo test --manifest-path src-tauri/Cargo.toml --locked
-npm run build -- --no-bundle
-src-tauri/target/release/nightfall
+npm --prefix desktop ci
+cargo test --manifest-path desktop/src-tauri/Cargo.toml --locked
+npm --prefix desktop run build -- --no-bundle
+cd cli
+NIGHTFALL_RENDERER="$PWD/../desktop/src-tauri/target/release/nightfall-renderer" go run .
 ```
 
 ## Release
@@ -75,3 +77,15 @@ and publishes all three archives with SHA256SUMS only after every build passes.
 The separate macOS dispatch workflow supports optional Developer ID signing.
 Ad-hoc releases require app-specific Gatekeeper approval; never disable it.
 The Homebrew cask is updated only after published asset hashes are available.
+
+## Source layout
+
+- `cli/`: Go terminal controls and Unix socket client. Builds without GTK or cgo.
+- `desktop/`: Rust/Tauri renderer, native platform integration, and overlay assets.
+- `website/`: marketing site.
+- `distribution/`: installers, release notes, and platform details.
+- `docs/screenshots/`: development reference captures.
+
+The terminal binary is portable across Linux distributions of the same CPU
+architecture, including musl. The renderer still requires the documented native
+libraries and a supported graphical compositor. It does not support every distro.

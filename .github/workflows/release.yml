@@ -25,10 +25,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: cli/go.mod
+          cache-dependency-path: cli/go.sum
+      - run: go test ./...
+        working-directory: cli
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: desktop/src-tauri
       - name: Check tag and versions
         shell: bash
         run: |
@@ -36,19 +43,26 @@ jobs:
           import json, os, re
           version = os.environ['GITHUB_REF_NAME'].removeprefix('v')
           assert re.fullmatch(r'\d+\.\d+\.\d+', version)
-          for path in ['package.json', 'package-lock.json', 'src-tauri/tauri.conf.json']:
+          for path in ['desktop/package.json', 'desktop/package-lock.json', 'desktop/src-tauri/tauri.conf.json']:
               assert json.load(open(path))['version'] == version, path
-          assert f'name = "nightfall"\nversion = "{version}"' in open('src-tauri/Cargo.lock').read()
-          assert f'version = "{version}"' in open('src-tauri/Cargo.toml').read()
+          assert f'name = "nightfall"\nversion = "{version}"' in open('desktop/src-tauri/Cargo.lock').read()
+          assert f'version = "{version}"' in open('desktop/src-tauri/Cargo.toml').read()
           PY
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf
       - run: npm ci
-      - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+        working-directory: desktop
+      - run: cargo test --manifest-path desktop/src-tauri/Cargo.toml --locked
       - if: runner.os == 'Linux'
-        run: npm run build -- --no-bundle
+        run: npm --prefix desktop run build -- --no-bundle
       - if: runner.os == 'macOS'
-        run: npm run build -- --bundles app
+        run: npm --prefix desktop run build -- --bundles app
+      - name: Build terminal controls
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          cd cli
+          go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_REF_NAME#v}" -o ../nightfall .
       - name: Archive
         shell: bash
         run: |
@@ -56,15 +70,22 @@ jobs:
           version=${GITHUB_REF_NAME#v}
           mkdir release-assets
           if [[ $RUNNER_OS == Linux ]]; then
-            ldd src-tauri/target/release/nightfall | tee /tmp/nightfall-libraries
+            ldd desktop/src-tauri/target/release/nightfall-renderer | tee /tmp/nightfall-libraries
             ! grep 'not found' /tmp/nightfall-libraries
-            tar -czf "release-assets/Nightfall-$version-${{ matrix.platform }}.tar.gz" -C src-tauri/target/release nightfall
+            mkdir linux-package
+            cp nightfall linux-package/
+            cp desktop/src-tauri/target/release/nightfall-renderer linux-package/
+            tar -czf "release-assets/Nightfall-$version-${{ matrix.platform }}.tar.gz" -C linux-package nightfall nightfall-renderer
           else
-            app=src-tauri/target/release/bundle/macos/Nightfall.app
+            app=desktop/src-tauri/target/release/bundle/macos/Nightfall.app
             codesign --force --deep --sign - "$app"
             codesign --verify --deep --strict "$app"
             test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$app/Contents/Info.plist")" = "$version"
-            ditto -c -k --sequesterRsrc --keepParent "$app" "release-assets/Nightfall-$version-${{ matrix.platform }}.zip"
+            codesign --force --sign - nightfall
+            mkdir mac-package
+            cp -R "$app" mac-package/Nightfall.app
+            cp nightfall mac-package/
+            ditto -c -k --sequesterRsrc mac-package "release-assets/Nightfall-$version-${{ matrix.platform }}.zip"
           fi
       - uses: actions/upload-artifact@v4
         with:

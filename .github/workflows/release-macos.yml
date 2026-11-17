@@ -27,12 +27,18 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: cli/go.mod
+          cache-dependency-path: cli/go.sum
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: desktop/src-tauri
       - run: npm ci
-      - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+        working-directory: desktop
+      - run: cargo test --manifest-path desktop/src-tauri/Cargo.toml --locked
       - name: Prepare Developer ID signing
         if: inputs.notarize
         env:
@@ -64,10 +70,11 @@ jobs:
           echo "APPLE_API_ISSUER=$API_ISSUER" >> "$GITHUB_ENV"
           echo "APPLE_API_KEY=$API_KEY" >> "$GITHUB_ENV"
           echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
-      - run: npm run build -- --bundles app
+      - run: npm --prefix desktop run build -- --bundles app
       - name: Verify and archive application
         run: |
-          APP=src-tauri/target/release/bundle/macos/Nightfall.app
+          APP=desktop/src-tauri/target/release/bundle/macos/Nightfall.app
+          (cd cli && CGO_ENABLED=0 go build -trimpath -ldflags '-s -w' -o ../nightfall .)
           if [ "${{ inputs.notarize }}" = "true" ]; then
             xcrun stapler validate "$APP"
             spctl --assess --type execute --verbose "$APP"
@@ -77,8 +84,12 @@ jobs:
           fi
           codesign --verify --deep --strict "$APP"
           /usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP/Contents/Info.plist"
-          file "$APP/Contents/MacOS/nightfall"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" "Nightfall-0.4.1-${{ matrix.arch }}.zip"
+          file "$APP/Contents/MacOS/nightfall-renderer"
+          codesign --force --sign - nightfall
+          mkdir mac-package
+          cp -R "$APP" mac-package/Nightfall.app
+          cp nightfall mac-package/
+          ditto -c -k --sequesterRsrc mac-package "Nightfall-0.4.1-${{ matrix.arch }}.zip"
           shasum -a 256 "Nightfall-0.4.1-${{ matrix.arch }}.zip"
       - uses: actions/upload-artifact@v4
         with:

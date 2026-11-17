@@ -1,4 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#[cfg(any(target_os = "linux", target_os = "macos"))]
+mod control;
 mod engine;
 #[cfg(target_os = "linux")]
 mod linux;
@@ -120,6 +122,8 @@ fn quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 fn main() {
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
+    control::client();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_settings,
@@ -140,12 +144,17 @@ fn main() {
                 .unwrap_or_default();
             settings.validate();
             settings.interactive = false;
+            if std::env::args().nth(1).as_deref() == Some("enable") {
+                settings.enabled = true;
+            }
             let settings = Arc::new(Mutex::new(settings));
             app.manage(State {
                 settings: settings.clone(),
                 worlds: Mutex::new(HashMap::new()),
                 path,
             });
+            #[cfg(any(target_os = "linux", target_os = "macos"))]
+            control::start(app.handle())?;
             #[cfg(target_os = "linux")]
             linux::start(settings);
             #[cfg(target_os = "macos")]

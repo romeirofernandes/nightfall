@@ -23,6 +23,6 @@ document.querySelector('#quit').onclick=async()=>{if(invoke)await invoke('quit')
 document.getElementById('send-santa').onclick=async()=>{try{if(invoke)await invoke('send_plow');status.textContent=invoke?'Santa is on his way.':'Santa cleanup runs in the desktop app.';}catch(e){status.textContent=String(e)}};
 document.getElementById('play-mode').onclick=()=>{settings.interactive=!settings.interactive;if(settings.interactive)settings.enabled=true;save()};
 // Reflect Escape/overlay exit without overwriting settings while a save is queued.
-setInterval(async()=>{if(invoke&&editVersion===savedVersion&&document.visibilityState==='visible'){try{const remote=await invoke('get_settings');if(remote.interactive!==settings.interactive){settings.interactive=remote.interactive;paint();}}catch{}}},1000);
+setInterval(async()=>{if(invoke&&editVersion===savedVersion&&document.visibilityState==='visible'){try{const remote=await invoke('get_settings');if(remote.interactive!==settings.interactive||remote.enabled!==settings.enabled){settings.interactive=remote.interactive;settings.enabled=remote.enabled;paint();}}catch{}}},1000);
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&settings.interactive){e.preventDefault();settings.interactive=false;save();}});

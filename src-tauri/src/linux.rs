@@ -44,12 +44,14 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
         )));
         let model = winter.clone();
         let config = settings.clone();
-        area.connect_draw(move |_, cr| {
+        area.connect_draw(move |widget, cr| {
             cr.set_operator(cairo::Operator::Source);
             cr.set_source_rgba(0., 0., 0., 0.);
             let _ = cr.paint();
             cr.set_operator(cairo::Operator::Over);
-            let m = model.borrow();
+            let mut m = model.borrow_mut();
+            m.width = widget.allocated_width() as f64;
+            m.height = widget.allocated_height() as f64;
             let s = config.lock().unwrap();
             if !s.enabled {
                 return glib::Propagation::Proceed;
@@ -153,8 +155,8 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
                     cairo::Region::create_rectangle(&cairo::RectangleInt::new(
                         0,
                         0,
-                        geo.width(),
-                        geo.height(),
+                        area.allocated_width(),
+                        area.allocated_height(),
                     ))
                 } else {
                     cairo::Region::create()

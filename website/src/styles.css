@@ -39,3 +39,15 @@
 .demo-window-body input:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media(max-width:540px){.demo-observatory .demo-window-body p{display:none}}
 @media(max-width:540px){.demo-observatory .demo-window-body label{display:none}}
+
+/* Selected direction: a quieter hero with a single content grid. */
+.editorial-nav nav{display:flex;align-items:center;gap:32px;font-size:13px}.editorial-nav nav a{display:flex;align-items:center;gap:8px;min-height:44px}
+.editorial-hero{isolation:isolate;overflow:hidden;min-height:calc(100svh - 94px);display:flex;align-items:center;padding:80px 0;background:#22261e}
+.editorial-hero .editorial-contours{position:absolute;inset:0;width:100%;height:100%;opacity:.09;z-index:-1;pointer-events:none}
+.editorial-hero-layout{display:grid;grid-template-columns: .9fr 1.1fr;align-items:center;gap:64px}
+.editorial-hero h1{font-size:clamp(64px,6.5vw,102px);line-height:1;letter-spacing:-.055em;margin:28px 0}
+.editorial-hero-copy>.eyebrow{font-size:11px;color:#bdbda7}.editorial-hero-copy>p{font-size:19px;line-height:1.6;color:#c3c3b1;margin:0 0 32px}
+.editorial-hero .desktop-demo{height:440px;border:0;border-radius:12px;box-shadow:0 28px 80px #0003}.editorial-hero .demo-dock,.editorial-hero .demo-menu-extra{display:none}
+.editorial-hero .demo-window-body strong{font-family:Gabarito,sans-serif}.editorial-hero .demo-window{border-radius:8px}.editorial-hero .demo-controls{right:16px;bottom:16px}
+@media(max-width:1000px){.editorial-hero-layout{gap:32px;grid-template-columns:1fr 1fr}.editorial-hero h1{font-size:72px}.editorial-hero .desktop-demo{height:400px}}
+@media(max-width:700px){.editorial-nav nav{gap:16px;font-size:11px}.editorial-nav nav>a:first-child{display:none}.editorial-hero{padding:48px 0 56px;min-height:auto}.editorial-hero-layout{grid-template-columns:1fr;gap:40px}.editorial-hero h1{font-size:clamp(58px,12vw,80px);margin:24px 0}.editorial-hero-copy>p{font-size:17px;margin-bottom:24px}.editorial-hero .desktop-demo{height:340px}.editorial-hero .demo-window-body strong{font-size:28px}.editorial-hero .eyebrow{font-size:10px}}

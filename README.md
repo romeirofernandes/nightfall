@@ -12,8 +12,11 @@ built with Rust + Tauri for macOS and Hyprland.
 
 ```sh
 brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofernandes/nightfall
+brew update-reset "$(brew --repository romeirofernandes/nightfall)"
 brew install --cask romeirofernandes/nightfall/nightfall
 ```
+
+already used the old tap? [repair it once](distribution/HOMEBREW-RECOVERY.md).
 
 open **Nightfall** from Applications, pick your weather, and carry on.
 clicks go right through the snow.

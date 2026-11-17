@@ -10,6 +10,26 @@ jobs:
     steps:
       - name: Tap the application repository
         run: brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofernandes/nightfall
+      - name: Reproduce the old tap history conflict and recover
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAP_PATH="$(brew --repository romeirofernandes/nightfall)"
+          cp "$TAP_PATH/Casks/nightfall.rb" "$RUNNER_TEMP/old-nightfall.rb"
+          git -C "$TAP_PATH" checkout --orphan migration-fixture
+          git -C "$TAP_PATH" rm -rf .
+          mkdir -p "$TAP_PATH/Casks"
+          cp "$RUNNER_TEMP/old-nightfall.rb" "$TAP_PATH/Casks/nightfall.rb"
+          sed -i '' 's|romeirofernandes/nightfall/releases|romeirofernandes/homebrew-nightfall/releases|' "$TAP_PATH/Casks/nightfall.rb"
+          git -C "$TAP_PATH" add Casks/nightfall.rb
+          git -C "$TAP_PATH" -c user.name='Migration fixture' -c user.email='fixture@example.invalid' commit -m 'Old unrelated tap history'
+          if git -C "$TAP_PATH" -c user.name='Migration fixture' -c user.email='fixture@example.invalid' rebase origin/main; then
+            echo 'Expected the unrelated cask histories to conflict'; exit 1
+          fi
+          git -C "$TAP_PATH" rebase --abort
+          brew update-reset "$TAP_PATH"
+          ruby -c "$TAP_PATH/Casks/nightfall.rb"
+          ! rg '^<<<<<<<|^=======|^>>>>>>>' "$TAP_PATH/Casks/nightfall.rb"
       - name: Install the prebuilt application
         run: brew install --cask romeirofernandes/nightfall/nightfall
       - name: Verify application

@@ -23,6 +23,8 @@ already used the old tap? [repair it once](distribution/HOMEBREW-RECOVERY.md).
 open **Nightfall** from Applications, pick your weather, and carry on.
 clicks go right through the snow.
 
+already have it? `brew upgrade --cask nightfall`.
+
 the Mac app isn't Apple-notarized yet, so the first launch may need
 **Open Anyway** in Privacy & Security.
 

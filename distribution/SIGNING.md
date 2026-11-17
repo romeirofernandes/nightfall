@@ -1,6 +1,6 @@
 # macOS signing
 
-The existing 0.3.0 release is ad-hoc signed. A Gatekeeper “Not Opened” alert
+The existing 0.3.1 release is ad-hoc signed. A Gatekeeper “Not Opened” alert
 is handled through System Settings → Privacy & Security → Open Anyway.
 Do not disable Gatekeeper or strip quarantine in the installer.
 

@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
-    "web": "node scripts/serve.mjs",
-    "test": "cargo test --manifest-path src-tauri/Cargo.toml"
+    "web": "npm --prefix website run dev -- --host 0.0.0.0",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "web:build": "npm --prefix website run build"
   },
   "devDependencies": {
     "@fontsource-variable/figtree": "^5.3.0",

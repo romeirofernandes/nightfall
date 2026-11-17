@@ -9,8 +9,10 @@
     "test": "cargo test --manifest-path src-tauri/Cargo.toml"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.10.0",
-    "@fontsource-variable/nunito": "^5.2.0"
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource-variable/gabarito": "^5.3.0",
+    "@fontsource-variable/nunito": "^5.2.0",
+    "@tauri-apps/cli": "^2.10.0"
   },
   "engines": {
     "node": ">=20"

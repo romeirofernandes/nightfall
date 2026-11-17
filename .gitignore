@@ -11,3 +11,5 @@ website/.sites*
 src-tauri/gen/
 !website/dist/
 !website/dist/**
+
+.taste-skill/

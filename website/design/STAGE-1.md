@@ -42,3 +42,7 @@ Next stage: snowfall accumulation, brushing and shedding. Character choreography
 ## User refinement after preview
 
 Removed the bottom time-selection bar and its label at the user's request. Header day/night switching remains. Fuller three-depth snowfall, a luminous sun/modelled moon, and a staged landscape/headline entrance replace the initial lighter treatment. Reduced-motion and pause behavior remain. Accumulation, brushing and shedding are still Stage 2. Build and clock tests pass after this refinement.
+
+## Dynamic sky and mobile snowfall refinement
+
+User requested larger, dynamic celestial bodies rather than a static blend. Added separate sun/moon layers with GSAP setting/rising arcs on theme changes, coordinated 2.6-second scenery lighting transitions, subtle solar atmosphere and slowly rotating detailed lunar texture. Motion pause and reduced-motion preferences are respected. Mobile snowfall is capped at 90 flakes (desktop remains 310), with smaller radii and softer opacity; resize applies the mobile cap immediately. Moon generated with built-in image_gen and its exact prompt embedded in media/winter/moon.png.

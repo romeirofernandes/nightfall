@@ -1,9 +1,9 @@
 cask "nightfall" do
   arch arm: "arm64", intel: "x64"
 
-  version "0.4.0"
-  sha256 arm:   "0c050cee09ccf701640f83cc81d98d288dcd7454d3436cf7541e8366ceec06da",
-         intel: "4225e6968ca7e2c7b3e1d9cba7c313cec2979bcdefd0fc6359cde2b70f7be9d3"
+  version "0.4.3"
+  sha256 arm:   "bd751f5002c886fef021b5d8e0f8f2ce8fb9e65fcd0c688f85105f7f42db0e85",
+         intel: "57805fff3f4755fd5d15e5316e969c31ec8d2029b19ba72371da32a0e86baf37"
 
   url "https://github.com/romeirofernandes/nightfall/releases/download/v#{version}/Nightfall-#{version}-#{arch}.zip"
   name "Nightfall"

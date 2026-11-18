@@ -13,16 +13,38 @@ fn number(dict: &CFDictionary<CFString, core_foundation::base::CFType>, key: &st
         .downcast::<CFNumber>()?
         .to_f64()
 }
+pub struct DesktopSurfaces {
+    pub ledges: Vec<Ledge>,
+    windows: Vec<[f64; 4]>,
+}
+
+impl DesktopSurfaces {
+    pub fn add_desktop_ledges(&mut self, ledges: impl IntoIterator<Item = Ledge>) {
+        self.ledges.extend(ledges.into_iter().filter(|ledge| {
+            !self.windows.iter().any(|&[left, top, width, height]| {
+                ledge.y > top
+                    && ledge.y < top + height
+                    && ledge.x < left + width
+                    && ledge.x + ledge.width > left
+            })
+        }));
+    }
+}
+
 pub fn surfaces(
     ox: f64,
     oy: f64,
     width: f64,
     height: f64,
     shadow_inset: f64,
-) -> Option<Vec<Ledge>> {
+) -> Option<DesktopSurfaces> {
     let ids = create_window_list(kCGWindowListOptionOnScreenOnly, kCGNullWindowID)?;
     let descriptions = create_description_from_array(ids)?;
-    let mut ledges = vec![];
+    let mut surfaces = DesktopSurfaces {
+        ledges: vec![],
+        windows: vec![],
+    };
+    let mut widget_ledges = vec![];
     let mut dock_ledge: Option<Ledge> = None;
     for dict in descriptions.iter() {
         let owner = dict
@@ -38,10 +60,7 @@ pub fn surfaces(
             owner.as_str(),
             "WindowManager" | "NotificationCenter" | "WidgetRenderer"
         ) || owner.ends_with("WidgetExtension");
-        if (!dock && !widget && layer != 0.)
-            || number(&dict, "kCGWindowOwnerPID") == Some(std::process::id() as f64)
-            || number(&dict, "kCGWindowAlpha") == Some(0.)
-        {
+        if (!dock && !widget && layer != 0.) || number(&dict, "kCGWindowAlpha") == Some(0.) {
             continue;
         }
         let bounds_key = CFString::new("kCGWindowBounds");
@@ -81,16 +100,29 @@ pub fn surfaces(
         } else {
             shadow_inset.min(w * 0.15).min(h * 0.15)
         };
-        if let Some((left, top, span)) = crate::engine::local_ledge(
-            [x + inset - ox, y + inset - oy, w - 2. * inset],
-            width,
-            height,
-        ) {
+        let left = x + inset - ox;
+        let top = y + inset - oy;
+        let span = w - 2. * inset;
+        if !dock && !widget && h > 0. {
+            surfaces.windows.push([left, top, span, h - 2. * inset]);
+        }
+        if number(&dict, "kCGWindowOwnerPID") == Some(std::process::id() as f64) {
+            continue;
+        }
+        if let Some((left, top, span)) =
+            crate::engine::local_ledge([left, top, span], width, height)
+        {
             let Some(id) = number(&dict, "kCGWindowNumber") else {
                 continue;
             };
             let ledge = Ledge::new(
-                if dock { "dock".into() } else { format!("{id}") },
+                if dock {
+                    "dock".into()
+                } else if widget {
+                    format!("widget-{id}")
+                } else {
+                    format!("{id}")
+                },
                 left,
                 top,
                 span,
@@ -102,13 +134,16 @@ pub fn surfaces(
                 {
                     dock_ledge = Some(ledge);
                 }
+            } else if widget {
+                widget_ledges.push(ledge);
             } else {
-                ledges.push(ledge);
+                surfaces.ledges.push(ledge);
             }
         }
     }
-    ledges.extend(dock_ledge);
-    Some(ledges)
+    surfaces.ledges.extend(dock_ledge);
+    surfaces.add_desktop_ledges(widget_ledges);
+    Some(surfaces)
 }
 
 fn dock_bar([x, y, width, height]: [f64; 4], screen_width: f64, screen_height: f64) -> bool {

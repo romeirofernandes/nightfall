@@ -10,7 +10,10 @@ use std::{
 const FOLDER_GEOMETRY: &str = r#"
 with timeout of 2 seconds
     tell application id "com.apple.finder"
-        set iconSize to icon size of icon view options of desktop
+        set iconSize to 64
+        try
+            set iconSize to icon size of icon view options of desktop window
+        end try
         set folderPositions to desktop position of every folder of desktop
     end tell
 end timeout

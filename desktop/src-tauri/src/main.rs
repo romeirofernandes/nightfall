@@ -140,7 +140,13 @@ fn frame(
         if let Some(mut surfaces) = macos::surfaces(ox, oy, world.width, world.height, inset) {
             if desktop_folders {
                 let bounds = state.folder_bounds.lock().unwrap();
-                surfaces.extend(finder::ledges(&bounds, ox, oy, world.width, world.height));
+                surfaces.add_desktop_ledges(finder::ledges(
+                    &bounds,
+                    ox,
+                    oy,
+                    world.width,
+                    world.height,
+                ));
             }
             // Use Nightfall's exact NSWindow frame rather than shadow bounds.
             if let Some(settings) = window.app_handle().get_webview_window("main") {
@@ -160,7 +166,7 @@ fn frame(
                         if let Some((x, y, width)) =
                             engine::local_ledge(frame, world.width, world.height)
                         {
-                            surfaces.push(engine::Ledge::new(
+                            surfaces.ledges.push(engine::Ledge::new(
                                 "nightfall-settings".into(),
                                 x,
                                 y,
@@ -170,7 +176,7 @@ fn frame(
                     }
                 }
             }
-            world.surfaces(surfaces);
+            world.surfaces(surfaces.ledges);
             state.ornament_slots.lock().unwrap().insert(
                 window.label().into(),
                 scene::visible_ornament_slots(&world.ledges),

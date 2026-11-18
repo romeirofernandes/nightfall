@@ -1,0 +1,1 @@
+import{a as t,j as e,M as n}from"./shared-CcsHTTPg.js";t.createRoot(document.getElementById("root")).render(e.jsxs(e.Fragment,{children:[e.jsx("a",{className:"skip-link",href:"#main-content",children:"Skip to content"}),e.jsx("div",{id:"main-content",children:e.jsx(n,{})})]}));

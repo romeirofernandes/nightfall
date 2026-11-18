@@ -38,3 +38,7 @@ Taste final result: **GATE: OPEN 9 (rounds used up)**. No waivers were entered. 
 These remain recorded rather than converting the approved composition into the kit template. The general layout checker reported right-aligned navigation as an edge-left finding at all four sizes; no other layout finding was reported. No full performance audit or full landing-page completion is claimed.
 
 Next stage: snowfall accumulation, brushing and shedding. Character choreography, Lenis scroll transitions, app demo and full sections remain later milestones.
+
+## User refinement after preview
+
+Removed the bottom time-selection bar and its label at the user's request. Header day/night switching remains. Fuller three-depth snowfall, a luminous sun/modelled moon, and a staged landscape/headline entrance replace the initial lighter treatment. Reduced-motion and pause behavior remain. Accumulation, brushing and shedding are still Stage 2. Build and clock tests pass after this refinement.

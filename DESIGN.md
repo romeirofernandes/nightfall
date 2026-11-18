@@ -204,6 +204,8 @@ The primary composition is a centered headline over full-bleed scenery. Installa
 
 Desktop landscape crops at `center 58%`, shifts to `center 52%` above aspect ratio (19/10), and to `60% center` at (900px). At (600px), the image occupies the bottom (71%) and crops at `100% bottom`, with a top fade that joins the sky. This retains the right-side snowman. Header GitHub text hides below (420px); its link remains a (44px) control.
 
+The scenic continuation keeps one sticky hero at the top of a single journey while the next passage scrolls naturally into view. Its foreground pine branches form left and right depth layers over the distant panorama; the headline holds its position and fades rather than moving with parallax. At (600px) and below, the branches use a wider, lower crop. Reduced motion returns the hero to normal document flow and gives the following passage its own background and (70svh) minimum height.
+
 ## Elevation & Depth
 
 The panorama supplies atmospheric depth. A restrained translucent time-selector surface and native installation dialog provide functional elevation; buttons otherwise rely on fill, border and a small state movement.
@@ -219,6 +221,8 @@ The panorama supplies atmospheric depth. A restrained translucent time-selector 
 **The Material Depth Rule.** Let landscape layers carry the scene; reserve interface shadows and blur for the installation dialog and time selector.
 
 The hero copy enters from (18px) below with a (1s) `power3.out` animation and (.1s) stagger. Landscape plates crossfade over (1200ms ease). Control-state transitions take (180ms). Reduced motion suppresses animation and transitions; the entrance runs only under `prefers-reduced-motion: no-preference`.
+
+The scenic passage uses scroll-linked transforms and opacity: distant scenery moves slowly while foreground branches separate outward. Lenis smooths wheel scrolling, leaving touch native; GSAP ScrollTrigger coordinates the bounded scene layers. Pause disables wheel smoothing and spatial scene transforms. Reduced motion omits the smooth-scroll/scroll-animation setup and hides the foreground branches. An open installation dialog stops Lenis until it closes. This is the scroll/depth foundation; character choreography remains a later milestone.
 
 ## Shapes
 

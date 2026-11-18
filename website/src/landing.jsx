@@ -39,6 +39,9 @@ export function Landing() {
   const hero = useRef(null);
   const snowField = useRef(null);
   const {phase: theme, selectMode, position} = useWinterTime();
+  const [seenThemes, setSeenThemes] = useState([theme]);
+  useEffect(() => { setSeenThemes(previous => previous.includes(theme) ? previous : [...previous, theme]); }, [theme]);
+  const foregroundThemes = seenThemes.includes(theme) ? seenThemes : [...seenThemes, theme];
   const [snowPaused, setSnowPaused] = useState(false);
   const [platform, setPlatform] = useState('mac');
   const [copyState, setCopyState] = useState('');
@@ -102,8 +105,8 @@ export function Landing() {
               <button data-snow-surface className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><SnowFill paused={snowPaused} field={snowField}/><span className="snow-button-label"><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></span><span className="snow-button-label snow-button-label-filled" aria-hidden="true"><Terminal size={17}/>Install on Linux<ArrowUpRight size={15}/></span></button>
             </div>
           </div>
-          <div className="winter-near winter-near-left" aria-hidden="true"><img src="/media/winter/foreground-pines.png" alt="" width="1672" height="941"/></div>
-          <div className="winter-near winter-near-right" aria-hidden="true"><img src="/media/winter/foreground-pines.png" alt="" width="1672" height="941"/></div>
+          <div className="winter-near winter-near-left" aria-hidden="true">{foregroundThemes.map(light => <img key={light} data-active={theme === light} src={light === 'afternoon' ? '/media/winter/foreground-pines.png' : '/media/winter/foreground-' + light + '.png'} alt="" width="1672" height="941"/>)}</div>
+          <div className="winter-near winter-near-right" aria-hidden="true">{foregroundThemes.map(light => <img key={light} data-active={theme === light} src={light === 'afternoon' ? '/media/winter/foreground-pines.png' : '/media/winter/foreground-' + light + '.png'} alt="" width="1672" height="941"/>)}</div>
           <div className="winter-passage-shade" aria-hidden="true"/>
           <a className="winter-scroll-cue" href="#winter-passage" aria-label="Explore the winter scene"><ArrowDown size={20} aria-hidden="true"/></a>
           <SnowSurfaces field={snowField} paused={snowPaused}/>

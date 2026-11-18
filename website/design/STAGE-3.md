@@ -7,3 +7,7 @@ Focal motion: moving through the foreground pine boughs into the alpine valley. 
 Continuity: keep the same daytime/nighttime plates, snow, working installation actions and existing controls. One new scene passage uses genuine product copy. Bottom footer remains reachable. Lenis supports wheel smoothing; native touch scrolling and keyboard scrolling remain, without snap or wheel interception. ScrollTrigger owns only transform/opacity of bounded scenery layers. Pause and reduced-motion disable spatial scroll effects; reduced motion uses a normal flowing hero and passage. Modal blocks the smoothing loop until closed.
 
 Scope of this first Stage 3 milestone: scroll foundation and depth. Do not call character choreography complete. Keep the user’s staged review cadence.
+
+## Theme correction
+
+User requires separate foreground artwork for each time phase, matching the existing themed landscape. Preserve branch geometry across real morning/day/evening/night lighting plates. Remove CSS colour filters. Crossfade the matching plate with the same 2.6-second duration as the distant scenery. Do not reuse a daylight foreground with a generic dark tint.

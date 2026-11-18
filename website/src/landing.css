@@ -143,8 +143,6 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-near img { display: block; position: absolute; bottom: -4%; width: 100%; height: 90%; object-fit: cover; }
 .winter-near-left { clip-path: inset(0 50% 0 0); transform-origin: 0 100%; }
 .winter-near-right { clip-path: inset(0 0 0 50%); transform-origin: 100% 100%; }
-.landing[data-theme="night"] .winter-near img { filter: brightness(.48) saturate(.8); }
-.landing[data-theme="evening"] .winter-near img { filter: sepia(.18) saturate(.8); }
 .winter-passage-shade { position: absolute; inset: 0; pointer-events: none; z-index: 0; background: var(--background); opacity: 0; }
 .winter-scroll-cue { position: absolute; bottom: 28px; left: calc(50% - 22px); width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #ffffff70; border-radius: 50%; background: #12332f99; color: #fffdf0!important; z-index: 3; transition: background 180ms; }
 .winter-scroll-cue:hover { background: #12332fe6; }
@@ -168,3 +166,6 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 }
 
 .landing-header { position: relative; z-index: 4; }
+
+.winter-near img { opacity: 0; transition: opacity 2600ms ease; }
+.winter-near img[data-active="true"] { opacity: 1; }

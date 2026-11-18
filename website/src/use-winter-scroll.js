@@ -18,7 +18,7 @@ export function useWinterScroll(root, paused) {
    const observer=new MutationObserver(sync);observer.observe(host,{attributes:true,subtree:true,attributeFilter:['open']});sync();
    const context=gsap.context(()=>{
     const journey=host.querySelector('.winter-journey');
-    const passage=gsap.timeline({scrollTrigger:{trigger:journey,start:'top top',end:'bottom bottom',scrub:paused?false:.65,invalidateOnRefresh:true}});
+    const passage=gsap.timeline({scrollTrigger:{trigger:journey,start:'top top',end:'bottom bottom',scrub:paused?true:.65,invalidateOnRefresh:true}});
     // Copy holds its position. Only the scenery supplies depth.
     passage.to('.landing-copy, .snow-surfaces',{autoAlpha:0,duration:.22,ease:'none'},.05)
       .to('.winter-scroll-cue',{autoAlpha:0,duration:.12,ease:'none'},0);
@@ -27,7 +27,7 @@ export function useWinterScroll(root, paused) {
       .to('.winter-near-left',{xPercent:-16,yPercent:10,scale:1.12,duration:1,ease:'none'},0)
       .to('.winter-near-right',{xPercent:16,yPercent:10,scale:1.12,duration:1,ease:'none'},0);
     }
-    passage.to('.winter-passage-shade',{opacity:.88,duration:.65,ease:'none'},.35);
+    passage.to('.winter-passage-shade',{opacity:.72,duration:.65,ease:'none'},.35);
    },host);
    const refresh=()=>ScrollTrigger.refresh();
    document.fonts.ready.then(refresh);

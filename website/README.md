@@ -1,7 +1,7 @@
 # Nightfall website
 
-React 19 + Vite + Tailwind 4. The selected After Hours design is served at `/` and `/after-hours/`.
-The two discarded directions and chooser have been removed.
+React 19 + Vite + Tailwind 4. The landing page is served at `/` and `/after-hours/`.
+The macOS first-launch guide is at `/mac-help/`.
 
 ```sh
 cd website

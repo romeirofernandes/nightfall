@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowDownToLine, ArrowUpRight, Check, Copy, Github, Moon, Pause, Play, Snowflake, Sun, Sunrise, Sunset, Terminal, X, Sparkles} from 'lucide-react';
+import {ArrowDownToLine, ArrowUpRight, Check, Copy, Github, Moon, Pause, Play, Snowflake, Sun, Terminal, X} from 'lucide-react';
 import '@fontsource/prata/latin-400.css';
 import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
@@ -33,7 +33,7 @@ const platforms = {
 export function Landing() {
   const dialog = useRef(null);
   const hero = useRef(null);
-  const {mode, phase: theme, selectMode, position} = useWinterTime();
+  const {phase: theme, selectMode, position} = useWinterTime();
   const [snowPaused, setSnowPaused] = useState(false);
   const [platform, setPlatform] = useState('mac');
   const [copyState, setCopyState] = useState('');
@@ -41,7 +41,10 @@ export function Landing() {
   useEffect(() => {
     const context = gsap.context(() => {
       gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from('.landing-copy > *', { y: 18, opacity: 0, duration: 1, stagger: .1, ease: 'power3.out', clearProps: 'all' });
+        const entrance = gsap.timeline();
+        entrance.from('.winter-world', { scale: 1.055, duration: 2.2, ease: 'power3.out', clearProps: 'transform' }, 0)
+          .from('.landing-copy h1', { y: 35, clipPath: 'inset(0 0 100% 0)', duration: 1.3, ease: 'power3.out', clearProps: 'all' }, .15)
+          .from('.landing-copy > p, .landing-actions', { y: 18, opacity: 0, duration: .9, stagger: .14, ease: 'power3.out', clearProps: 'all' }, .65);
       });
     }, hero);
     return () => context.revert();
@@ -66,7 +69,7 @@ export function Landing() {
               fetchPriority={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme) ? 'high' : 'low'} alt=""/>)}
             <div className="winter-celestial" style={{'--orb-x':position.x + '%','--orb-y':position.y + '%','--orb-rise':((43-position.y)/38*8) + 'px'}}/>
           </div>
-          <div className="landing-snow" aria-hidden="true"><Snow density={0} wind={5} paused={snowPaused}/></div>
+          <div className="landing-snow" aria-hidden="true"><Snow density={2} atmosphere wind={12} paused={snowPaused}/></div>
           <header className="landing-shell wrap landing-header">
             <a className="landing-brand" href="/" aria-label="Nightfall home"><Snowflake aria-hidden="true" size={27}/>Nightfall</a>
             <div className="landing-header-actions">
@@ -89,17 +92,6 @@ export function Landing() {
               <button className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>
               <button className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></button>
             </div>
-          </div>
-          <div className="winter-time landing-shell wrap">
-            <p className="winter-time-status" aria-live="polite">{mode === 'auto' ? 'Following your local time' : 'Choose your winter light'}</p>
-            <fieldset className="winter-time-switch">
-              <legend className="sr-only">Choose the time of day</legend>
-              {[[Sparkles,'auto','Auto'],[Sunrise,'morning','Morning'],[Sun,'afternoon','Afternoon'],[Sunset,'evening','Evening'],[Moon,'night','Night']].map(([Icon, value, label]) =>
-                <button key={value} type="button" aria-pressed={mode === value} onClick={() => selectMode(value)}>
-                  <Icon aria-hidden="true" size={16}/><span>{label}</span>
-                </button>)}
-            </fieldset>
-            <span className="sr-only" role="status">{mode === 'auto' ? 'Following local time: ' : 'Scene: '}{theme}</span>
           </div>
         </section>
       </main>

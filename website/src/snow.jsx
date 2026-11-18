@@ -3,13 +3,13 @@ import {Snowflake,Minus,Square,X,Play,Pause,Wind,RotateCcw,ArrowUpRight,Music,Fo
 
 export function Contours({className=''}){return <svg className={'contour-map '+className} viewBox="0 0 1200 800" preserveAspectRatio="none" fill="none" aria-hidden="true"><g stroke="currentColor" strokeWidth=".7">{Array.from({length:19},(_,i)=><path key={i} d={`M${-180+i*18},${850-i*15} C${100+i*4},${500-i*25} ${800-i*30},${800-i*13} ${900-i*12},${420-i*18} S${1250-i*9},${60+i*3} ${1310-i*10},${-160+i*18}`}/>)}</g></svg>}
 
-export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false}){
+export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false,atmosphere=false}){
  const canvas=useRef(null),config=useRef({density,wind,paused,obstacle,onCount});
  useEffect(()=>{config.current={density,wind,paused,obstacle,onCount};},[density,wind,paused,obstacle,onCount]);
  useEffect(()=>{
   const el=canvas.current,ctx=el.getContext('2d');let w=1,h=1,raf,last=0,t=0,frame=0,bank=Array(70).fill(1),lastObstacle=null,visible=true;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const flakes=Array.from({length:95},()=>({x:Math.random(),y:Math.random(),z:Math.random(),p:Math.random()*6.28}));
+  const flakes=Array.from({length:atmosphere?310:95},()=>({x:Math.random(),y:Math.random(),z:Math.random(),p:Math.random()*6.28}));
   const resize=()=>{const r=el.getBoundingClientRect();w=r.width;h=r.height;const d=Math.min(devicePixelRatio||1,1.5);el.width=w*d;el.height=h*d;ctx.setTransform(d,0,0,d,0,0);};
   const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const io=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting});io.observe(el);
@@ -23,7 +23,7 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
     if(!stopped){const old=f.y;f.y+=(14+f.z*35)*dt/Math.max(h,1);f.x=(f.x+(c.wind+Math.sin(t*.7+f.p)*12)*dt/Math.max(w,1)+1)%1;
      if(ob&&f.x>=ob.x&&f.x<ob.x+ob.width){const i=Math.min(69,Math.floor((f.x-ob.x)/ob.width*69));if(old<=ob.y-bank[i]/h&&f.y>=ob.y-bank[i]/h){bank[i]=Math.min(13,bank[i]+.6);f.y=-.01;f.x=Math.random();}}
      if(f.y>1.01){f.y=-.01;f.x=Math.random();}}
-    ctx.fillStyle=flat?'#e4ead6':'#edf6fa';ctx.globalAlpha=.25+f.z*.65;ctx.beginPath();ctx.ellipse(f.x*w,f.y*h,.45+f.z*1.5,.6+f.z*1.8,Math.sin(t+f.p)*.3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=flat?'#e4ead6':'#edf6fa';ctx.globalAlpha=atmosphere?.5+f.z*.48:.25+f.z*.65;ctx.beginPath();ctx.ellipse(f.x*w,f.y*h,(atmosphere?.7:.45)+f.z*(atmosphere?3.4:1.5),(atmosphere?.8:.6)+f.z*(atmosphere?3.8:1.8),Math.sin(t+f.p)*.3,0,Math.PI*2);ctx.fill();
    }
    ctx.globalAlpha=1;
    if(ob){const copy=bank.slice();if(!stopped)bank=bank.map((v,i)=>v+(copy[Math.max(0,i-1)]+copy[Math.min(69,i+1)]-2*v)*dt);
@@ -31,7 +31,7 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
    if(++frame%30===0)c.onCount?.(flakes.length);
   };raf=requestAnimationFrame(loop);
   return()=>{cancelAnimationFrame(raf);ro.disconnect();io.disconnect();};
- },[flat]);
+ },[flat,atmosphere]);
  return <canvas className="snow-canvas" ref={canvas} aria-hidden="true"/>;
 }
 

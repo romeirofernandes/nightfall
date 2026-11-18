@@ -1,0 +1,5 @@
+{
+  "prompt": "Change ONLY lighting and time of day of this exact alpine illustration into a beautiful deep winter NIGHT. Preserve all geometry and composition pixel-aligned: the same mountain silhouettes, same pines, same snowman, same village, same foreground path and berries. Quiet upper sky becomes near-black navy (#091628 at zenith, muted midnight blue near horizon), with very subtle faint stars and thin night clouds, NO moon disc because it will be drawn separately. Snow is clearly visible cool pale blue in soft moonlight; mountains have atmospheric blue depth. Deep green firs read against snow. Existing warm amber Christmas bulbs and distant village windows glow warmly, detailed snowman in moonlit blue white and burgundy scarf remains legible. The entire scene must remain a carefully painted dimensional winter illustration, not a uniform blue filter, not blackened invisible terrain. NO typography, no controls, no logos, no airborne snowflakes, no borders. Exact same layout and aspect ratio as the reference.",
+  "tool": "built-in image_gen",
+  "output": "website/public/media/winter/alpine-night.jpg"
+}

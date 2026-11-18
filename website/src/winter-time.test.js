@@ -19,6 +19,6 @@ test('sun and moon stay on screen through the complete day', () => {
   for (let hour = 0; hour < 24; hour += .25) {
     const {x,y} = celestialPosition('auto', hour);
     assert.ok(x >= 14 && x <= 86);
-    assert.ok(y >= 14 && y <= 46);
+    assert.ok(y >= 5 && y <= 43);
   }
 });

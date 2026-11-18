@@ -21,5 +21,5 @@ export function celestialPosition(mode, hour) {
     ? ((sample - 19 + 24) % 24) / 11
     : Math.max(0, Math.min(1, (sample - 6) / 13));
   // Travel above the mountains, outside the central copy column.
-  return { x: 14 + progress * 72, y: 46 - Math.sin(progress * Math.PI) * 32 };
+  return { x: 14 + progress * 72, y: 43 - Math.sin(progress * Math.PI) * 38 };
 }

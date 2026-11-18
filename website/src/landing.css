@@ -16,7 +16,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-world { position: absolute; inset: 0; z-index: -3; background: var(--sky); overflow: hidden; }
 .winter-landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
 .winter-sky { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky) 0%, transparent 40%); opacity: .25; }
-.winter-celestial { position: absolute; width: clamp(28px, 3vw, 44px); aspect-ratio: 1; border-radius: 50%; background: #fff9d6; box-shadow: 0 0 48px 16px #ffe6a975; }
+.winter-celestial { left: var(--orb-x); top: var(--orb-y); position: absolute; width: clamp(28px, 3vw, 44px); aspect-ratio: 1; border-radius: 50%; background: #fff9d6; box-shadow: 0 0 48px 16px #ffe6a975; }
 .landing-snow { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 .landing-snow canvas { display: block; width: 100%; height: 100%; }
 .landing-header { min-height: 96px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
@@ -80,10 +80,47 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
   .landing-copy > p { margin: 18px auto 24px; font-size: 17px; max-width: 25ch; }
   .landing-actions { gap: 10px; }
   .landing .landing-actions .landing-button { min-width: 0; min-height: 48px; padding-inline: 16px; font-size: 14px; }
-  .winter-landscape { height: 71%; top: auto; bottom: 0; object-position: 73% bottom; mask-image: linear-gradient(transparent, #000 20%); }
+  .winter-landscape { height: 71%; top: auto; bottom: 0; object-position: 100% bottom; mask-image: linear-gradient(transparent, #000 20%); }
   .winter-sky { background: linear-gradient(180deg, var(--sky) 0%, var(--sky) 24%, transparent 65%); opacity: .7; }
-  .winter-celestial { width: 25px; }
+  .winter-celestial { width: 25px; top: calc(var(--orb-y) * .25 + 43%); }
   .landing-footer { justify-content: center; text-align: center; padding-block: 24px; }
 }
 @media (max-width: 360px) { .landing-actions { flex-direction: column; align-items: center; gap: 8px; } .landing-actions .landing-button { width: 210px; } .landing-copy > p { font-size: 16px; } }
 @media (prefers-reduced-motion: reduce) { .landing *, .landing *::before, .landing *::after { animation: none!important; transition: none!important; scroll-behavior: auto!important; } }
+
+/* The same winter, lit four ways. Imagery changes with the atmosphere. */
+.landing[data-theme="morning"] { --sky: #c5def7; }
+.landing[data-theme="evening"] { --sky: #f4dfca; --background: #f7eee3; --panel: #fff8ef; --ink: #352f2b; --muted: #55473d; --accent: #8b422c; }
+.landing[data-theme="night"] {
+  --sky: #081a2d; --background: #081827; --panel: #122b3e; --ink: #f6f4e9; --muted: #c5d6e2;
+  --line: #365165; --field: #1e3b4e; --field-border: #587184; --field-hover: #2b4b60;
+  --accent: #f2cf8e; --button: #f0e8cf; --button-hover: #fff6df; --on-button: #183a35;
+  color-scheme: dark;
+}
+.winter-landscape { opacity: 0; transition: opacity 1200ms ease; }
+.winter-landscape[data-active="true"] { opacity: 1; }
+.landing[data-theme="morning"] .winter-sky { opacity: .5; background: linear-gradient(165deg, #ffeac833, transparent 55%); }
+.landing[data-theme="night"] .winter-sky { opacity: .12; }
+.landing[data-theme="night"] .winter-celestial { background: #f4f1d9; box-shadow: 0 0 38px 10px #d9eeff25; }
+.landing[data-theme="night"] .winter-celestial::after { content: ''; position: absolute; width: 20%; height: 20%; left: 24%; top: 23%; border-radius: 50%; background: #c2c9b955; box-shadow: 12px 7px 0 3px #c2c9b944, 3px 17px 0 -1px #c2c9b955; }
+.landing[data-theme="night"] .landing-secondary { border-color: #bfd7e48c; background: #081c3033; }
+.landing[data-theme="night"] .landing-secondary:hover { background: #48677c66; }
+.winter-time { position: absolute; bottom: 32px; inset-inline: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.winter-time-status { margin: 0; padding: 2px 10px; color: #fffdf4; font-size: 12px; letter-spacing: .015em; text-shadow: 0 1px 6px #09223a, 0 1px 3px #09223a; }
+.winter-time-switch { display: flex; align-items: center; gap: 4px; margin: 0; padding: 5px; border: 1px solid #ffffff90; border-radius: 14px; background: #f8f7efd9; color: #153e3d; box-shadow: 0 6px 24px #0a233d29; backdrop-filter: blur(14px); }
+.winter-time-switch button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 9px 18px; border: 1px solid transparent; border-radius: 9px; background: transparent; font-size: 13px; transition: background 180ms, transform 180ms; }
+.winter-time-switch button:hover { background: #b9ccc659; transform: translateY(-1px); }
+.winter-time-switch button:active { transform: translateY(1px); }
+.winter-time-switch button[aria-pressed="true"] { background: #133e37; color: #fffdf0; }
+.winter-time-switch :focus-visible { outline-color: #153e3d; outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 600px) {
+  .winter-time { bottom: 22px; inset-inline: 20px; gap: 8px; }
+  .winter-time-switch { width: 100%; max-width: 390px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; padding: 4px; }
+  .winter-time-switch button { flex-direction: column; gap: 4px; min-height: 57px; padding: 5px 2px; font-size: 10px; }
+  .winter-time-switch button svg { width: 16px; height: 16px; }
+  .winter-time-status { font-size: 11px; }
+  .landing[data-theme="morning"] .winter-sky { background: linear-gradient(180deg, #c5def7 0%, transparent 75%); opacity: .4; }
+  .landing[data-theme="night"] .winter-sky { background: linear-gradient(180deg, #081a2d 0%, transparent 75%); opacity: .8; }
+}
+@media (max-width: 420px) { .landing-github { width: 44px; } .landing-github span { display: none; } }

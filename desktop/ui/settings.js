@@ -26,7 +26,11 @@ const boards = {
   ornaments: document.querySelector('#ornament-board'),
 };
 const names = { snowman: 'Snowman', tree: 'Tree', gift: 'Gift', ornament: 'Ornament' };
-const symbols = { snowman: '☃', tree: '🎄', gift: '🎁', ornament: '★' };
+const symbols = {
+  snowman: '<circle cx="12" cy="17" r="6" fill="#eef7f4"/><circle cx="12" cy="8" r="4" fill="#eef7f4"/><path d="M7 4h10M9 4V1h6v3" stroke="#367651" stroke-width="2"/><path d="M9 12h7" stroke="#b74450" stroke-width="2"/><path d="m13 8 4 1-4 1" fill="#e9a44c"/><circle cx="11" cy="7" r=".7" fill="#243e2a"/><path d="M12 15v4" stroke="#243e2a" stroke-width="1.5" stroke-dasharray="1 1.5"/>',
+  tree: '<path d="M10 19h4v4h-4z" fill="#b98758"/><path d="m12 2 7 9h-3l5 9H3l5-9H5z" fill="#65a47b"/><path d="m12 0 1 3 3 .2-2.4 1.8.8 3-2.4-1.8L9.6 8l.8-3L8 3.2l3-.2z" fill="#f1bd75"/><circle cx="10" cy="12" r="1.2" fill="#dc6d75"/><circle cx="15" cy="17" r="1.2" fill="#f1bd75"/>',
+  gift: '<path d="M3 10h18v12H3zM2 7h20v5H2z" fill="#c75362"/><path d="M10 7h4v15h-4z" fill="#f1bd75"/><path d="M12 7C1 7 6-3 12 7Zm0 0c11 0 6-10 0 0Z" fill="none" stroke="#f1bd75" stroke-width="1.5"/>',
+};
 const markers = new Map();
 let ornamentSlots = invoke ? 0 : 6;
 let drag;
@@ -64,7 +68,8 @@ function makeMarker(kind, index) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'placement-marker';
-  button.textContent = kind === 'ornament' && index % 2 ? '●' : symbols[kind];
+  if (kind === 'ornament') button.textContent = index % 2 ? '●' : '★';
+  else button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + symbols[kind] + '</svg>';
   button.title = names[kind] + ' ' + (index + 1);
   button.setAttribute('aria-label', button.title + '. Use arrow keys to move.');
   wrapper.append(button);

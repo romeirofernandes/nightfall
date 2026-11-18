@@ -94,7 +94,7 @@ export function Landing() {
             <p>Free desktop snow for macOS &amp; Hyprland.</p>
             <div className="landing-actions">
               <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>
-              <button data-snow-surface className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><SnowFill paused={snowPaused}/><span className="snow-button-label"><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></span><span className="snow-button-label snow-button-label-filled" aria-hidden="true"><Terminal size={17}/>Install on Linux<ArrowUpRight size={15}/></span></button>
+              <button data-snow-surface className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><SnowFill paused={snowPaused} field={snowField}/><span className="snow-button-label"><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></span><span className="snow-button-label snow-button-label-filled" aria-hidden="true"><Terminal size={17}/>Install on Linux<ArrowUpRight size={15}/></span></button>
             </div>
           </div>
           <SnowSurfaces field={snowField} paused={snowPaused}/>

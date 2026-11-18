@@ -1,0 +1,3 @@
+# Nightfall project instructions
+
+For frontend work, always apply the installed Impeccable and design-taste-frontend (Taste) skills. Apply Half Send for approved execution, reusing decisions already answered rather than reopening intake. Follow the user's visual brief over kit defaults. Use imagegen for natural painted raster ornaments; do not replace the established detailed alpine aesthetic with flat SVG or CSS cartoon decorations. Inspect mobile and desktop, including actual interaction states. Preserve pause/reduced-motion behavior. Make focused commits regularly on the task branch. Do not push or publish without authorization.

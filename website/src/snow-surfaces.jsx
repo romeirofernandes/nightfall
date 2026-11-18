@@ -36,7 +36,29 @@ export function SnowSurfaces({field, paused}) {
       spin:(Math.random()-.5)*2,dust:Math.random()<.5});
    }
   }
-  const manager={land(x,before,after,size){
+  const manager={
+   take(node,dt){
+    if(pause.current||reduced.matches)return [];
+    const bank=banks.get(node);if(!bank)return [];
+    const pieces=[],step=bank.width/(bank.depth.length-1);
+    bank.depth.forEach((depth,i)=>{
+     const amount=depth*(1-Math.exp(-dt*1.4));bank.depth[i]-=amount;
+     if(amount>.003)pieces.push({x:6+i*step,amount,area:amount*step,depth});
+    });return pieces;
+   },
+   spill(node,dt,released){
+    if(pause.current||reduced.matches||released<=0)return;
+    const bank=banks.get(node);if(!bank)return;
+    const rect=node.getBoundingClientRect(),bounds=root.getBoundingClientRect();
+    const count=Math.min(12,Math.ceil(released*rect.width*3));
+    for(let i=0;i<count&&debris.length<180;i++){
+     const life=1.2+Math.random()*.7;
+     debris.push({x:rect.left-bounds.left+5+Math.random()*(rect.width-10),y:rect.bottom-bounds.top-1,
+      vx:(Math.random()-.5)*30,vy:20+Math.random()*35,r:.6+Math.random()*1.8,
+      life,initial:life,angle:Math.random()*6.28,spin:(Math.random()-.5)*4,dust:i%4===0});
+    }
+   },
+   land(x,before,after,size){
    if(pause.current||reduced.matches)return false;
    for(const bank of [...banks.values()].sort((a,b)=>a.y-b.y)){
     if(x<bank.x||x>bank.x+bank.width)continue;
@@ -73,7 +95,8 @@ export function SnowSurfaces({field, paused}) {
    const stopped=pause.current||reduced.matches||!!root.closest('.landing')?.querySelector('dialog[open]');
    const night=root.closest('.landing')?.dataset.theme==='night';
    if(!stopped){
-    for(const stroke of strokes.splice(0))for(const bank of banks.values()){
+    for(const stroke of strokes.splice(0))for(const [node,bank] of banks){
+     if(node.dataset.snowFilling==='true')continue;
      const from={x:stroke.from.x-bank.x,y:stroke.from.y-bank.y};
      const to={x:stroke.to.x-bank.x,y:stroke.to.y-bank.y};
      scatter(bank,sweep(bank,from,to,stroke.radius),stroke.vx,stroke.vy);

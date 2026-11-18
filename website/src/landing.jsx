@@ -1,5 +1,7 @@
-import React, {useRef, useState} from 'react';
-import {ArrowDownToLine, ArrowUpRight, Check, Command, Copy, Github, Moon, Pause, Play, Snowflake, Sun, Terminal, X} from 'lucide-react';
+import React, {useEffect, useRef, useState} from 'react';
+import {ArrowDownToLine, ArrowUpRight, Check, Copy, Github, Moon, Pause, Play, Snowflake, Sun, Sunrise, Sunset, Terminal, X, Sparkles} from 'lucide-react';
+import '@fontsource/prata/latin-400.css';
+import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
 import {Snow} from './snow';
 import './landing.css';
@@ -28,86 +30,64 @@ const platforms = {
 
 export function Landing() {
   const dialog = useRef(null);
-  const [theme, setTheme] = useState(() => {
-    try {
-      return localStorage.getItem('nightfall-theme') === 'light' ? 'light' : 'dark';
-    } catch {
-      return 'dark';
-    }
-  });
+  const hero = useRef(null);
+  const theme = 'afternoon';
   const [snowPaused, setSnowPaused] = useState(false);
   const [platform, setPlatform] = useState('mac');
   const [copyState, setCopyState] = useState('');
   const install = platforms[platform];
-
-  function toggleTheme() {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    try {
-      localStorage.setItem('nightfall-theme', next);
-    } catch {
-      // Keep the theme switch usable if storage is unavailable.
-    }
-  }
-
+  useEffect(() => {
+    const context = gsap.context(() => {
+      gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.from('.landing-copy > *', { y: 18, opacity: 0, duration: 1, stagger: .1, ease: 'power3.out', clearProps: 'all' });
+      });
+    }, hero);
+    return () => context.revert();
+  }, []);
   function openInstaller(platform) {
-    setPlatform(platform);
-    setCopyState('');
-    dialog.current.showModal();
+    setPlatform(platform); setCopyState(''); dialog.current.showModal();
   }
-
   async function copyCommands() {
-    try {
-      await navigator.clipboard.writeText(install.command);
-      setCopyState('copied');
-    } catch {
-      setCopyState('error');
-    }
+    try { await navigator.clipboard.writeText(install.command); setCopyState('copied'); }
+    catch { setCopyState('error'); }
   }
-
   return (
-    <div className="landing" data-theme={theme}>
-      <div className="landing-snow" aria-hidden="true"><Snow density={0} wind={5} paused={snowPaused}/></div>
+    <div className="landing" data-theme={theme} ref={hero}>
       <a className="landing-skip" href="#main-content">Skip to content</a>
-      <header className="landing-shell landing-header">
-        <a className="landing-brand" href="/"><Snowflake aria-hidden="true" size={24}/>Nightfall</a>
-        <div className="landing-header-actions">
-          <button className="landing-icon-button" onClick={() => setSnowPaused(!snowPaused)}
-            aria-label={snowPaused ? 'Resume snowfall' : 'Pause snowfall'} title={snowPaused ? 'Resume snowfall' : 'Pause snowfall'}>
-            {snowPaused ? <Play aria-hidden="true" size={16}/> : <Pause aria-hidden="true" size={16}/>}
-          </button>
-          <button className="landing-icon-button" onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
-            {theme === 'dark' ? <Sun aria-hidden="true" size={18}/> : <Moon aria-hidden="true" size={18}/>}
-          </button>
-          <a className="landing-link" href={repository}><Github aria-hidden="true" size={17}/>GitHub<ArrowUpRight aria-hidden="true" size={14}/></a>
-        </div>
-      </header>
-
-      <main className="landing-shell landing-main" id="main-content" tabIndex={-1}>
-        <section className="landing-hero" data-enter aria-labelledby="landing-title">
-          <div className="landing-copy">
-            <h1 id="landing-title">Snow for your<br/> desktop<span>.</span></h1>
-            <p>Let it snow over your windows, hang a few lights, and throw a snowball. Nightfall is free and open source.</p>
-            <div className="landing-actions">
-              <button className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><Command aria-hidden="true" size={17}/>macOS</button>
-              <button className="landing-button" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><Terminal aria-hidden="true" size={17}/>Arch + Hyprland</button>
-            </div>
-            <a className="landing-link landing-download" href={RELEASE}><ArrowDownToLine aria-hidden="true" size={15}/>Direct downloads</a>
+      <main id="main-content" tabIndex={-1}>
+        <section className="landing-hero hero" data-enter aria-labelledby="landing-title">
+          <div className="winter-world" aria-hidden="true">
+            <img className="winter-landscape" src="/media/winter/alpine-day.jpg" width="1487" height="1058" fetchPriority="high" alt=""/>
+            <div className="winter-sky"/>
+            <div className="winter-celestial" style={{left:'83%',top:'36%'}}/>
           </div>
-          <div className="landing-preview">
-            <img src="/nightfall-desktop.webp" width="1600" height="1041" fetchPriority="high"
-              alt="Nightfall in Blizzard mode on macOS, with snow settling on the settings window, Christmas lights, snowmen, and Santa flying overhead"/>
+          <div className="landing-snow" aria-hidden="true"><Snow density={0} wind={5} paused={snowPaused}/></div>
+          <header className="landing-shell landing-header">
+            <a className="landing-brand" href="/" aria-label="Nightfall home"><Snowflake aria-hidden="true" size={27}/>Nightfall</a>
+            <div className="landing-header-actions">
+              <a className="landing-link landing-github" href={repository}><Github aria-hidden="true" size={17}/>GitHub<ArrowUpRight aria-hidden="true" size={14}/></a>
+              <span className="landing-nav-divider" aria-hidden="true"/>
+              <button className="landing-icon-button" onClick={() => setSnowPaused(!snowPaused)} aria-pressed={snowPaused}
+                aria-label={snowPaused ? 'Resume snowfall' : 'Pause snowfall'} title={snowPaused ? 'Resume snowfall' : 'Pause snowfall'}>
+                {snowPaused ? <Play aria-hidden="true" size={16}/> : <Pause aria-hidden="true" size={16}/>}
+              </button>
+            </div>
+          </header>
+          <div className="landing-shell landing-copy">
+            <h1 id="landing-title">A little winter.<span> All yours.</span></h1>
+            <p>Free desktop snow for macOS &amp; Hyprland.</p>
+            <div className="landing-actions">
+              <button className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>
+              <button className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></button>
+            </div>
+            <a className="landing-link landing-download" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
           </div>
         </section>
       </main>
-
       <footer className="landing-shell landing-footer">
-        <Snowflake aria-hidden="true" size={17}/>
+        <span><Snowflake aria-hidden="true" size={16}/>A little winter for your desktop.</span>
         <p>crafted by <a href="https://romeiro.dev">romeiro</a>, <a href="https://russel.is-a.dev">russel</a> &amp; <a href="https://gavin-soares.vercel.app">gavin</a>'s agents</p>
       </footer>
-
       <dialog className="landing-dialog" ref={dialog} aria-labelledby="install-title">
         <div className="landing-dialog-header">
           <h2 id="install-title">Install on {install.name}</h2>

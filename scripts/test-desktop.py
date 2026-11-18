@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Exercise the installed CLI and renderer together on a disposable desktop."""
+
+import ctypes
+from ctypes import wintypes
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import zipfile
+
+WINDOWS = sys.platform == "win32"
+
+
+def wait_for(check, description, timeout=20):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if result := check():
+            return result
+        time.sleep(0.2)
+    raise AssertionError(f"Timed out waiting for {description}")
+
+
+def window_exists(title):
+    if WINDOWS:
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+        user32.FindWindowW.argtypes = (wintypes.LPCWSTR, wintypes.LPCWSTR)
+        user32.FindWindowW.restype = wintypes.HWND
+        user32.IsWindowVisible.argtypes = (wintypes.HWND,)
+        user32.IsWindowVisible.restype = wintypes.BOOL
+        handle = user32.FindWindowW(None, title)
+        return handle and user32.IsWindowVisible(handle)
+    if os.getenv("SWAYSOCK"):
+        result = subprocess.check_output(["swaymsg", "-t", "get_tree"], text=True)
+        return f'"name": "{title}"' in result
+    return subprocess.run(
+        ["xdotool", "search", "--onlyvisible", "--name", f"^{title}$"],
+        capture_output=True,
+        timeout=5,
+    ).returncode == 0
+
+
+def smoke(cli, config_dir):
+    def command(*args, check=True):
+        return subprocess.run(
+            [cli, *args], check=check, capture_output=True, text=True, timeout=30
+        )
+
+    def expect(expected, *args):
+        result = command(*args)
+        assert expected in result.stdout, result.stdout
+
+    try:
+        expect("nightfall ", "--version")
+        assert command("status", check=False).returncode != 0, "renderer already running"
+        expect("Settings updated", "enable")
+        expect("snow enabled", "status")
+        if not os.getenv("SWAYSOCK"):
+            wait_for(lambda: window_exists("Nightfall snow"), "snow overlay window")
+        expect("Settings opened", "settings")
+        wait_for(lambda: window_exists("Nightfall"), "settings window")
+        expect("Settings updated", "toggle")
+        expect("snow disabled", "status")
+        settings = config_dir / "settings.json"
+        assert json.loads(settings.read_text())["enabled"] is False
+        expect("Settings updated", "disable")
+        expect("Nightfall stopped", "quit")
+        wait_for(lambda: command("status", check=False).returncode != 0, "renderer exit")
+        expect("Settings opened", "settings")
+        expect("snow disabled", "status")
+        expect("Settings updated", "enable")
+        assert json.loads(settings.read_text())["enabled"] is True
+        print(f"{sys.platform}: overlay, settings, CLI controls, and restart smoke passed")
+    except subprocess.CalledProcessError as error:
+        print(error.stdout, error.stderr, file=sys.stderr)
+        raise
+    finally:
+        command("quit", check=False)
+        wait_for(lambda: command("status", check=False).returncode != 0, "renderer cleanup")
+        log = config_dir / "renderer.log"
+        if log.exists():
+            print(log.read_text(errors="replace"))
+
+
+def main():
+    path = Path(sys.argv[1]).resolve()
+    # Keep the temporary Linux UNIX socket below the platform's path limit.
+    with tempfile.TemporaryDirectory(prefix="nf-", dir=None if WINDOWS else "/tmp") as directory:
+        root = Path(directory)
+        if WINDOWS:
+            # The runner has a disposable Windows user profile. Tauri locates its
+            # roaming directory through the Windows known folder API.
+            local = root / "local"
+            local.mkdir()
+            os.environ["LOCALAPPDATA"] = str(local)
+            config_dir = Path(os.environ["APPDATA"]) / "app.nightfall.desktop"
+            install = root / "Nightfall Portable"
+            with zipfile.ZipFile(path) as archive:
+                assert set(archive.namelist()) == {"nightfall.exe", "nightfall-renderer.exe"}
+                assert archive.testzip() is None
+                archive.extractall(install)
+            smoke(install / "nightfall.exe", config_dir)
+        else:
+            os.environ["XDG_CONFIG_HOME"] = str(root)
+            smoke(path, root / "app.nightfall.desktop")
+
+
+if __name__ == "__main__":
+    main()

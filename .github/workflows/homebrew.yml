@@ -36,7 +36,7 @@ jobs:
         run: |
           test -d /Applications/Nightfall.app
           codesign --verify --deep --strict /Applications/Nightfall.app
-          test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' /Applications/Nightfall.app/Contents/Info.plist)" = 0.4.6
+          test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' /Applications/Nightfall.app/Contents/Info.plist)" = 0.4.7
           "$(brew --prefix)/bin/nightfall" --help
           brew list --cask nightfall
       - name: Uninstall

@@ -141,3 +141,6 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 
 .letter-santa-hat { position: absolute; width: 1.05em; height: 1.05em; object-fit: contain; left: -.07em; top: -.62em; transform: rotate(-10deg); pointer-events: none; }
 .snowball-letter img { position: absolute; width: .62em; height: .62em; object-fit: contain; left: -.05em; top: .265em; pointer-events: none; }
+
+.landing-copy h1 .snowball-letter { display: inline; width: auto; }
+.snowball-letter img { position: static; display: inline-block; width: .58em; height: .58em; margin-inline: -.03em; vertical-align: -.105em; }

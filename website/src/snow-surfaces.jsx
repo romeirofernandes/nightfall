@@ -40,10 +40,16 @@ export function SnowSurfaces({field, paused}) {
    take(node,dt){
     if(pause.current||reduced.matches)return [];
     const bank=banks.get(node);if(!bank)return [];
+    bank.releaseClock=(bank.releaseClock??0)+dt;
+    if(bank.releaseClock<.22)return [];
+    bank.releaseClock=0;
+    const center=Math.random()*bank.width, radius=12+Math.random()*14;
     const pieces=[],step=bank.width/(bank.depth.length-1);
     bank.depth.forEach((depth,i)=>{
-     const amount=depth*(1-Math.exp(-dt*1.4));bank.depth[i]-=amount;
-     if(amount>.003)pieces.push({x:6+i*step,amount,area:amount*step,depth});
+     const distance=Math.abs(i*step-center);
+     const falloff=Math.max(0,1-distance/radius);
+     const amount=depth*falloff*.65;bank.depth[i]-=amount;
+     if(amount>.025)pieces.push({x:6+i*step,amount,area:amount*step,depth});
     });return pieces;
    },
    spill(node,dt,released){

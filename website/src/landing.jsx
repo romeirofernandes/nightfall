@@ -48,6 +48,8 @@ export function Landing() {
         const entrance = gsap.timeline();
         entrance.from('.winter-world', { scale: 1.055, duration: 2.2, ease: 'power3.out', clearProps: 'transform' }, 0)
           .from('.landing-copy h1', { y: 35, clipPath: 'inset(0 0 100% 0)', duration: 1.3, ease: 'power3.out', clearProps: 'all' }, .15)
+          .from('.letter-santa-hat', { y: -24, x: -8, rotation: -26, opacity: 0, duration: 1.1, ease: 'power3.out', clearProps: 'transform,opacity' }, .85)
+          .from('.snowball-letter img', { x: 34, y: -5, rotation: 110, opacity: 0, duration: 1.25, ease: 'power3.out', clearProps: 'transform,opacity' }, .9)
           .from('.landing-copy > p, .landing-actions', { y: 18, opacity: 0, duration: .9, stagger: .14, ease: 'power3.out', clearProps: 'all' }, .65);
       });
     }, hero);
@@ -90,7 +92,7 @@ export function Landing() {
             </div>
           </header>
           <div className="landing-shell wrap landing-copy">
-            <h1 id="landing-title" aria-label="A little winter. All yours."><span className="winter-title-first" aria-hidden="true"><span className="christmas-letter">A<img className="letter-santa-hat" src="/media/winter/santa-hat.png" alt="" width="256" height="256"/></span> little winter.</span><span className="winter-title-last" aria-hidden="true"> All y<span className="snowball-letter">o<img src="/media/winter/snowball.png" alt="" width="128" height="128"/></span>urs.</span></h1>
+            <h1 id="landing-title" aria-label="A little winter. All yours."><span className="winter-title-first" aria-hidden="true"><span className="christmas-letter">A<img className="letter-santa-hat" src="/media/winter/santa-hat.png" alt="" width="256" height="256"/></span> little winter.</span><span className="winter-title-last" aria-hidden="true"> All y<span className="snowball-letter"><img src="/media/winter/snowball.png" alt="" width="128" height="128"/></span>urs.</span></h1>
             <p>Free desktop snow for macOS &amp; Hyprland.</p>
             <div className="landing-actions">
               <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>

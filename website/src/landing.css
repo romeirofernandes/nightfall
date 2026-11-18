@@ -124,3 +124,5 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 @keyframes lunar-turn { to { transform: rotate(360deg); } }
 @media (max-width: 900px) and (min-width: 601px) { .sky-orbit { --sky-orbit-height: 96px; } .sky-body { width: 56px; } }
 @media (max-width: 600px) { .sky-orbit { --sky-orbit-height: 47%; } .sky-body { width: 52px; } }
+/* On phones the open sky is left of the foreground pine canopy. */
+@media (max-width: 600px) { .sky-orbit { left: 8%; right: auto; width: 35%; } }

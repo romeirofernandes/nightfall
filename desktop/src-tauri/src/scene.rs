@@ -1,5 +1,5 @@
 //! Small shared vector scene: identical artwork in Cairo and the macOS canvas.
-use crate::engine::{noise, Ledge, Settings, Winter};
+use crate::engine::{noise, Ledge, LightPattern, Settings, Winter};
 use serde::Serialize;
 #[derive(Serialize)]
 pub struct Shape {
@@ -68,6 +68,39 @@ pub fn height(l: &Ledge, u: f64) -> f64 {
         .clamp(0., 1.);
     h * edge
 }
+fn bulb_brightness(pattern: LightPattern, time: f64, i: usize, seed: f64) -> f64 {
+    let i = i as f64;
+    match pattern {
+        LightPattern::Steady => 1.,
+        LightPattern::Twinkle => {
+            0.34 + 0.66
+                * (0.5 + 0.5 * (time * (1.2 + noise(seed + i) * 2.) + i * 2.4).sin()).powi(3)
+        }
+        LightPattern::Wave => 0.27 + 0.73 * (0.5 + 0.5 * (time * 2.7 - i * 0.66).sin()).powi(2),
+        LightPattern::Alternate => {
+            0.33 + 0.67 * (0.5 + 0.5 * (time * 2.6 + i * std::f64::consts::PI).cos())
+        }
+    }
+}
+
+fn placement(s: &Settings, kind: &str, i: u8, count: u8) -> [f64; 2] {
+    if let Some(position) = s.placements.get(&format!("{kind}-{i}")) {
+        return *position;
+    }
+    let f = (i as f64 + 0.5) / count.max(1) as f64;
+    let offset = (i as f64 * 2.39).sin() * 0.22 / count.max(1) as f64;
+    match kind {
+        "snowman" if count == 1 => [0.94, 1.],
+        "snowman" => [1. - f * 0.83 - offset, 1.],
+        "tree" => [f * 0.72 + offset, 1.],
+        "gift" => [0.15 + f * 0.79 + offset, 1.],
+        _ => [
+            f + offset,
+            0.18 + ((i as f64 + 1.) * 1.23).sin().abs() * 0.71,
+        ],
+    }
+}
+
 pub fn scene(m: &Winter, s: &Settings) -> Scene {
     let mut v = vec![];
     if !s.enabled {
@@ -122,32 +155,49 @@ pub fn scene(m: &Winter, s: &Settings) -> Scene {
                 i += 1.;
             }
         }
+        if l.width < 32. {
+            continue;
+        }
+        let inset = 10.;
+        let span = l.width - 2. * inset;
+        let left = l.x + inset;
         if s.lights {
-            let n = (l.width / 38.).floor().max(1.) as usize;
-            let rope: Vec<_> = (0..=n * 6)
+            let n = (span / 44.).round().clamp(1., 80.) as usize;
+            let cable_y =
+                |u: f64| l.y + 1. + (u * std::f64::consts::PI * n as f64).sin().abs() * 8.;
+            let rope = (0..=n * 8)
                 .map(|i| {
-                    let u = i as f64 / (n * 6) as f64;
-                    [
-                        l.x + u * l.width,
-                        l.y + 5. + (u * std::f64::consts::PI * n as f64).sin().abs() * 7.,
-                    ]
+                    let u = i as f64 / (n * 8) as f64;
+                    [left + u * span, cable_y(u)]
                 })
                 .collect();
-            line(&mut v, rope, DARK, 1.4);
-            let colors = [RED, GOLD, [0.2, 0.78, 0.54, 1.], [0.35, 0.65, 1., 1.]];
+            line(&mut v, rope, [0.06, 0.16, 0.12, 0.9], 2.);
+            let colors = [RED, GOLD, [0.27, 0.73, 0.46, 1.], [0.96, 0.88, 0.61, 1.]];
             for i in 0..n {
-                let x = l.x + (i as f64 + 0.5) * l.width / n as f64;
-                let c = colors[i % 4];
-                ellipse(&mut v, x, l.y + 17., 5., 7., [c[0], c[1], c[2], 0.12]);
-                ellipse(&mut v, x, l.y + 17., 2.4, 3.8, c);
+                let u = (i as f64 + 0.5) / n as f64;
+                let x = left + u * span;
+                let y = cable_y(u);
+                let c = colors[i % colors.len()];
+                let brightness = bulb_brightness(s.light_pattern, m.time, i, seed);
+                rect(&mut v, x - 1.6, y, 3.2, 4., DARK);
+                ellipse(
+                    &mut v,
+                    x,
+                    y + 6.,
+                    5.6,
+                    7.,
+                    [c[0], c[1], c[2], 0.19 * brightness],
+                );
+                ellipse(&mut v, x, y + 6., 2.6, 4., [c[0], c[1], c[2], brightness]);
             }
         }
         if s.dangling {
-            let n = (l.width / 150.).floor() as usize;
-            for i in 0..n.min(30) {
-                let x = l.x + (i as f64 + 0.5) * l.width / n as f64;
-                let y = l.y + 23. + noise(seed + i as f64) * 23.;
-                line(&mut v, vec![[x, l.y + 1.], [x, y]], GOLD, 0.7);
+            let n = (span / 145.).round().clamp(1., 30.) as u8;
+            for i in 0..n {
+                let [u, drop] = placement(s, "ornament", i, n);
+                let x = left + u * span;
+                let y = l.y + 14. + drop * 52.;
+                line(&mut v, vec![[x, l.y + 1.], [x, y]], GOLD, 0.9);
                 if i % 2 == 0 {
                     star(&mut v, x, y + 6., 6., GOLD);
                 } else {
@@ -156,28 +206,27 @@ pub fn scene(m: &Winter, s: &Settings) -> Scene {
             }
         }
     }
-    let floor = m.height - 5.;
-    if s.snowman {
-        for i in 0..s.snowman_count {
-            let margin = 40. * s.snowman_size;
-            let x = m.width
-                - margin
-                - i as f64 * (m.width - 2. * margin).max(1.)
-                    / (s.snowman_count.saturating_sub(1).max(1)) as f64;
-            snowman(&mut v, x, floor, s.snowman_size, i);
+    for (kind, count, scale) in [
+        (
+            "snowman",
+            if s.snowman { s.snowman_count } else { 0 },
+            s.snowman_size,
+        ),
+        ("tree", s.trees, s.decoration_size),
+        ("gift", s.gifts, s.decoration_size),
+    ] {
+        for i in 0..count {
+            let [u, w] = placement(s, kind, i, count);
+            let margin = (34. * scale).min(m.width * 0.5);
+            let top = (if kind == "gift" { 40. } else { 114. } * scale).min(m.height - 5.);
+            let x = margin + u * (m.width - 2. * margin);
+            let y = top + w * (m.height - 5. - top);
+            match kind {
+                "snowman" => snowman(&mut v, x, y, scale, i),
+                "tree" => tree(&mut v, x, y, scale),
+                _ => gift(&mut v, x, y, scale, i),
+            }
         }
-    }
-    for i in 0..s.trees {
-        let x = 35. * s.decoration_size
-            + i as f64 * (m.width * 0.55 - 70. * s.decoration_size).max(1.)
-                / s.trees.saturating_sub(1).max(1) as f64;
-        tree(&mut v, x, floor, s.decoration_size);
-    }
-    for i in 0..s.gifts {
-        let x = 65. * s.decoration_size
-            + i as f64 * (m.width * 0.7 - 100. * s.decoration_size).max(1.)
-                / s.gifts.saturating_sub(1).max(1) as f64;
-        gift(&mut v, x, floor, s.decoration_size, i);
     }
     if let Some(x) = m.plow_x {
         santa(&mut v, x, 90. + (m.time * 0.9).sin() * 12., m.time);
@@ -414,6 +463,56 @@ fn santa(v: &mut Scene, x: f64, y: f64, t: f64) {
             y + 8. + (t * 3. + i as f64).sin() * 15.,
             1. + a * 3.,
             [0.98, 0.83, 0.46, 0.6],
+        );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn decoration_positions_and_light_patterns() {
+        let mut s = Settings::default();
+        s.placements.insert("tree-0".into(), [1.2, -0.1]);
+        s.placements.insert("gift-22".into(), [0.4, 0.8]);
+        s.validate();
+        assert_eq!(placement(&s, "tree", 0, 1), [1., 0.]);
+        assert!(!s.placements.contains_key("gift-22"));
+        assert_eq!(bulb_brightness(LightPattern::Steady, 1., 2, 0.), 1.);
+        for pattern in [
+            LightPattern::Twinkle,
+            LightPattern::Wave,
+            LightPattern::Alternate,
+        ] {
+            let initial = bulb_brightness(pattern, 0., 2, 42.);
+            let later = bulb_brightness(pattern, 0.5, 2, 42.);
+            assert!((0.25..=1.).contains(&initial));
+            assert!((0.25..=1.).contains(&later));
+            assert!((initial - later).abs() > 0.01);
+        }
+    }
+
+    #[test]
+    fn lights_and_ornaments_attach_at_the_window_edge() {
+        let mut s = Settings::default();
+        s.lights = true;
+        s.dangling = true;
+        s.snowman = false;
+        let mut world = Winter::new(800., 600.);
+        let mut ledge = Ledge::new("window".into(), 100., 200., 400.);
+        ledge.bank.fill(6.);
+        world.surfaces(vec![ledge]);
+        let shapes = scene(&world, &s);
+        assert!(shapes
+            .iter()
+            .any(|shape| shape.stroke && shape.points[0] == [110., 201.]));
+        assert!(shapes
+            .iter()
+            .any(|shape| shape.stroke && shape.color == GOLD && shape.points[0][1] == 201.));
+        assert_eq!(
+            crate::engine::local_ledge([-20., 200., 400.], 800., 600.),
+            Some((0., 200., 380.))
         );
     }
 }

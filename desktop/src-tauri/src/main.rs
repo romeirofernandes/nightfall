@@ -112,16 +112,41 @@ fn frame(
         .entry(window.label().into())
         .or_insert_with(|| Winter::new(width.clamp(1., 16000.), height.clamp(1., 16000.)));
     #[cfg(target_os = "macos")]
-    if world.time - world.geometry_time >= 0.5 {
-        world.geometry_time = world.time;
+    if world.geometry_time == 0. || world.time - world.geometry_time >= 0.12 {
+        world.geometry_time = world.time.max(f64::EPSILON);
         let scale = window.scale_factor().map_err(|e| e.to_string())?;
         let pos = window.outer_position().map_err(|e| e.to_string())?;
-        if let Some(surfaces) = macos::surfaces(
-            pos.x as f64 / scale,
-            pos.y as f64 / scale,
-            world.width,
-            world.height,
-        ) {
+        let (ox, oy) = (pos.x as f64 / scale, pos.y as f64 / scale);
+        let inset = state.settings.lock().unwrap().window_inset;
+        if let Some(mut surfaces) = macos::surfaces(ox, oy, world.width, world.height, inset) {
+            // Use Nightfall's exact NSWindow frame rather than shadow bounds.
+            if let Some(settings) = window.app_handle().get_webview_window("main") {
+                if settings.is_visible().unwrap_or(false)
+                    && !settings.is_minimized().unwrap_or(true)
+                {
+                    if let (Ok(position), Ok(size), Ok(scale)) = (
+                        settings.outer_position(),
+                        settings.outer_size(),
+                        settings.scale_factor(),
+                    ) {
+                        let frame = [
+                            position.x as f64 / scale - ox,
+                            position.y as f64 / scale - oy,
+                            size.width as f64 / scale,
+                        ];
+                        if let Some((x, y, width)) =
+                            engine::local_ledge(frame, world.width, world.height)
+                        {
+                            surfaces.push(engine::Ledge::new(
+                                "nightfall-settings".into(),
+                                x,
+                                y,
+                                width,
+                            ));
+                        }
+                    }
+                }
+            }
             world.surfaces(surfaces);
         }
     }

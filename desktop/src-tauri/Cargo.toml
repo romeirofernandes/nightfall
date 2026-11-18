@@ -1,6 +1,6 @@
 [package]
 name = "nightfall"
-version = "0.4.3"
+version = "0.4.4"
 description = "A little winter for your desktop"
 authors = ["Nightfall contributors"]
 edition = "2021"

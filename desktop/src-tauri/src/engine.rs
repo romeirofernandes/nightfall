@@ -1,6 +1,24 @@
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Copy, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LightPattern {
+    #[default]
+    Steady,
+    Twinkle,
+    Wave,
+    Alternate,
+}
+#[derive(Clone, Copy, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Theme {
+    #[default]
+    Dark,
+    Light,
+    System,
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Settings {
@@ -19,6 +37,10 @@ pub struct Settings {
     pub gifts: u8,
     pub decoration_size: f64,
     pub lights: bool,
+    pub light_pattern: LightPattern,
+    pub theme: Theme,
+    pub window_inset: f64,
+    pub placements: std::collections::BTreeMap<String, [f64; 2]>,
     pub dangling: bool,
     pub interactive: bool,
     #[serde(skip)]
@@ -42,6 +64,10 @@ impl Default for Settings {
             gifts: 0,
             decoration_size: 1.,
             lights: false,
+            light_pattern: LightPattern::Steady,
+            theme: Theme::Dark,
+            window_inset: 22.,
+            placements: Default::default(),
             dangling: false,
             interactive: false,
             cleanup_request: 0,
@@ -50,6 +76,28 @@ impl Default for Settings {
 }
 impl Settings {
     pub fn validate(&mut self) {
+        self.window_inset = finite(self.window_inset, 22.).clamp(0., 40.);
+        self.placements.retain(|key, position| {
+            let Some((kind, index)) = key.split_once('-') else {
+                return false;
+            };
+            let Ok(index) = index.parse::<u8>() else {
+                return false;
+            };
+            let count = match kind {
+                "snowman" | "tree" => 12,
+                "gift" => 20,
+                "ornament" => 30,
+                _ => return false,
+            };
+            if index >= count || key != &format!("{kind}-{index}") {
+                return false;
+            }
+            for value in position {
+                *value = finite(*value, 0.5).clamp(0., 1.);
+            }
+            true
+        });
         self.cleanup_interval = finite(self.cleanup_interval, 120.).clamp(15., 3600.);
         self.snowman_count = self.snowman_count.min(12);
         self.trees = self.trees.min(12);
@@ -75,6 +123,13 @@ fn finite(value: f64, fallback: f64) -> f64 {
         fallback
     }
 }
+#[cfg(any(target_os = "macos", test))]
+pub fn local_ledge([x, y, span]: [f64; 3], width: f64, height: f64) -> Option<(f64, f64, f64)> {
+    let left = x.max(0.);
+    let right = (x + span).min(width);
+    (y >= 0. && y < height && right > left).then_some((left, y, right - left))
+}
+
 pub fn noise(seed: f64) -> f64 {
     (seed.sin() * 43758.5453).fract().abs()
 }

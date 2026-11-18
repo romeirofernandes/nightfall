@@ -51,7 +51,7 @@ pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
             let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
             let mut command = String::new();
             if std::io::Read::by_ref(&mut stream)
-                .take(4096)
+                .take(16 * 1024)
                 .read_to_string(&mut command)
                 .is_err()
             {

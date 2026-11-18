@@ -13,7 +13,13 @@ fn number(dict: &CFDictionary<CFString, core_foundation::base::CFType>, key: &st
         .downcast::<CFNumber>()?
         .to_f64()
 }
-pub fn surfaces(ox: f64, oy: f64, width: f64, height: f64) -> Option<Vec<Ledge>> {
+pub fn surfaces(
+    ox: f64,
+    oy: f64,
+    width: f64,
+    height: f64,
+    shadow_inset: f64,
+) -> Option<Vec<Ledge>> {
     let ids = create_window_list(
         kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
         kCGNullWindowID,
@@ -55,9 +61,20 @@ pub fn surfaces(ox: f64, oy: f64, width: f64, height: f64) -> Option<Vec<Ledge>>
         if dock && (w < 40. || h < 15. || h > height * 0.4 || y < oy + height * 0.45) {
             continue;
         }
-        let left = (x - ox).max(0.);
-        let right = (x - ox + w).min(width);
-        if right > left && y >= oy && y < oy + height {
+        // Regular Quartz bounds can include the transparent window shadow.
+        // Dock and edge-to-edge windows are kept at their reported bounds.
+        let fullscreen =
+            x <= ox + 1. && y <= oy + 1. && x + w >= ox + width - 1. && y + h >= oy + height - 1.;
+        let inset = if dock || fullscreen {
+            0.
+        } else {
+            shadow_inset.min(w * 0.15).min(h * 0.15)
+        };
+        if let Some((left, top, span)) = crate::engine::local_ledge(
+            [x + inset - ox, y + inset - oy, w - 2. * inset],
+            width,
+            height,
+        ) {
             let Some(id) = number(&dict, "kCGWindowNumber") else {
                 continue;
             };
@@ -68,8 +85,8 @@ pub fn surfaces(ox: f64, oy: f64, width: f64, height: f64) -> Option<Vec<Ledge>>
                     format!("{id}")
                 },
                 left,
-                y - oy,
-                right - left,
+                top,
+                span,
             ));
         }
     }

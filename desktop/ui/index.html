@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,8 +13,10 @@
     <nav aria-label="Settings sections">
       <button data-page="weather" aria-current="page"><span aria-hidden="true">❅</span> Weather</button>
       <button data-page="decorations"><span aria-hidden="true">✧</span> Decorations</button>
+      <button data-page="layout"><span aria-hidden="true">⌖</span> Arrange</button>
       <button data-page="play"><span aria-hidden="true">◌</span> Snowballs</button>
     </nav>
+    <label class="theme-control">Appearance<select data-setting="theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
     <button class="quiet" id="quit">Quit Nightfall</button>
   </aside>
   <main>
@@ -31,6 +33,7 @@
         <label class="row"><span>Wind <small>West to east</small></span><span class="range"><input type="range" data-setting="wind" min="-80" max="80" step="1"><output data-value="wind"></output></span></label>
         <label class="row"><span>Snow on ledges</span><input type="checkbox" role="switch" data-setting="accumulation"></label>
         <label class="row"><span>Icicles</span><input type="checkbox" role="switch" data-setting="icicles"></label>
+        <label class="row" id="window-inset" hidden><span>Window edge inset <small>Adjust if snow floats above other Mac windows</small></span><span class="range"><input type="range" data-setting="window_inset" min="0" max="40" step="1"><output data-value="window_inset"></output></span></label>
         <label class="row"><span>Animation</span><select data-setting="fps"><option value="30">30 fps</option><option value="60">60 fps</option></select></label>
       </div>
     </section>
@@ -44,6 +47,7 @@
         <label class="row"><span>Gifts</span><input type="number" data-setting="gifts" min="0" max="20" step="1"></label>
         <label class="row"><span>Tree and gift size</span><span class="range"><input type="range" data-setting="decoration_size" min="0.4" max="2.5" step="0.1"><output data-value="decoration_size"></output></span></label>
         <label class="row"><span>Window lights</span><input type="checkbox" role="switch" data-setting="lights"></label>
+        <label class="row"><span>Light pattern</span><select data-setting="light_pattern"><option value="steady">Steady</option><option value="twinkle">Twinkle</option><option value="wave">Wave</option><option value="alternate">Alternating glow</option></select></label>
         <label class="row"><span>Hanging ornaments</span><input type="checkbox" role="switch" data-setting="dangling"></label>
       </div>
       <h2>Santa’s cleanup</h2>
@@ -51,6 +55,23 @@
         <label class="row"><span>Automatic visits</span><input type="checkbox" role="switch" data-setting="plow"></label>
         <label class="row"><span>Time between visits <small>15–3,600 seconds</small></span><input type="number" data-setting="cleanup_interval" min="15" max="3600" step="1"></label>
         <div class="row"><button class="secondary" id="santa">Send Santa now</button></div>
+      </div>
+    </section>
+    <section id="layout" class="page" aria-labelledby="layout-title" hidden>
+      <header><h1 id="layout-title">Arrange</h1><p>Move each decoration to a spot of its own. Positions apply proportionally to each display.</p></header>
+      <div class="group">
+        <label class="row"><span>Decoration</span><select id="placement-item"></select></label>
+        <div class="layout-editor" id="layout-editor" hidden>
+          <div class="placement-board" id="placement-board">
+            <span id="placement-edge" hidden>Window edge</span>
+            <button type="button" class="placement-marker" id="placement-marker" aria-label="Drag decoration, or use arrow keys"></button>
+          </div>
+          <label class="row"><span>Across</span><span class="range"><input type="range" id="placement-x" min="0" max="100"><output id="placement-x-value"></output></span></label>
+          <label class="row"><span id="placement-y-label">Down</span><span class="range"><input type="range" id="placement-y" min="0" max="100"><output id="placement-y-value"></output></span></label>
+          <button class="secondary" id="reset-placement">Reset position</button>
+          <p class="placement-help" id="placement-help"></p>
+        </div>
+        <p class="placement-empty" id="placement-empty" hidden>Turn on and add decorations to arrange them here.</p>
       </div>
     </section>
     <section id="play" class="page" aria-labelledby="play-title" hidden>

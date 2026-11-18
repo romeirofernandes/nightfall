@@ -6,4 +6,4 @@ Reference recording: broad landscape across the lower viewport, centred expressi
 
 Concepts: (A) centred alpine panorama; (B) editorial left-aligned opening into a valley; (C) framed winter window with a foreground snowman. Same winter palette and serif/sans typography across all three.
 
-Pending: user's comp choice. No website implementation edits before that choice.
+Approved composition: A, .impeccable/mocks/alpine-panorama.png. Keep centred editorial typography above an edge-to-edge alpine panorama. Live controls replace raster text; separate scenery supports time transitions. User explicitly requests multiple commits within Stage 1.

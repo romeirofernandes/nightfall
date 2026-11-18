@@ -4,6 +4,7 @@ import '@fontsource/prata/latin-400.css';
 import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
 import {Snow} from './snow';
+import {Celestial} from './celestial';
 import {useWinterTime} from './use-winter-time';
 import './landing.css';
 
@@ -67,7 +68,7 @@ export function Landing() {
               data-active={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme)}
               src={scenery[light]} width="1672" height="941"
               fetchPriority={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme) ? 'high' : 'low'} alt=""/>)}
-            <div className="winter-celestial" style={{'--orb-x':position.x + '%','--orb-y':position.y + '%','--orb-rise':((43-position.y)/38*8) + 'px'}}/>
+            <Celestial phase={theme} position={position} paused={snowPaused}/>
           </div>
           <div className="landing-snow" aria-hidden="true"><Snow density={2} atmosphere wind={12} paused={snowPaused}/></div>
           <header className="landing-shell wrap landing-header">

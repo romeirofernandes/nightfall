@@ -47,6 +47,9 @@ func request(command string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if len(reply) == 0 {
+		return "", errors.New("Nightfall closed the connection without replying")
+	}
 	if strings.HasPrefix(string(reply), "error:") {
 		return "", errors.New(strings.TrimSpace(string(reply)))
 	}

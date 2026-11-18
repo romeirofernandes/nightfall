@@ -10,27 +10,37 @@ import (
 )
 
 func TestControlReplyAndRendererErrors(t *testing.T) {
-	if runtime.GOOS != "linux" {
-		t.Skip("isolated config path uses XDG_CONFIG_HOME")
+	temp := os.TempDir()
+	if runtime.GOOS != "windows" {
+		temp = "/tmp" // Keep the socket within the OS pathname limit.
 	}
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
-	dir, err := configDir()
+	base, err := os.MkdirTemp(temp, "nf-")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dir) > 95 {
-		t.Skip("temporary socket path too long")
+	t.Cleanup(func() { _ = os.RemoveAll(base) })
+	switch runtime.GOOS {
+	case "windows":
+		t.Setenv("LOCALAPPDATA", base)
+	case "darwin":
+		t.Setenv("HOME", base)
+	default:
+		t.Setenv("XDG_CONFIG_HOME", base)
 	}
-	if err = os.MkdirAll(dir, 0700); err != nil {
+	path, err := controlPath()
+	if err != nil {
 		t.Fatal(err)
 	}
-	listener, err := net.Listen("unix", filepath.Join(dir, "control.sock"))
+	if err = os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		t.Fatal(err)
+	}
+	listener, err := net.Listen("unix", path)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer listener.Close()
 	go func() {
-		for _, reply := range []string{"Nightfall running, snow enabled\n", "error: cannot save settings\n"} {
+		for _, reply := range []string{"Nightfall running, snow enabled\n", "error: cannot save settings\n", ""} {
 			conn, e := listener.Accept()
 			if e != nil {
 				return
@@ -46,5 +56,8 @@ func TestControlReplyAndRendererErrors(t *testing.T) {
 	}
 	if _, err = request("disable"); err == nil {
 		t.Fatal("renderer failure was reported as success")
+	}
+	if _, err = request("status"); err == nil {
+		t.Fatal("a connection closed without a reply was reported as success")
 	}
 }

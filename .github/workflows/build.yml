@@ -63,8 +63,15 @@ jobs:
         name: Smoke test on the Ubuntu runner
         shell: bash
         run: |
-          sudo apt-get install -y xvfb xauth xdotool dbus-x11
-          dbus-run-session -- xvfb-run -a -s '-screen 0 1280x800x24' python3 scripts/test-desktop.py desktop/src-tauri/target/release/nightfall
+          sudo apt-get install -y xvfb xauth xdotool xcompmgr dbus-x11
+          bash scripts/test-linux-desktop.sh x11 desktop/src-tauri/target/release/nightfall
+          dbus-run-session -- xvfb-run -a python3 scripts/test-tui.py desktop/src-tauri/target/release/nightfall
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Test Wayland layer-shell and uncomposited X11
+        run: |
+          sudo apt-get install -y sway
+          bash scripts/test-linux-desktop.sh wayland desktop/src-tauri/target/release/nightfall
+          bash scripts/test-linux-desktop.sh settings-only desktop/src-tauri/target/release/nightfall
       - if: matrix.os == 'ubuntu-22.04'
         name: Run the Ubuntu-built binaries on Debian, Fedora, and Arch
         run: bash scripts/test-linux-distros.sh

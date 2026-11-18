@@ -5,6 +5,7 @@ import ctypes
 from ctypes import wintypes
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -32,7 +33,15 @@ def window_exists(title):
         user32.IsWindowVisible.argtypes = (wintypes.HWND,)
         user32.IsWindowVisible.restype = wintypes.BOOL
         handle = user32.FindWindowW(None, title)
-        return handle and user32.IsWindowVisible(handle)
+        if not handle or not user32.IsWindowVisible(handle):
+            return False
+        if title == "Nightfall snow":
+            user32.GetWindowLongW.argtypes = (wintypes.HWND, ctypes.c_int)
+            user32.GetWindowLongW.restype = ctypes.c_long
+            styles = user32.GetWindowLongW(handle, -20)  # GWL_EXSTYLE
+            passive_styles = 0x08080020  # NOACTIVATE | LAYERED | TRANSPARENT
+            assert styles & passive_styles == passive_styles, f"Overlay style: {styles:#x}"
+        return True
     if os.getenv("SWAYSOCK"):
         result = subprocess.check_output(["swaymsg", "-t", "get_tree"], text=True)
         return f'"name": "{title}"' in result
@@ -58,10 +67,24 @@ def smoke(cli, config_dir):
         assert command("status", check=False).returncode != 0, "renderer already running"
         expect("Settings updated", "enable")
         expect("snow enabled", "status")
-        if not os.getenv("SWAYSOCK"):
+        settings_only = os.getenv("NIGHTFALL_TEST_SETTINGS_ONLY") == "1"
+        if not os.getenv("SWAYSOCK") and not settings_only:
             wait_for(lambda: window_exists("Nightfall snow"), "snow overlay window")
-        expect("Settings opened", "settings")
+        renderer = cli.with_name("nightfall-renderer.exe" if WINDOWS else "nightfall-renderer")
+        subprocess.run([renderer], check=True, capture_output=True, timeout=20)
         wait_for(lambda: window_exists("Nightfall"), "settings window")
+        log = config_dir / "renderer.log"
+        if settings_only:
+            assert not window_exists("Nightfall snow"), "overlay on uncomposited X11"
+            assert "Settings remain available" in log.read_text()
+        if os.getenv("SWAYSOCK"):
+            wait_for(
+                lambda: any(
+                    "get_layer_surface" in line and '"nightfall"' in line
+                    for line in log.read_text(errors="replace").splitlines()
+                ),
+                "Wayland layer-shell surface",
+            )
         expect("Settings updated", "toggle")
         expect("snow disabled", "status")
         settings = config_dir / "settings.json"
@@ -73,7 +96,7 @@ def smoke(cli, config_dir):
         expect("snow disabled", "status")
         expect("Settings updated", "enable")
         assert json.loads(settings.read_text())["enabled"] is True
-        print(f"{sys.platform}: overlay, settings, CLI controls, and restart smoke passed")
+        print(f"{sys.platform}: settings, CLI controls, restart, and desktop mode checks passed")
     except subprocess.CalledProcessError as error:
         print(error.stdout, error.stderr, file=sys.stderr)
         raise
@@ -82,7 +105,8 @@ def smoke(cli, config_dir):
         wait_for(lambda: command("status", check=False).returncode != 0, "renderer cleanup")
         log = config_dir / "renderer.log"
         if log.exists():
-            print(log.read_text(errors="replace"))
+            lines = log.read_text(errors="replace").splitlines()
+            print("\n".join(line for line in lines if not re.match(r"^\[\d+\.", line)), file=sys.stderr)
 
 
 def main():

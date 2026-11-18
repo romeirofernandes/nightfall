@@ -90,7 +90,7 @@ export function Landing() {
             </div>
           </header>
           <div className="landing-shell wrap landing-copy">
-            <h1 id="landing-title" aria-label="A little winter. All yours."><span className="winter-title-first" aria-hidden="true">A little <span className="christmas-letter">w<svg className="letter-santa-hat" viewBox="0 0 70 58" fill="none"><path d="M12 42C15 27 21 9 39 7c15-2 22 11 24 22-9-9-15-9-18-5l4 18Z" fill="#aa2939"/><path d="M20 34c6-17 11-22 22-23-9 5-12 16-13 23" fill="#d35255"/><path d="M10 39q21-7 42 0l1 11q-21-5-44 0Z" fill="#f4f3e9"/><circle cx="62" cy="29" r="7" fill="#f4f3e9"/></svg></span>inter.</span><span className="winter-title-last" aria-hidden="true"> All y<span className="snowball-letter">o</span>urs.</span></h1>
+            <h1 id="landing-title" aria-label="A little winter. All yours."><span className="winter-title-first" aria-hidden="true"><span className="christmas-letter">A<img className="letter-santa-hat" src="/media/winter/santa-hat.png" alt="" width="256" height="256"/></span> little winter.</span><span className="winter-title-last" aria-hidden="true"> All y<span className="snowball-letter">o<img src="/media/winter/snowball.png" alt="" width="128" height="128"/></span>urs.</span></h1>
             <p>Free desktop snow for macOS &amp; Hyprland.</p>
             <div className="landing-actions">
               <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>

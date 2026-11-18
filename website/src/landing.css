@@ -132,11 +132,12 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 /* Holiday lettering stays part of the live, accessible headline. */
 .landing-copy h1 .winter-title-first { white-space: nowrap; display: inline; }
 .landing-copy h1 .christmas-letter { position: relative; display: inline-block; }
-.letter-santa-hat { position: absolute; width: .66em; height: .6em; left: -.04em; top: -.19em; transform: rotate(-14deg); overflow: visible; filter: drop-shadow(0 2px 2px #091a3226); }
 .landing-copy h1 .snowball-letter { position: relative; display: inline-block; color: transparent; width: .52em; }
-.snowball-letter::after { content: ''; position: absolute; width: .43em; height: .43em; border-radius: 47% 51% 46% 50%; left: .04em; top: .36em; background: radial-gradient(ellipse at 32% 25%, #fffef7 15%, #e5eff4 52%, #a3bbce 100%); box-shadow: inset -1px -2px 3px #6f91ad44, 0 1px 2px #12304820; }
 .landing .landing-secondary { position: relative; isolation: isolate; overflow: hidden; }
 .button-snow-fill { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
 .snow-button-label { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
 .snow-button-label-filled { position: absolute; inset: 0; color: #173c43; pointer-events: none; clip-path: inset(calc(100% - var(--snow-fill, 0%)) 0 0); }
 @media (max-width: 900px) { .landing-copy h1 .winter-title-last { display: block; } }
+
+.letter-santa-hat { position: absolute; width: 1.05em; height: 1.05em; object-fit: contain; left: -.07em; top: -.62em; transform: rotate(-10deg); pointer-events: none; }
+.snowball-letter img { position: absolute; width: .62em; height: .62em; object-fit: contain; left: -.05em; top: .265em; pointer-events: none; }

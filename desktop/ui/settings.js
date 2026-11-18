@@ -10,7 +10,7 @@ const previewDefaults = {
   snowman: true, snowman_count: 1, snowman_size: 1, trees: 0, gifts: 0,
   decoration_size: 1, lights: false, dangling: false, plow: true,
   cleanup_interval: 120, fps: 30, interactive: false,
-  window_inset: 22, light_pattern: "steady", theme: "dark", placements: {},
+  desktop_folders: false, window_inset: 22, light_pattern: "steady", theme: "dark", placements: {},
 };
 
 let settings;
@@ -253,7 +253,9 @@ for (const link of links) {
 
 async function start() {
   settings = invoke ? await invoke('get_settings') : previewDefaults;
-  document.querySelector('#window-inset').hidden = !/Mac/.test(navigator.platform);
+  const mac = /Mac/.test(navigator.platform);
+  document.querySelector('#window-inset').hidden = !mac;
+  document.querySelector('#desktop-folders').hidden = !mac;
   systemTheme.addEventListener('change', render);
   if (invoke) ornamentSlots = await invoke('arrangement_slots');
   document.querySelector('#theme').onclick = () => {

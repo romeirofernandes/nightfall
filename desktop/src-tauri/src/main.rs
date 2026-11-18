@@ -2,6 +2,8 @@
 #[cfg(any(target_os = "linux", target_os = "macos"))]
 mod control;
 mod engine;
+#[cfg(target_os = "macos")]
+mod finder;
 #[cfg(target_os = "linux")]
 mod linux;
 #[cfg(target_os = "macos")]
@@ -19,6 +21,8 @@ struct State {
     worlds: Mutex<HashMap<String, Winter>>,
     path: std::path::PathBuf,
     ornament_slots: Arc<Mutex<HashMap<String, u8>>>,
+    #[cfg(target_os = "macos")]
+    folder_bounds: finder::FolderBounds,
 }
 #[tauri::command]
 fn get_settings(state: tauri::State<State>) -> Settings {
@@ -129,8 +133,15 @@ fn frame(
         let scale = window.scale_factor().map_err(|e| e.to_string())?;
         let pos = window.outer_position().map_err(|e| e.to_string())?;
         let (ox, oy) = (pos.x as f64 / scale, pos.y as f64 / scale);
-        let inset = state.settings.lock().unwrap().window_inset;
+        let (inset, desktop_folders) = {
+            let settings = state.settings.lock().unwrap();
+            (settings.window_inset, settings.desktop_folders)
+        };
         if let Some(mut surfaces) = macos::surfaces(ox, oy, world.width, world.height, inset) {
+            if desktop_folders {
+                let bounds = state.folder_bounds.lock().unwrap();
+                surfaces.extend(finder::ledges(&bounds, ox, oy, world.width, world.height));
+            }
             // Use Nightfall's exact NSWindow frame rather than shadow bounds.
             if let Some(settings) = window.app_handle().get_webview_window("main") {
                 if settings.is_visible().unwrap_or(false)
@@ -242,11 +253,15 @@ fn main() {
                 worlds: Mutex::new(HashMap::new()),
                 path,
                 ornament_slots: ornament_slots.clone(),
+                #[cfg(target_os = "macos")]
+                folder_bounds: Default::default(),
             });
             #[cfg(any(target_os = "linux", target_os = "macos"))]
             control::start(app.handle())?;
             #[cfg(target_os = "linux")]
             linux::start(settings, ornament_slots);
+            #[cfg(target_os = "macos")]
+            finder::start(settings, app.state::<State>().folder_bounds.clone());
             #[cfg(target_os = "macos")]
             for (i, monitor) in app.available_monitors()?.iter().enumerate() {
                 let scale = monitor.scale_factor();

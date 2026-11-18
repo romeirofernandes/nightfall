@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nightfall Settings</title>
   <link rel="stylesheet" href="settings.css">
+  <script src="select.js" defer></script>
   <script src="settings.js" defer></script>
 </head>
 <body>
@@ -13,11 +14,16 @@
     <nav aria-label="Settings sections">
       <button data-page="weather" aria-current="page"><span aria-hidden="true">❅</span> Weather</button>
       <button data-page="decorations"><span aria-hidden="true">✧</span> Decorations</button>
-      <button data-page="layout"><span aria-hidden="true">⌖</span> Arrange</button>
+      <button data-page="layout"><span aria-hidden="true">↔</span> Arrange</button>
       <button data-page="play"><span aria-hidden="true">◌</span> Snowballs</button>
     </nav>
-    <label class="theme-control">Appearance<select data-setting="theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
-    <button class="quiet" id="quit">Quit Nightfall</button>
+    <div class="sidebar-actions">
+      <button type="button" class="theme-button" id="theme" title="Switch to light mode" aria-label="Switch to light mode">
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 14.1A9 9 0 0 1 9.9 3.2 9 9 0 1 0 20.8 14.1Z"/></svg>
+      </button>
+      <button type="button" class="danger" id="quit">Quit Nightfall</button>
+    </div>
   </aside>
   <main>
     <section id="weather" class="page" aria-labelledby="weather-title">
@@ -58,20 +64,22 @@
       </div>
     </section>
     <section id="layout" class="page" aria-labelledby="layout-title" hidden>
-      <header><h1 id="layout-title">Arrange</h1><p>Move each decoration to a spot of its own. Positions apply proportionally to each display.</p></header>
-      <div class="group">
-        <label class="row"><span>Decoration</span><select id="placement-item"></select></label>
-        <div class="layout-editor" id="layout-editor" hidden>
-          <div class="placement-board" id="placement-board">
-            <span id="placement-edge" hidden>Window edge</span>
-            <button type="button" class="placement-marker" id="placement-marker" aria-label="Drag decoration, or use arrow keys"></button>
-          </div>
-          <label class="row"><span>Across</span><span class="range"><input type="range" id="placement-x" min="0" max="100"><output id="placement-x-value"></output></span></label>
-          <label class="row"><span id="placement-y-label">Down</span><span class="range"><input type="range" id="placement-y" min="0" max="100"><output id="placement-y-value"></output></span></label>
-          <button class="secondary" id="reset-placement">Reset position</button>
-          <p class="placement-help" id="placement-help"></p>
+      <header><h1 id="layout-title">Arrange</h1><p>Drag any decoration. You can also focus it and use the arrow keys.</p></header>
+      <div class="arrange-actions">
+        <button type="button" class="secondary" id="randomize">Randomize positions</button>
+        <button type="button" class="secondary" id="ground">Put all on the ground</button>
+      </div>
+      <div class="group arrange">
+        <div id="desktop-layout">
+          <h2 id="desktop-board-title">Desktop</h2>
+          <div class="placement-board" id="desktop-board" role="group" aria-labelledby="desktop-board-title"></div>
+          <p class="placement-help" id="desktop-empty">Add snowmen, trees, or gifts to move them here.</p>
         </div>
-        <p class="placement-empty" id="placement-empty" hidden>Turn on and add decorations to arrange them here.</p>
+        <div id="ornament-layout" hidden>
+          <h2 id="ornament-board-title">Window ornaments</h2>
+          <div class="placement-board window-board" id="ornament-board" role="group" aria-labelledby="ornament-board-title"></div>
+          <p class="placement-help" id="ornament-help">Slide ornaments along the edge or drag down to lengthen the cord. The pattern repeats across windows.</p>
+        </div>
       </div>
     </section>
     <section id="play" class="page" aria-labelledby="play-title" hidden>

@@ -18,10 +18,22 @@ struct State {
     settings: Arc<Mutex<Settings>>,
     worlds: Mutex<HashMap<String, Winter>>,
     path: std::path::PathBuf,
+    ornament_slots: Arc<Mutex<HashMap<String, u8>>>,
 }
 #[tauri::command]
 fn get_settings(state: tauri::State<State>) -> Settings {
     state.settings.lock().unwrap().clone()
+}
+#[tauri::command]
+fn arrangement_slots(state: tauri::State<State>) -> u8 {
+    state
+        .ornament_slots
+        .lock()
+        .unwrap()
+        .values()
+        .copied()
+        .max()
+        .unwrap_or(0)
 }
 #[tauri::command]
 fn save_settings(
@@ -148,6 +160,10 @@ fn frame(
                 }
             }
             world.surfaces(surfaces);
+            state.ornament_slots.lock().unwrap().insert(
+                window.label().into(),
+                scene::visible_ornament_slots(&world.ledges),
+            );
         }
     }
     world.step(dt, &state.settings.lock().unwrap());
@@ -197,6 +213,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_settings,
+            arrangement_slots,
             save_settings,
             update_settings,
             frame,
@@ -219,15 +236,17 @@ fn main() {
                 settings.enabled = true;
             }
             let settings = Arc::new(Mutex::new(settings));
+            let ornament_slots = Arc::new(Mutex::new(HashMap::new()));
             app.manage(State {
                 settings: settings.clone(),
                 worlds: Mutex::new(HashMap::new()),
                 path,
+                ornament_slots: ornament_slots.clone(),
             });
             #[cfg(any(target_os = "linux", target_os = "macos"))]
             control::start(app.handle())?;
             #[cfg(target_os = "linux")]
-            linux::start(settings);
+            linux::start(settings, ornament_slots);
             #[cfg(target_os = "macos")]
             for (i, monitor) in app.available_monitors()?.iter().enumerate() {
                 let scale = monitor.scale_factor();

@@ -21,15 +21,15 @@ let revision = 0;
 const systemTheme = matchMedia('(prefers-color-scheme: dark)');
 const format = (key, value) => ['snowman_size', 'decoration_size'].includes(key)
   ? Number(value).toFixed(1) + '×' : key === 'window_inset' ? value + ' px' : String(value);
-const selection = document.querySelector('#placement-item');
-const board = document.querySelector('#placement-board');
-const marker = document.querySelector('#placement-marker');
-const positionFields = ['x', 'y'].map(axis => document.querySelector('#placement-' + axis));
+const boards = {
+  desktop: document.querySelector('#desktop-board'),
+  ornaments: document.querySelector('#ornament-board'),
+};
 const names = { snowman: 'Snowman', tree: 'Tree', gift: 'Gift', ornament: 'Ornament' };
 const symbols = { snowman: '☃', tree: '🎄', gift: '🎁', ornament: '★' };
-let positionDraft;
-let layoutCounts;
-let dragging = false;
+const markers = new Map();
+let ornamentSlots = invoke ? 0 : 6;
+let drag;
 
 function defaultPlacement(kind, index, count) {
   const f = (index + 0.5) / count;
@@ -40,68 +40,127 @@ function defaultPlacement(kind, index, count) {
   return [f + offset, 0.18 + Math.abs(Math.sin((index + 1) * 1.23)) * 0.71];
 }
 
-function paintPosition(current) {
-  if (!selection.value) return;
-  const [kind, index] = selection.value.split('-');
-  const position = positionDraft || current.placements[selection.value]
-    || defaultPlacement(kind, Number(index), layoutCounts[kind]);
-  board.classList.toggle('window-board', kind === 'ornament');
-  document.querySelector('#placement-edge').hidden = kind !== 'ornament';
-  document.querySelector('#placement-y-label').textContent = kind === 'ornament' ? 'Drop length' : 'Down';
-  document.querySelector('#placement-help').textContent = kind === 'ornament'
-    ? 'Ornament positions repeat on windows. Wider windows have more ornaments.'
-    : 'Drag the marker or use the sliders to set its desktop position.';
-  marker.textContent = symbols[kind];
-  board.style.setProperty('--cord-x', (8 + position[0] * 84) + '%');
-  board.style.setProperty('--cord-length', (12 + position[1] * 76) + '%');
-  marker.style.left = (8 + position[0] * 84) + '%';
-  marker.style.top = (12 + position[1] * 76) + '%';
-  for (const [axis, field] of positionFields.entries()) {
-    field.value = Math.round(position[axis] * 100);
-    document.querySelector('#' + field.id + '-value').value = field.value + '%';
+function activePlacements() {
+  return pending.placements ?? inFlight.placements ?? settings.placements;
+}
+
+function paintMarker(item, position) {
+  item.position = position;
+  item.wrapper.style.setProperty('--x', (5 + position[0] * 90) + '%');
+  item.wrapper.style.setProperty('--y', (13 + position[1] * 73) + '%');
+}
+
+function moveDecoration(id, position) {
+  void save({ placements: { ...activePlacements(), [id]: position } });
+}
+
+const unit = value => Math.max(0, Math.min(1, value));
+
+function makeMarker(kind, index) {
+  const board = kind === 'ornament' ? boards.ornaments : boards.desktop;
+  const id = kind + '-' + index;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'decoration ' + kind;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'placement-marker';
+  button.textContent = kind === 'ornament' && index % 2 ? '●' : symbols[kind];
+  button.title = names[kind] + ' ' + (index + 1);
+  button.setAttribute('aria-label', button.title + '. Use arrow keys to move.');
+  wrapper.append(button);
+  board.append(wrapper);
+  const item = { id, kind, wrapper, position: [0, 0] };
+  button.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || drag) return;
+    const bounds = board.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    drag = { item, x: event.clientX, y: event.clientY, initial: item.position,
+      width: bounds.width * 0.90, height: bounds.height * 0.73 };
+    wrapper.classList.add('dragging');
+    button.setPointerCapture(event.pointerId);
+  });
+  button.addEventListener('pointermove', event => {
+    if (drag?.item !== item) return;
+    const { x, y, initial, width, height } = drag;
+    paintMarker(item, [unit(initial[0] + (event.clientX - x) / width),
+      unit(initial[1] + (event.clientY - y) / height)]);
+  });
+  function endDrag(cancel) {
+    if (drag?.item !== item) return;
+    const initial = drag.initial;
+    drag = undefined;
+    wrapper.classList.remove('dragging');
+    if (cancel) render();
+    else if (item.position.some((value, axis) => value !== initial[axis])) moveDecoration(id, item.position);
   }
+  button.addEventListener('pointerup', () => endDrag(false));
+  button.addEventListener('pointercancel', () => endDrag(true));
+  button.addEventListener('lostpointercapture', () => endDrag(true));
+  button.addEventListener('keydown', event => {
+    const delta = { ArrowLeft: [-0.02, 0], ArrowRight: [0.02, 0],
+      ArrowUp: [0, -0.02], ArrowDown: [0, 0.02] }[event.key];
+    if (!delta) return;
+    event.preventDefault();
+    moveDecoration(id, item.position.map((p, i) => unit(p + delta[i])));
+  });
+  return item;
 }
 
 function renderLayout(current) {
   const counts = {
     snowman: current.snowman ? current.snowman_count : 0,
-    tree: current.trees, gift: current.gifts, ornament: current.dangling ? 30 : 0,
+    tree: current.trees,
+    gift: current.gifts,
+    ornament: current.dangling ? ornamentSlots : 0,
   };
-  if (JSON.stringify(counts) !== JSON.stringify(layoutCounts)) {
-    const previous = selection.value;
-    layoutCounts = counts;
-    selection.replaceChildren();
-    for (const [kind, count] of Object.entries(counts)) {
-      for (let i = 0; i < count; i++) selection.add(new Option(names[kind] + ' ' + (i + 1), kind + '-' + i));
+  const wanted = new Set();
+  for (const [kind, count] of Object.entries(counts)) {
+    for (let i = 0; i < count; i++) {
+      const id = kind + '-' + i;
+      wanted.add(id);
+      if (!markers.has(id)) markers.set(id, makeMarker(kind, i));
+      const item = markers.get(id);
+      if (drag?.item !== item) {
+        paintMarker(item, current.placements[id] ?? defaultPlacement(kind, i, count));
+      }
     }
-    if (Array.from(selection.options).some(option => option.value === previous)) selection.value = previous;
-    else if (!selection.options.length) selection.add(new Option('No decorations', ''));
-    selection.disabled = !selection.value;
-    document.querySelector('#layout-editor').hidden = !selection.value;
-    document.querySelector('#placement-empty').hidden = !!selection.value;
   }
-  paintPosition(current);
+  for (const [id, item] of markers) {
+    if (wanted.has(id)) continue;
+    if (drag?.item === item) drag = undefined;
+    item.wrapper.remove();
+    markers.delete(id);
+  }
+  const floorCount = counts.snowman + counts.tree + counts.gift;
+  document.querySelector('#desktop-empty').hidden = floorCount > 0;
+  document.querySelector('#desktop-board').hidden = floorCount === 0;
+  document.querySelector('#ornament-layout').hidden = !counts.ornament;
+  document.querySelector('#randomize').disabled = !wanted.size;
+  document.querySelector('#ground').disabled = !floorCount;
 }
 
-function updatePlacement(position) {
-  positionDraft = undefined;
-  const placements = { ...(pending.placements ?? inFlight.placements ?? settings.placements) };
-  if (position) placements[selection.value] = position;
-  else delete placements[selection.value];
+function rearrange(ground) {
+  const placements = { ...activePlacements() };
+  const items = [...markers.values()];
+  for (const lane of ['desktop', 'ornaments']) {
+    if (ground && lane === 'ornaments') continue;
+    const group = items.filter(item => (item.kind === 'ornament') === (lane === 'ornaments'));
+    if (ground) {
+      for (const item of group) placements[item.id] = [item.position[0], 1];
+      continue;
+    }
+    // Shuffle spatial slots so neighboring decorations don't all land on top of one another.
+    const slots = group.map((_, i) => (i + 0.2 + Math.random() * 0.6) / group.length);
+    for (let i = slots.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [slots[i], slots[j]] = [slots[j], slots[i]];
+    }
+    group.forEach((item, i) => {
+      placements[item.id] = [slots[i], lane === 'desktop' ? 0.4 + Math.random() * 0.56 : 0.15 + Math.random() * 0.7];
+    });
+  }
   void save({ placements });
 }
-
-function positionFromFields() {
-  return positionFields.map(field => Number(field.value) / 100);
-}
-
-function positionFromPointer(event) {
-  const bounds = board.getBoundingClientRect();
-  const x = ((event.clientX - bounds.left) / bounds.width - 0.08) / 0.84;
-  const y = ((event.clientY - bounds.top) / bounds.height - 0.12) / 0.76;
-  return [x, y].map(value => Math.max(0, Math.min(1, value)));
-}
-
 
 function report(message, error = false) {
   status.textContent = message;
@@ -112,6 +171,10 @@ function render() {
   const current = { ...settings, ...inFlight, ...pending };
   document.documentElement.dataset.theme = current.theme === 'system'
     ? (systemTheme.matches ? 'dark' : 'light') : current.theme;
+  const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  const themeButton = document.querySelector('#theme');
+  themeButton.title = 'Switch to ' + nextTheme + ' mode';
+  themeButton.setAttribute('aria-label', themeButton.title);
   renderLayout(current);
   for (const field of fields) {
     if (field.type === 'checkbox') field.checked = current[field.dataset.setting];
@@ -132,6 +195,7 @@ function render() {
   play.setAttribute('aria-pressed', String(current.interactive));
   santa.disabled = !current.enabled;
   document.querySelector('[data-setting="light_pattern"]').disabled = !current.lights;
+  syncSelectMenus();
 }
 
 async function save(changes) {
@@ -163,9 +227,10 @@ async function save(changes) {
 async function refresh() {
   if (!invoke || saving || document.hidden) return;
   const requestedAt = revision;
-  const latest = await invoke('get_settings');
+  const [latest, slots] = await Promise.all([invoke('get_settings'), invoke('arrangement_slots')]);
   if (saving || revision !== requestedAt) return;
   settings = latest;
+  ornamentSlots = slots;
   render();
 }
 
@@ -185,39 +250,18 @@ async function start() {
   settings = invoke ? await invoke('get_settings') : previewDefaults;
   document.querySelector('#window-inset').hidden = !/Mac/.test(navigator.platform);
   systemTheme.addEventListener('change', render);
-  selection.onchange = () => { positionDraft = undefined; render(); };
-  document.querySelector('#reset-placement').onclick = () => updatePlacement();
-  for (const field of positionFields) {
-    field.oninput = () => { positionDraft = positionFromFields(); paintPosition(settings); };
-    field.onchange = () => updatePlacement(positionFromFields());
-  }
-  marker.onpointerdown = event => {
-    if (event.button !== 0) return;
-    dragging = true;
-    marker.setPointerCapture(event.pointerId);
+  if (invoke) ornamentSlots = await invoke('arrangement_slots');
+  document.querySelector('#theme').onclick = () => {
+    void save({ theme: document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark' });
   };
-  marker.onpointermove = event => {
-    if (!dragging) return;
-    positionDraft = positionFromPointer(event);
-    paintPosition(settings);
-  };
-  marker.onpointerup = () => {
-    if (!dragging) return;
-    dragging = false;
-    if (positionDraft) updatePlacement(positionDraft);
-  };
-  marker.onpointercancel = () => { dragging = false; positionDraft = undefined; render(); };
-  marker.onkeydown = event => {
-    const delta = { ArrowLeft: [-0.02, 0], ArrowRight: [0.02, 0], ArrowUp: [0, -0.02], ArrowDown: [0, 0.02] }[event.key];
-    if (!delta) return;
-    event.preventDefault();
-    updatePlacement(positionFromFields().map((p, i) => Math.max(0, Math.min(1, p + delta[i]))));
-  };
+  document.querySelector('#randomize').onclick = () => rearrange(false);
+  document.querySelector('#ground').onclick = () => rearrange(true);
+  makeSelectMenus();
   render();
   for (const field of fields) {
     field.onchange = () => {
       const value = field.type === 'checkbox' ? field.checked
-        : ['theme', 'light_pattern'].includes(field.dataset.setting) ? field.value : Number(field.value);
+        : field.dataset.setting === 'light_pattern' ? field.value : Number(field.value);
       if (field.type !== 'checkbox' && !field.checkValidity()) {
         field.value = settings[field.dataset.setting];
         return;
@@ -246,7 +290,7 @@ async function start() {
     } catch (error) { report(String(error), true); }
   };
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && settings.interactive) void save({ interactive: false });
+    if (!event.defaultPrevented && event.key === 'Escape' && settings.interactive) void save({ interactive: false });
   });
   if (invoke) setInterval(() => refresh().catch(error => report(String(error), true)), 750);
   else report('Preview only. Open Nightfall to change desktop snow.');

@@ -5,7 +5,10 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-pub fn start(settings: Arc<Mutex<Settings>>) {
+pub fn start(
+    settings: Arc<Mutex<Settings>>,
+    ornament_slots: Arc<Mutex<std::collections::HashMap<String, u8>>>,
+) {
     let display = gdk::Display::default().expect("Graphical display required");
     let layer_shell = gtk_layer_shell::is_supported();
     let x11 = display.type_().name() == "GdkX11Display";
@@ -149,6 +152,8 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
             }
             std::thread::sleep(Duration::from_millis(500));
         });
+        let slots = ornament_slots.clone();
+        let display_key = index.to_string();
         glib::timeout_add_local(Duration::from_millis(16), move || {
             frames += 1;
             let s = config.lock().unwrap().clone();
@@ -160,7 +165,11 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
             last = now;
             let mut m = winter.borrow_mut();
             if let Ok(surfaces) = rx.try_recv() {
-                m.surfaces(surfaces)
+                m.surfaces(surfaces);
+                slots.lock().unwrap().insert(
+                    display_key.clone(),
+                    crate::scene::visible_ornament_slots(&m.ledges),
+                );
             }
             // GTK input regions stay empty except during explicit snowball mode.
             if let Some(window) = win.window() {
@@ -180,11 +189,13 @@ pub fn start(settings: Arc<Mutex<Settings>>) {
                 }
             }
             win.set_accept_focus(s.interactive && s.enabled);
-            if layer_shell { win.set_keyboard_mode(if s.interactive && s.enabled {
-                gtk_layer_shell::KeyboardMode::OnDemand
-            } else {
-                gtk_layer_shell::KeyboardMode::None
-            }); }
+            if layer_shell {
+                win.set_keyboard_mode(if s.interactive && s.enabled {
+                    gtk_layer_shell::KeyboardMode::OnDemand
+                } else {
+                    gtk_layer_shell::KeyboardMode::None
+                });
+            }
             m.step(dt, &s);
             drop(m);
             area.queue_draw();

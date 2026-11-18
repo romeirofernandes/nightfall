@@ -1,10 +1,4 @@
-- Snow, lights, and ornaments share the top window edge. Nightfall uses its
-  own native window frame, and macOS has a Window edge inset slider for other
-  windows whose reported bounds include a shadow.
-- Window lights have four patterns. Choose Steady, Twinkle, Wave, or Alternating glow.
-- Arrange lets you move snowmen, trees, gifts, and ornaments. Ornament patterns
-  follow window edges, and positions are saved across app launches.
-- Settings have Jua headings, maroon, evergreen and gold accents, and Light,
-  Dark and System appearance modes.
-
-The Go terminal controls remain available through `nightfall` or `nightfall tui`.
+- Arrange shows all enabled desktop decorations together. Drag them directly, randomize their positions, or put all snowmen, trees, and gifts on the ground.
+- Window ornament patterns have their own live arrangement area and keep following window edges.
+- Settings use solid colors, custom dropdown menus with keyboard controls, an icon-only theme button, and a filled red Quit button.
+- The README includes a new macOS screenshot and shorter installation instructions.

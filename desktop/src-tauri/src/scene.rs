@@ -101,6 +101,17 @@ fn placement(s: &Settings, kind: &str, i: u8, count: u8) -> [f64; 2] {
     }
 }
 
+fn ornament_count(ledge: &Ledge) -> u8 {
+    if ledge.id == "ground" || ledge.width < 32. {
+        return 0;
+    }
+    ((ledge.width - 20.) / 145.).round().clamp(1., 30.) as u8
+}
+
+pub fn visible_ornament_slots(ledges: &[Ledge]) -> u8 {
+    ledges.iter().map(ornament_count).max().unwrap_or(0)
+}
+
 pub fn scene(m: &Winter, s: &Settings) -> Scene {
     let mut v = vec![];
     if !s.enabled {
@@ -192,7 +203,7 @@ pub fn scene(m: &Winter, s: &Settings) -> Scene {
             }
         }
         if s.dangling {
-            let n = (span / 145.).round().clamp(1., 30.) as u8;
+            let n = ornament_count(l);
             for i in 0..n {
                 let [u, drop] = placement(s, "ornament", i, n);
                 let x = left + u * span;

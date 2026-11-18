@@ -1,4 +1,3 @@
-- Arrange shows all enabled desktop decorations together. Drag them directly, randomize their positions, or put all snowmen, trees, and gifts on the ground.
-- Window ornament patterns have their own live arrangement area and keep following window edges.
-- Settings use solid colors, custom dropdown menus with keyboard controls, an icon-only theme button, and a filled red Quit button.
-- The README includes a new macOS screenshot and shorter installation instructions.
+- Nightfall now looks for desktop widgets and for the Dock along the bottom or sides of the screen on macOS.
+- Turn on **Weather → Snow on desktop folders** and allow Finder access to try snow buildup on folder icons.
+- Desktop snow depends on the geometry macOS reports for each surface.

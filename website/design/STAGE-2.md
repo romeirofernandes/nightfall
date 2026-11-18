@@ -13,3 +13,9 @@ The first surface renderer produced uniformly white symmetric caps with an obvio
 ## Brushing correction
 
 User also rejected the abrupt swipe animation. Replaced repeated 85%-per-pointer-sample clearing with segment-distance sweeps: each crossed bank sample has a quadratic spatial falloff and retains residual powder. Stationary input does not erase snow. Swipe velocity is clamped and damped; fragments move briefly with the stroke before falling, with small fractured clusters, low-opacity dust, gravity and a continuous fade instead of round upward projectiles. Pending strokes are bounded and discarded while paused or a modal is open. Build and seven tests pass, including stationary/missed/localized sweep cases. Tested a drag across the real hero button in the in-app browser: snow cleared locally and the installer did not accidentally open. No extra controls or labels added.
+
+## Retained button fill and holiday headline
+
+Per user request, desktop bank capacity and growth scale by 1.8 while mobile remains at its previous setting. Transparent Linux button fills internally with textured snow while hovered; the fill is retained on pointer leave and continues from that level on later visits. Keyboard focus-visible has equivalent behavior; pointer-created focus does not keep filling after leave. Clipped duplicate visual text keeps lettering dark against the filled area while the accessible label is announced once. Existing actions remain.
+
+Headline retains accessible name "A little winter. All yours." with a decorative Santa hat on w and a snowball o. Verified live in the in-app browser: fill reached42.99815% on leave and remained exactly42.99815% on the subsequent check. Fixed snowball alignment at mobile size. Vite build and existing seven tests pass.

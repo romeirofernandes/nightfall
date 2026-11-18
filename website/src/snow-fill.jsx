@@ -27,7 +27,7 @@ export function SnowFill({paused}) {
    if((hover||focus)&&fill<1&&!reduced.matches)raf=requestAnimationFrame(run);
   }
   function start(){cancelAnimationFrame(raf);if(reduced.matches){if(!frozen.current){fill=Math.min(1,fill+.08);paint();}}else{last=performance.now();raf=requestAnimationFrame(run);}}
-  const enter=()=>{hover=true;start()},leave=()=>{hover=false},onFocus=()=>{focus=true;start()},onBlur=()=>{focus=false};
+  const enter=()=>{hover=true;start()},leave=()=>{hover=false},onFocus=()=>{focus=button.matches(':focus-visible');if(focus)start()},onBlur=()=>{focus=false};
   button.addEventListener('pointerenter',enter);button.addEventListener('pointerleave',leave);button.addEventListener('focus',onFocus);button.addEventListener('blur',onBlur);
   const observer=new ResizeObserver(paint);observer.observe(button);paint();
   return()=>{cancelAnimationFrame(raf);observer.disconnect();button.removeEventListener('pointerenter',enter);button.removeEventListener('pointerleave',leave);button.removeEventListener('focus',onFocus);button.removeEventListener('blur',onBlur);};

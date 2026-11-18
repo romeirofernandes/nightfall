@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"errors"
+	"io"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,6 +19,13 @@ func controlPath() (string, error) {
 		return "", errors.New("LOCALAPPDATA is required")
 	}
 	return filepath.Join(base, "Nightfall.sock"), nil
+}
+
+func exchangeCommand(conn *net.UnixConn, command string) (string, error) {
+	if _, err := io.WriteString(conn, command+"\n"); err != nil {
+		return "", err
+	}
+	return bufio.NewReader(io.LimitReader(conn, 65536)).ReadString('\n')
 }
 
 func rendererCandidates(dir string) []string {

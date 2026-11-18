@@ -3,6 +3,8 @@
 package main
 
 import (
+	"io"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,6 +17,17 @@ func controlPath() (string, error) {
 		return "", err
 	}
 	return filepath.Join(dir, "control.sock"), nil
+}
+
+func exchangeCommand(conn *net.UnixConn, command string) (string, error) {
+	if _, err := io.WriteString(conn, command); err != nil {
+		return "", err
+	}
+	if err := conn.CloseWrite(); err != nil {
+		return "", err
+	}
+	reply, err := io.ReadAll(io.LimitReader(conn, 65536))
+	return string(reply), err
 }
 
 func rendererCandidates(dir string) []string {

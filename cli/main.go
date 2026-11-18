@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -37,23 +36,17 @@ func request(command string) (string, error) {
 	if err = conn.SetDeadline(time.Now().Add(5 * time.Second)); err != nil {
 		return "", err
 	}
-	if _, err = io.WriteString(conn, command); err != nil {
-		return "", err
-	}
-	if err = conn.(*net.UnixConn).CloseWrite(); err != nil {
-		return "", err
-	}
-	reply, err := io.ReadAll(io.LimitReader(conn, 65536))
+	reply, err := exchangeCommand(conn.(*net.UnixConn), command)
 	if err != nil {
 		return "", err
 	}
 	if len(reply) == 0 {
 		return "", errors.New("Nightfall closed the connection without replying")
 	}
-	if strings.HasPrefix(string(reply), "error:") {
-		return "", errors.New(strings.TrimSpace(string(reply)))
+	if strings.HasPrefix(reply, "error:") {
+		return "", errors.New(strings.TrimSpace(reply))
 	}
-	return string(reply), nil
+	return reply, nil
 }
 func rendererPath() (string, error) {
 	if override := os.Getenv("NIGHTFALL_RENDERER"); override != "" {

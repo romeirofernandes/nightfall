@@ -69,7 +69,18 @@ fn save_settings(
     let _ = (app, capture);
     Ok(())
 }
-// Open lazily: terminal-only runs don't allocate a settings webview.
+fn create_settings_window(app: &tauri::AppHandle) -> tauri::Result<tauri::WebviewWindow> {
+    tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
+        .title("Nightfall")
+        .inner_size(860., 720.)
+        .min_inner_size(700., 560.)
+        .resizable(true)
+        .center()
+        .visible(false)
+        .build()
+}
+
+// Linux and macOS open lazily to avoid allocating a webview for terminal-only runs.
 fn show_settings(app: &tauri::AppHandle) -> Result<(), String> {
     let state = app.state::<State>();
     let playing = state.settings.lock().unwrap().interactive;
@@ -79,14 +90,7 @@ fn show_settings(app: &tauri::AppHandle) -> Result<(), String> {
     let window = if let Some(w) = app.get_webview_window("main") {
         w
     } else {
-        tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
-            .title("Nightfall")
-            .inner_size(860., 720.)
-            .min_inner_size(700., 560.)
-            .resizable(true)
-            .center()
-            .build()
-            .map_err(|e| e.to_string())?
+        create_settings_window(app).map_err(|e| e.to_string())?
     };
     window.show().map_err(|e| e.to_string())?;
     window.unminimize().map_err(|e| e.to_string())?;
@@ -277,7 +281,11 @@ fn main() {
             });
             control::start(app.handle())?;
             #[cfg(windows)]
-            windows::start(app.handle())?;
+            {
+                // Create WebView2 during setup, before processing tray or socket events.
+                create_settings_window(app.handle())?;
+                windows::start(app.handle())?;
+            }
             #[cfg(target_os = "linux")]
             linux::start(settings, ornament_slots);
             #[cfg(target_os = "macos")]

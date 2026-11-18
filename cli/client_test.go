@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"io"
 	"net"
 	"os"
@@ -45,7 +46,11 @@ func TestControlReplyAndRendererErrors(t *testing.T) {
 			if e != nil {
 				return
 			}
-			_, _ = io.ReadAll(conn)
+			if runtime.GOOS == "windows" {
+				_, _ = bufio.NewReader(conn).ReadString('\n')
+			} else {
+				_, _ = io.ReadAll(conn)
+			}
 			_, _ = io.WriteString(conn, reply)
 			_ = conn.Close()
 		}

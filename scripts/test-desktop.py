@@ -60,7 +60,7 @@ def smoke(cli, config_dir):
 
     def expect(expected, *args):
         result = command(*args)
-        assert expected in result.stdout, result.stdout
+        assert expected in result.stdout, f"{args}: {result.stdout!r} {result.stderr!r}"
 
     try:
         expect("nightfall ", "--version")
@@ -89,6 +89,11 @@ def smoke(cli, config_dir):
         expect("snow disabled", "status")
         settings = config_dir / "settings.json"
         assert json.loads(settings.read_text())["enabled"] is False
+        for _ in range(3):
+            expect("Settings updated", "toggle")
+            expect("snow enabled", "status")
+            expect("Settings updated", "toggle")
+            expect("snow disabled", "status")
         expect("Settings updated", "disable")
         expect("Nightfall stopped", "quit")
         wait_for(lambda: command("status", check=False).returncode != 0, "renderer exit")

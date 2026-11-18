@@ -4,6 +4,7 @@ import '@fontsource/prata/latin-400.css';
 import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
 import {Snow} from './snow';
+import {SnowSurfaces} from './snow-surfaces';
 import {Celestial} from './celestial';
 import {useWinterTime} from './use-winter-time';
 import './landing.css';
@@ -34,6 +35,7 @@ const platforms = {
 export function Landing() {
   const dialog = useRef(null);
   const hero = useRef(null);
+  const snowField = useRef(null);
   const {phase: theme, selectMode, position} = useWinterTime();
   const [snowPaused, setSnowPaused] = useState(false);
   const [platform, setPlatform] = useState('mac');
@@ -70,17 +72,17 @@ export function Landing() {
               fetchPriority={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme) ? 'high' : 'low'} alt=""/>)}
             <Celestial phase={theme} position={position} paused={snowPaused}/>
           </div>
-          <div className="landing-snow" aria-hidden="true"><Snow density={2} atmosphere wind={12} paused={snowPaused}/></div>
+          <div className="landing-snow" aria-hidden="true"><Snow density={2} atmosphere wind={12} paused={snowPaused} surfaces={snowField}/></div>
           <header className="landing-shell wrap landing-header">
             <a className="landing-brand" href="/" aria-label="Nightfall home"><Snowflake aria-hidden="true" size={27}/>Nightfall</a>
             <div className="landing-header-actions">
               <a className="landing-link landing-github" href={repository} aria-label="Nightfall on GitHub"><Github aria-hidden="true" size={17}/><span>GitHub</span><ArrowUpRight aria-hidden="true" size={14}/></a>
               <span className="landing-nav-divider" aria-hidden="true"/>
-              <button className="landing-icon-button" onClick={() => setSnowPaused(!snowPaused)} aria-pressed={snowPaused}
+              <button data-snow-surface className="landing-icon-button" onClick={() => setSnowPaused(!snowPaused)} aria-pressed={snowPaused}
                 aria-label={snowPaused ? 'Resume snowfall' : 'Pause snowfall'} title={snowPaused ? 'Resume snowfall' : 'Pause snowfall'}>
                 {snowPaused ? <Play aria-hidden="true" size={16}/> : <Pause aria-hidden="true" size={16}/>}
               </button>
-              <button className="landing-icon-button" onClick={() => selectMode(theme === 'night' ? 'afternoon' : 'night')}
+              <button data-snow-surface className="landing-icon-button" onClick={() => selectMode(theme === 'night' ? 'afternoon' : 'night')}
                 aria-label={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'} title={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'}>
                 {theme === 'night' ? <Sun aria-hidden="true" size={18}/> : <Moon aria-hidden="true" size={18}/>}
               </button>
@@ -90,10 +92,11 @@ export function Landing() {
             <h1 id="landing-title">A little winter.<span> All yours.</span></h1>
             <p>Free desktop snow for macOS &amp; Hyprland.</p>
             <div className="landing-actions">
-              <button className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>
-              <button className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></button>
+              <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>
+              <button data-snow-surface className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></button>
             </div>
           </div>
+          <SnowSurfaces field={snowField} paused={snowPaused}/>
         </section>
       </main>
       <footer className="landing-shell wrap landing-footer closing">

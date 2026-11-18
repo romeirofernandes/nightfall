@@ -3,7 +3,7 @@ import {Snowflake,Minus,Square,X,Play,Pause,Wind,RotateCcw,ArrowUpRight,Music,Fo
 
 export function Contours({className=''}){return <svg className={'contour-map '+className} viewBox="0 0 1200 800" preserveAspectRatio="none" fill="none" aria-hidden="true"><g stroke="currentColor" strokeWidth=".7">{Array.from({length:19},(_,i)=><path key={i} d={`M${-180+i*18},${850-i*15} C${100+i*4},${500-i*25} ${800-i*30},${800-i*13} ${900-i*12},${420-i*18} S${1250-i*9},${60+i*3} ${1310-i*10},${-160+i*18}`}/>)}</g></svg>}
 
-export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false,atmosphere=false}){
+export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false,atmosphere=false,surfaces=null}){
  const canvas=useRef(null),config=useRef({density,wind,paused,obstacle,onCount});
  useEffect(()=>{config.current={density,wind,paused,obstacle,onCount};},[density,wind,paused,obstacle,onCount]);
  useEffect(()=>{
@@ -21,6 +21,7 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
    ctx.clearRect(0,0,w,h);
    for(const f of flakes){
     if(!stopped){const old=f.y;f.y+=(14+f.z*35)*dt/Math.max(h,1);f.x=(f.x+(c.wind+Math.sin(t*.7+f.p)*12)*dt/Math.max(w,1)+1)%1;
+     if(surfaces?.current?.land(f.x*w,old*h,f.y*h,f.z)){f.y=-.01;f.x=Math.random();}
      if(ob&&f.x>=ob.x&&f.x<ob.x+ob.width){const i=Math.min(69,Math.floor((f.x-ob.x)/ob.width*69));if(old<=ob.y-bank[i]/h&&f.y>=ob.y-bank[i]/h){bank[i]=Math.min(13,bank[i]+.6);f.y=-.01;f.x=Math.random();}}
      if(f.y>1.01){f.y=-.01;f.x=Math.random();}}
     ctx.fillStyle=flat?'#e4ead6':'#edf6fa';ctx.globalAlpha=mobile?.3+f.z*.5:atmosphere?.5+f.z*.48:.25+f.z*.65;ctx.beginPath();ctx.ellipse(f.x*w,f.y*h,(mobile?.45:atmosphere?.7:.45)+f.z*(mobile?1.3:atmosphere?3.4:1.5),(mobile?.55:atmosphere?.8:.6)+f.z*(mobile?1.6:atmosphere?3.8:1.8),Math.sin(t+f.p)*.3,0,Math.PI*2);ctx.fill();
@@ -31,7 +32,7 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
    if(++frame%30===0)c.onCount?.(flakes.length);
   };raf=requestAnimationFrame(loop);
   return()=>{cancelAnimationFrame(raf);ro.disconnect();io.disconnect();};
- },[flat,atmosphere]);
+ },[flat,atmosphere,surfaces]);
  return <canvas className="snow-canvas" ref={canvas} aria-hidden="true"/>;
 }
 

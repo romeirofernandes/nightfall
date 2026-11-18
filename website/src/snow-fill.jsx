@@ -11,6 +11,11 @@ export function SnowFill({paused, field}) {
   let state={fill:0,phase:'filling',elapsed:0},hover=false,focus=false,raf,last=0,w=1,h=1,spawn=0;
   const falling=[];
   const collapse={open:0};let collapseTimeline=null;
+  const suspended=()=>frozen.current||document.hidden||!!button.closest('.landing').querySelector('dialog[open]');
+  const syncTimeline=()=>collapseTimeline?.paused(suspended());
+  document.addEventListener('visibilitychange',syncTimeline);
+  const modalObserver=new MutationObserver(syncTimeline);
+  modalObserver.observe(button.closest('.landing'),{subtree:true,attributes:true,attributeFilter:['open']});
   function paint(){
    const r=button.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);w=r.width;h=r.height;
    if(el.width!==Math.round(w*d)||el.height!==Math.round(h*d)){el.width=Math.round(w*d);el.height=Math.round(h*d);ctx.setTransform(d,0,0,d,0,0);}
@@ -32,7 +37,8 @@ export function SnowFill({paused, field}) {
   function run(now){
    const dt=Math.min(.05,(now-last)/1000);last=now;
    const active=hover||focus;
-   if(!frozen.current&&!document.hidden&&!button.closest('.landing').querySelector('dialog[open]')){
+   syncTimeline();
+   if(!suspended()){
     const roof=active?field.current?.take(button,dt)??[]:[];
     if(active){
      spawn+=dt*26;
@@ -70,7 +76,7 @@ export function SnowFill({paused, field}) {
   const enter=()=>{hover=true;start()},onFocus=()=>{focus=button.matches(':focus-visible');if(focus)start()},onBlur=()=>{focus=false;button.dataset.snowFilling=String(hover)};
   button.addEventListener('pointerenter',enter);button.addEventListener('pointerleave',leave);button.addEventListener('focus',onFocus);button.addEventListener('blur',onBlur);
   const observer=new ResizeObserver(paint);observer.observe(button);paint();
-  return()=>{cancelAnimationFrame(raf);collapseTimeline?.kill();observer.disconnect();delete button.dataset.snowState;delete button.dataset.snowFilling;button.removeEventListener('pointerenter',enter);button.removeEventListener('pointerleave',leave);button.removeEventListener('focus',onFocus);button.removeEventListener('blur',onBlur);};
+  return()=>{cancelAnimationFrame(raf);collapseTimeline?.kill();observer.disconnect();modalObserver.disconnect();document.removeEventListener('visibilitychange',syncTimeline);delete button.dataset.snowState;delete button.dataset.snowFilling;button.removeEventListener('pointerenter',enter);button.removeEventListener('pointerleave',leave);button.removeEventListener('focus',onFocus);button.removeEventListener('blur',onBlur);};
  },[field]);
  return <canvas className="button-snow-fill" ref={canvas} aria-hidden="true"/>;
 }

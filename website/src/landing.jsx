@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ArrowDownToLine, ArrowUpRight, Check, Copy, Github, Moon, Pause, Play, Snowflake, Sun, Terminal, X} from 'lucide-react';
+import {ArrowDown, ArrowDownToLine, ArrowUpRight, Check, Copy, Github, Moon, Pause, Play, Snowflake, Sun, Terminal, X} from 'lucide-react';
 import '@fontsource/prata/latin-400.css';
 import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
@@ -8,6 +8,7 @@ import {SnowFill} from './snow-fill';
 import {SnowSurfaces} from './snow-surfaces';
 import {Celestial} from './celestial';
 import {useWinterTime} from './use-winter-time';
+import {useWinterScroll} from './use-winter-scroll';
 import './landing.css';
 
 const scenery = {day: '/media/winter/alpine-day.jpg', evening: '/media/winter/alpine-evening.jpg', night: '/media/winter/alpine-night.jpg'};
@@ -42,6 +43,7 @@ export function Landing() {
   const [platform, setPlatform] = useState('mac');
   const [copyState, setCopyState] = useState('');
   const install = platforms[platform];
+  useWinterScroll(hero, snowPaused);
   useEffect(() => {
     const context = gsap.context(() => {
       gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
@@ -64,13 +66,16 @@ export function Landing() {
     <div className="landing" data-theme={theme} ref={hero}>
       <a className="landing-skip" href="#main-content">Skip to content</a>
       <main id="main-content" tabIndex={-1}>
+        <div className="winter-journey">
         <section className="landing-hero hero" data-enter aria-labelledby="landing-title">
           <div className="winter-world hero__bg" aria-hidden="true">
+            <div className="winter-distance">
             {['day', 'evening', 'night'].map(light => <img key={light}
               className={'winter-landscape winter-' + light}
               data-active={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme)}
               src={scenery[light]} width="1672" height="941"
               fetchPriority={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme) ? 'high' : 'low'} alt=""/>)}
+            </div>
             <Celestial phase={theme} position={position} paused={snowPaused}/>
           </div>
           <div className="landing-snow" aria-hidden="true"><Snow density={2} atmosphere wind={12} paused={snowPaused} surfaces={snowField}/></div>
@@ -97,8 +102,19 @@ export function Landing() {
               <button data-snow-surface className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><SnowFill paused={snowPaused} field={snowField}/><span className="snow-button-label"><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></span><span className="snow-button-label snow-button-label-filled" aria-hidden="true"><Terminal size={17}/>Install on Linux<ArrowUpRight size={15}/></span></button>
             </div>
           </div>
+          <div className="winter-near winter-near-left" aria-hidden="true"><img src="/media/winter/foreground-pines.png" alt="" width="1672" height="941"/></div>
+          <div className="winter-near winter-near-right" aria-hidden="true"><img src="/media/winter/foreground-pines.png" alt="" width="1672" height="941"/></div>
+          <div className="winter-passage-shade" aria-hidden="true"/>
+          <a className="winter-scroll-cue" href="#winter-passage" aria-label="Explore the winter scene"><ArrowDown size={20} aria-hidden="true"/></a>
           <SnowSurfaces field={snowField} paused={snowPaused}/>
         </section>
+        <section id="winter-passage" className="winter-passage" aria-labelledby="winter-passage-title">
+          <div className="landing-shell winter-passage-copy">
+            <h2 id="winter-passage-title">A snow day.<br/><em>On your desktop.</em></h2>
+            <p>Snow gathers on your windows.<br/>Lights hang from the ledges.<br/>A little winter, while you carry on.</p>
+          </div>
+        </section>
+        </div>
       </main>
       <footer className="landing-shell wrap landing-footer closing">
         <a className="landing-link" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>

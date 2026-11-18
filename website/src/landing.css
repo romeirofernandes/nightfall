@@ -134,3 +134,35 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .button-snow-fill { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
 .snow-button-label { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
 .snow-button-label-filled { position: absolute; inset: 0; color: #173c43; pointer-events: none; clip-path: inset(calc(100% - var(--snow-fill, 0%)) 0 0); }
+
+/* One continuous passage from the sky into the winter landscape. */
+.winter-journey { position: relative; isolation: isolate; }
+.winter-journey .landing-hero { position: sticky; top: 0; z-index: 0; height: max(760px, 100svh); }
+.winter-distance { position: absolute; inset: 0; transform-origin: 50% 64%; }
+.winter-near { position: absolute; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
+.winter-near img { display: block; position: absolute; bottom: -4%; width: 100%; height: 90%; object-fit: cover; }
+.winter-near-left { clip-path: inset(0 50% 0 0); transform-origin: 0 100%; }
+.winter-near-right { clip-path: inset(0 0 0 50%); transform-origin: 100% 100%; }
+.landing[data-theme="night"] .winter-near img { filter: brightness(.48) saturate(.8); }
+.landing[data-theme="evening"] .winter-near img { filter: sepia(.18) saturate(.8); }
+.winter-passage-shade { position: absolute; inset: 0; pointer-events: none; z-index: 0; background: var(--background); opacity: 0; }
+.winter-scroll-cue { position: absolute; bottom: 28px; left: calc(50% - 22px); width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #ffffff70; border-radius: 50%; background: #12332f99; color: #fffdf0!important; z-index: 3; transition: background 180ms; }
+.winter-scroll-cue:hover { background: #12332fe6; }
+.winter-passage { position: relative; z-index: 3; min-height: 100svh; display: flex; align-items: center; pointer-events: none; }
+.winter-passage-copy { padding-block: 100px; text-align: center; }
+.winter-passage h2 { margin: 0; font: 400 clamp(52px, 6.5vw, 92px)/1.18 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
+.winter-passage h2 em { font-style: normal; }
+.winter-passage p { margin: 30px 0 0; color: var(--muted); font-size: clamp(18px, 1.6vw, 23px); line-height: 1.8; }
+@media (max-width: 600px) {
+ .winter-journey .landing-hero { height: max(800px, 100svh); }
+ .winter-near img { width: 135%; max-width: none; height: 55%; bottom: -3%; left: -17.5%; }
+ .winter-scroll-cue { bottom: 20px; }
+ .winter-passage h2 { font-size: clamp(38px, 10vw, 58px); }
+ .winter-passage p { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .winter-journey .landing-hero { position: relative; }
+ .winter-passage { background: var(--background); min-height: 70svh; }
+ .winter-passage-shade { display: none; }
+ .winter-near { display: none; }
+}

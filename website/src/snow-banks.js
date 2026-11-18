@@ -40,3 +40,21 @@ export function deposit(bank, x, amount) {
   bank.depth[i] += amount;
   return true;
 }
+
+// Process each bank sample once per stroke segment: independent of pointer event sampling.
+export function sweep(bank, from, to, radius = 16) {
+  const dx=to.x-from.x, dy=to.y-from.y, distance=Math.hypot(dx,dy);
+  if(distance<.5)return [];
+  const removed=[];
+  bank.depth.forEach((depth,i)=>{
+    const x=i/(bank.depth.length-1)*bank.width, y=-depth*.5;
+    const t=Math.max(0,Math.min(1,((x-from.x)*dx+(y-from.y)*dy)/(distance*distance)));
+    const separation=Math.hypot(x-from.x-t*dx,y-from.y-t*dy);
+    const falloff=Math.max(0,1-separation/radius);
+    // A pass leaves a soft residual dusting instead of snapping the bank to zero.
+    const amount=depth*(1-Math.exp(-Math.min(distance,28)/12))*falloff*falloff;
+    bank.depth[i]-=amount;
+    if(amount>.025)removed.push({x,amount,depth});
+  });
+  return removed;
+}

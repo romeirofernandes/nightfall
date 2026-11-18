@@ -18,3 +18,12 @@ test('landing adds snow and overloading sheds excess',()=>{
  deposit(bank,50,30);const shed=settle(bank,.05,()=>0);
  assert.ok(shed.length>0);assert.ok(bank.depth.every((v,i)=>v<=capacity(bank,i)+1e-9));
 });
+
+test('sweep leaves a soft residual wake and preserves untouched snow',async()=>{
+ const {sweep}=await import('./snow-banks.js');const bank=createBank(200);bank.depth.fill(5);
+ const removed=sweep(bank,{x:70,y:-2},{x:125,y:-2},15);
+ assert.ok(removed.length>0);assert.equal(bank.depth[0],5);
+ assert.ok(bank.depth[25]>0&&bank.depth[25]<5);
+ const after=bank.depth.slice();assert.deepEqual(sweep(bank,{x:100,y:0},{x:100,y:0}),[]);assert.deepEqual(bank.depth,after);
+ assert.deepEqual(sweep(bank,{x:0,y:80},{x:200,y:80}),[]);
+});

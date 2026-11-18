@@ -1,0 +1,808 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T21:22:12.176267+00:00",
+  "title": "Design System: Nightfall",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "Background",
+        "tonalRamp": [
+          "oklch(15% 0.00836 236.56)",
+          "oklch(26% 0.00836 236.56)",
+          "oklch(38% 0.00836 236.56)",
+          "oklch(49% 0.00836 236.56)",
+          "oklch(61% 0.00836 236.56)",
+          "oklch(72% 0.00836 236.56)",
+          "oklch(84% 0.00836 236.56)",
+          "oklch(95% 0.00836 236.56)"
+        ]
+      },
+      "sky": {
+        "role": "neutral",
+        "displayName": "Sky",
+        "tonalRamp": [
+          "oklch(15% 0.06174 250.01)",
+          "oklch(26% 0.06174 250.01)",
+          "oklch(38% 0.06174 250.01)",
+          "oklch(49% 0.06174 250.01)",
+          "oklch(61% 0.06174 250.01)",
+          "oklch(72% 0.06174 250.01)",
+          "oklch(84% 0.06174 250.01)",
+          "oklch(95% 0.06174 250.01)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "tonalRamp": [
+          "oklch(15% 0.00337 145.55)",
+          "oklch(26% 0.00337 145.55)",
+          "oklch(38% 0.00337 145.55)",
+          "oklch(49% 0.00337 145.55)",
+          "oklch(61% 0.00337 145.55)",
+          "oklch(72% 0.00337 145.55)",
+          "oklch(84% 0.00337 145.55)",
+          "oklch(95% 0.00337 145.55)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.04241 233.76)",
+          "oklch(26% 0.04241 233.76)",
+          "oklch(38% 0.04241 233.76)",
+          "oklch(49% 0.04241 233.76)",
+          "oklch(61% 0.04241 233.76)",
+          "oklch(72% 0.04241 233.76)",
+          "oklch(84% 0.04241 233.76)",
+          "oklch(95% 0.04241 233.76)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.03921 229.66)",
+          "oklch(26% 0.03921 229.66)",
+          "oklch(38% 0.03921 229.66)",
+          "oklch(49% 0.03921 229.66)",
+          "oklch(61% 0.03921 229.66)",
+          "oklch(72% 0.03921 229.66)",
+          "oklch(84% 0.03921 229.66)",
+          "oklch(95% 0.03921 229.66)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "tonalRamp": [
+          "oklch(15% 0.01940 213.43)",
+          "oklch(26% 0.01940 213.43)",
+          "oklch(38% 0.01940 213.43)",
+          "oklch(49% 0.01940 213.43)",
+          "oklch(61% 0.01940 213.43)",
+          "oklch(72% 0.01940 213.43)",
+          "oklch(84% 0.01940 213.43)",
+          "oklch(95% 0.01940 213.43)"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field",
+        "tonalRamp": [
+          "oklch(15% 0.00790 177.32)",
+          "oklch(26% 0.00790 177.32)",
+          "oklch(38% 0.00790 177.32)",
+          "oklch(49% 0.00790 177.32)",
+          "oklch(61% 0.00790 177.32)",
+          "oklch(72% 0.00790 177.32)",
+          "oklch(84% 0.00790 177.32)",
+          "oklch(95% 0.00790 177.32)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field Border",
+        "tonalRamp": [
+          "oklch(15% 0.02174 211.78)",
+          "oklch(26% 0.02174 211.78)",
+          "oklch(38% 0.02174 211.78)",
+          "oklch(49% 0.02174 211.78)",
+          "oklch(61% 0.02174 211.78)",
+          "oklch(72% 0.02174 211.78)",
+          "oklch(84% 0.02174 211.78)",
+          "oklch(95% 0.02174 211.78)"
+        ]
+      },
+      "field-hover": {
+        "role": "neutral",
+        "displayName": "Field Hover",
+        "tonalRamp": [
+          "oklch(15% 0.01546 181.75)",
+          "oklch(26% 0.01546 181.75)",
+          "oklch(38% 0.01546 181.75)",
+          "oklch(49% 0.01546 181.75)",
+          "oklch(61% 0.01546 181.75)",
+          "oklch(72% 0.01546 181.75)",
+          "oklch(84% 0.01546 181.75)",
+          "oklch(95% 0.01546 181.75)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Accent",
+        "tonalRamp": [
+          "oklch(15% 0.07496 171.16)",
+          "oklch(26% 0.07496 171.16)",
+          "oklch(38% 0.07496 171.16)",
+          "oklch(49% 0.07496 171.16)",
+          "oklch(61% 0.07496 171.16)",
+          "oklch(72% 0.07496 171.16)",
+          "oklch(84% 0.07496 171.16)",
+          "oklch(95% 0.07496 171.16)"
+        ]
+      },
+      "button": {
+        "role": "primary",
+        "displayName": "Button",
+        "tonalRamp": [
+          "oklch(15% 0.05785 179.33)",
+          "oklch(26% 0.05785 179.33)",
+          "oklch(38% 0.05785 179.33)",
+          "oklch(49% 0.05785 179.33)",
+          "oklch(61% 0.05785 179.33)",
+          "oklch(72% 0.05785 179.33)",
+          "oklch(84% 0.05785 179.33)",
+          "oklch(95% 0.05785 179.33)"
+        ]
+      },
+      "button-hover": {
+        "role": "primary",
+        "displayName": "Button Hover",
+        "tonalRamp": [
+          "oklch(15% 0.06847 178.23)",
+          "oklch(26% 0.06847 178.23)",
+          "oklch(38% 0.06847 178.23)",
+          "oklch(49% 0.06847 178.23)",
+          "oklch(61% 0.06847 178.23)",
+          "oklch(72% 0.06847 178.23)",
+          "oklch(84% 0.06847 178.23)",
+          "oklch(95% 0.06847 178.23)"
+        ]
+      },
+      "on-button": {
+        "role": "primary",
+        "displayName": "On Button",
+        "tonalRamp": [
+          "oklch(15% 0.01056 100.82)",
+          "oklch(26% 0.01056 100.82)",
+          "oklch(38% 0.01056 100.82)",
+          "oklch(49% 0.01056 100.82)",
+          "oklch(61% 0.01056 100.82)",
+          "oklch(72% 0.01056 100.82)",
+          "oklch(84% 0.01056 100.82)",
+          "oklch(95% 0.01056 100.82)"
+        ]
+      },
+      "morning-sky": {
+        "role": "neutral",
+        "displayName": "Morning Sky",
+        "tonalRamp": [
+          "oklch(15% 0.04366 248.32)",
+          "oklch(26% 0.04366 248.32)",
+          "oklch(38% 0.04366 248.32)",
+          "oklch(49% 0.04366 248.32)",
+          "oklch(61% 0.04366 248.32)",
+          "oklch(72% 0.04366 248.32)",
+          "oklch(84% 0.04366 248.32)",
+          "oklch(95% 0.04366 248.32)"
+        ]
+      },
+      "evening-sky": {
+        "role": "neutral",
+        "displayName": "Evening Sky",
+        "tonalRamp": [
+          "oklch(15% 0.03635 67.35)",
+          "oklch(26% 0.03635 67.35)",
+          "oklch(38% 0.03635 67.35)",
+          "oklch(49% 0.03635 67.35)",
+          "oklch(61% 0.03635 67.35)",
+          "oklch(72% 0.03635 67.35)",
+          "oklch(84% 0.03635 67.35)",
+          "oklch(95% 0.03635 67.35)"
+        ]
+      },
+      "evening-background": {
+        "role": "neutral",
+        "displayName": "Evening Background",
+        "tonalRamp": [
+          "oklch(15% 0.01758 73.08)",
+          "oklch(26% 0.01758 73.08)",
+          "oklch(38% 0.01758 73.08)",
+          "oklch(49% 0.01758 73.08)",
+          "oklch(61% 0.01758 73.08)",
+          "oklch(72% 0.01758 73.08)",
+          "oklch(84% 0.01758 73.08)",
+          "oklch(95% 0.01758 73.08)"
+        ]
+      },
+      "evening-panel": {
+        "role": "neutral",
+        "displayName": "Evening Panel",
+        "tonalRamp": [
+          "oklch(15% 0.01407 74.43)",
+          "oklch(26% 0.01407 74.43)",
+          "oklch(38% 0.01407 74.43)",
+          "oklch(49% 0.01407 74.43)",
+          "oklch(61% 0.01407 74.43)",
+          "oklch(72% 0.01407 74.43)",
+          "oklch(84% 0.01407 74.43)",
+          "oklch(95% 0.01407 74.43)"
+        ]
+      },
+      "evening-ink": {
+        "role": "neutral",
+        "displayName": "Evening Ink",
+        "tonalRamp": [
+          "oklch(15% 0.01121 55.94)",
+          "oklch(26% 0.01121 55.94)",
+          "oklch(38% 0.01121 55.94)",
+          "oklch(49% 0.01121 55.94)",
+          "oklch(61% 0.01121 55.94)",
+          "oklch(72% 0.01121 55.94)",
+          "oklch(84% 0.01121 55.94)",
+          "oklch(95% 0.01121 55.94)"
+        ]
+      },
+      "evening-muted": {
+        "role": "neutral",
+        "displayName": "Evening Muted",
+        "tonalRamp": [
+          "oklch(15% 0.02511 57.49)",
+          "oklch(26% 0.02511 57.49)",
+          "oklch(38% 0.02511 57.49)",
+          "oklch(49% 0.02511 57.49)",
+          "oklch(61% 0.02511 57.49)",
+          "oklch(72% 0.02511 57.49)",
+          "oklch(84% 0.02511 57.49)",
+          "oklch(95% 0.02511 57.49)"
+        ]
+      },
+      "evening-accent": {
+        "role": "primary",
+        "displayName": "Evening Accent",
+        "tonalRamp": [
+          "oklch(15% 0.10548 37.50)",
+          "oklch(26% 0.10548 37.50)",
+          "oklch(38% 0.10548 37.50)",
+          "oklch(49% 0.10548 37.50)",
+          "oklch(61% 0.10548 37.50)",
+          "oklch(72% 0.10548 37.50)",
+          "oklch(84% 0.10548 37.50)",
+          "oklch(95% 0.10548 37.50)"
+        ]
+      },
+      "night-sky": {
+        "role": "neutral",
+        "displayName": "Night Sky",
+        "tonalRamp": [
+          "oklch(15% 0.04470 251.61)",
+          "oklch(26% 0.04470 251.61)",
+          "oklch(38% 0.04470 251.61)",
+          "oklch(49% 0.04470 251.61)",
+          "oklch(61% 0.04470 251.61)",
+          "oklch(72% 0.04470 251.61)",
+          "oklch(84% 0.04470 251.61)",
+          "oklch(95% 0.04470 251.61)"
+        ]
+      },
+      "night-background": {
+        "role": "neutral",
+        "displayName": "Night Background",
+        "tonalRamp": [
+          "oklch(15% 0.03728 248.56)",
+          "oklch(26% 0.03728 248.56)",
+          "oklch(38% 0.03728 248.56)",
+          "oklch(49% 0.03728 248.56)",
+          "oklch(61% 0.03728 248.56)",
+          "oklch(72% 0.03728 248.56)",
+          "oklch(84% 0.03728 248.56)",
+          "oklch(95% 0.03728 248.56)"
+        ]
+      },
+      "night-panel": {
+        "role": "neutral",
+        "displayName": "Night Panel",
+        "tonalRamp": [
+          "oklch(15% 0.04696 243.59)",
+          "oklch(26% 0.04696 243.59)",
+          "oklch(38% 0.04696 243.59)",
+          "oklch(49% 0.04696 243.59)",
+          "oklch(61% 0.04696 243.59)",
+          "oklch(72% 0.04696 243.59)",
+          "oklch(84% 0.04696 243.59)",
+          "oklch(95% 0.04696 243.59)"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "tonalRamp": [
+          "oklch(15% 0.01469 98.28)",
+          "oklch(26% 0.01469 98.28)",
+          "oklch(38% 0.01469 98.28)",
+          "oklch(49% 0.01469 98.28)",
+          "oklch(61% 0.01469 98.28)",
+          "oklch(72% 0.01469 98.28)",
+          "oklch(84% 0.01469 98.28)",
+          "oklch(95% 0.01469 98.28)"
+        ]
+      },
+      "night-muted": {
+        "role": "neutral",
+        "displayName": "Night Muted",
+        "tonalRamp": [
+          "oklch(15% 0.02480 238.45)",
+          "oklch(26% 0.02480 238.45)",
+          "oklch(38% 0.02480 238.45)",
+          "oklch(49% 0.02480 238.45)",
+          "oklch(61% 0.02480 238.45)",
+          "oklch(72% 0.02480 238.45)",
+          "oklch(84% 0.02480 238.45)",
+          "oklch(95% 0.02480 238.45)"
+        ]
+      },
+      "night-line": {
+        "role": "neutral",
+        "displayName": "Night Line",
+        "tonalRamp": [
+          "oklch(15% 0.04671 241.30)",
+          "oklch(26% 0.04671 241.30)",
+          "oklch(38% 0.04671 241.30)",
+          "oklch(49% 0.04671 241.30)",
+          "oklch(61% 0.04671 241.30)",
+          "oklch(72% 0.04671 241.30)",
+          "oklch(84% 0.04671 241.30)",
+          "oklch(95% 0.04671 241.30)"
+        ]
+      },
+      "night-field": {
+        "role": "neutral",
+        "displayName": "Night Field",
+        "tonalRamp": [
+          "oklch(15% 0.04846 239.10)",
+          "oklch(26% 0.04846 239.10)",
+          "oklch(38% 0.04846 239.10)",
+          "oklch(49% 0.04846 239.10)",
+          "oklch(61% 0.04846 239.10)",
+          "oklch(72% 0.04846 239.10)",
+          "oklch(84% 0.04846 239.10)",
+          "oklch(95% 0.04846 239.10)"
+        ]
+      },
+      "night-field-border": {
+        "role": "neutral",
+        "displayName": "Night Field Border",
+        "tonalRamp": [
+          "oklch(15% 0.04193 241.31)",
+          "oklch(26% 0.04193 241.31)",
+          "oklch(38% 0.04193 241.31)",
+          "oklch(49% 0.04193 241.31)",
+          "oklch(61% 0.04193 241.31)",
+          "oklch(72% 0.04193 241.31)",
+          "oklch(84% 0.04193 241.31)",
+          "oklch(95% 0.04193 241.31)"
+        ]
+      },
+      "night-field-hover": {
+        "role": "neutral",
+        "displayName": "Night Field Hover",
+        "tonalRamp": [
+          "oklch(15% 0.05194 238.72)",
+          "oklch(26% 0.05194 238.72)",
+          "oklch(38% 0.05194 238.72)",
+          "oklch(49% 0.05194 238.72)",
+          "oklch(61% 0.05194 238.72)",
+          "oklch(72% 0.05194 238.72)",
+          "oklch(84% 0.05194 238.72)",
+          "oklch(95% 0.05194 238.72)"
+        ]
+      },
+      "night-accent": {
+        "role": "primary",
+        "displayName": "Night Accent",
+        "tonalRamp": [
+          "oklch(15% 0.09140 82.42)",
+          "oklch(26% 0.09140 82.42)",
+          "oklch(38% 0.09140 82.42)",
+          "oklch(49% 0.09140 82.42)",
+          "oklch(61% 0.09140 82.42)",
+          "oklch(72% 0.09140 82.42)",
+          "oklch(84% 0.09140 82.42)",
+          "oklch(95% 0.09140 82.42)"
+        ]
+      },
+      "night-button": {
+        "role": "primary",
+        "displayName": "Night Button",
+        "tonalRamp": [
+          "oklch(15% 0.03414 92.28)",
+          "oklch(26% 0.03414 92.28)",
+          "oklch(38% 0.03414 92.28)",
+          "oklch(49% 0.03414 92.28)",
+          "oklch(61% 0.03414 92.28)",
+          "oklch(72% 0.03414 92.28)",
+          "oklch(84% 0.03414 92.28)",
+          "oklch(95% 0.03414 92.28)"
+        ]
+      },
+      "night-button-hover": {
+        "role": "primary",
+        "displayName": "Night Button Hover",
+        "tonalRamp": [
+          "oklch(15% 0.03162 89.14)",
+          "oklch(26% 0.03162 89.14)",
+          "oklch(38% 0.03162 89.14)",
+          "oklch(49% 0.03162 89.14)",
+          "oklch(61% 0.03162 89.14)",
+          "oklch(72% 0.03162 89.14)",
+          "oklch(84% 0.03162 89.14)",
+          "oklch(95% 0.03162 89.14)"
+        ]
+      },
+      "night-on-button": {
+        "role": "primary",
+        "displayName": "Night On Button",
+        "tonalRamp": [
+          "oklch(15% 0.04081 182.87)",
+          "oklch(26% 0.04081 182.87)",
+          "oklch(38% 0.04081 182.87)",
+          "oklch(49% 0.04081 182.87)",
+          "oklch(61% 0.04081 182.87)",
+          "oklch(72% 0.04081 182.87)",
+          "oklch(84% 0.04081 182.87)",
+          "oklch(95% 0.04081 182.87)"
+        ]
+      },
+      "time-panel": {
+        "role": "neutral",
+        "displayName": "Time Panel",
+        "tonalRamp": [
+          "oklch(15% 0.01061 100.82 / 0.8510)",
+          "oklch(26% 0.01061 100.82 / 0.8510)",
+          "oklch(38% 0.01061 100.82 / 0.8510)",
+          "oklch(49% 0.01061 100.82 / 0.8510)",
+          "oklch(61% 0.01061 100.82 / 0.8510)",
+          "oklch(72% 0.01061 100.82 / 0.8510)",
+          "oklch(84% 0.01061 100.82 / 0.8510)",
+          "oklch(95% 0.01061 100.82 / 0.8510)"
+        ]
+      },
+      "time-ink": {
+        "role": "neutral",
+        "displayName": "Time Ink",
+        "tonalRamp": [
+          "oklch(15% 0.04531 192.99)",
+          "oklch(26% 0.04531 192.99)",
+          "oklch(38% 0.04531 192.99)",
+          "oklch(49% 0.04531 192.99)",
+          "oklch(61% 0.04531 192.99)",
+          "oklch(72% 0.04531 192.99)",
+          "oklch(84% 0.04531 192.99)",
+          "oklch(95% 0.04531 192.99)"
+        ]
+      },
+      "time-selected": {
+        "role": "neutral",
+        "displayName": "Time Selected",
+        "tonalRamp": [
+          "oklch(15% 0.04876 180.58)",
+          "oklch(26% 0.04876 180.58)",
+          "oklch(38% 0.04876 180.58)",
+          "oklch(49% 0.04876 180.58)",
+          "oklch(61% 0.04876 180.58)",
+          "oklch(72% 0.04876 180.58)",
+          "oklch(84% 0.04876 180.58)",
+          "oklch(95% 0.04876 180.58)"
+        ]
+      },
+      "time-on-selected": {
+        "role": "neutral",
+        "displayName": "Time On Selected",
+        "tonalRamp": [
+          "oklch(15% 0.01717 99.59)",
+          "oklch(26% 0.01717 99.59)",
+          "oklch(38% 0.01717 99.59)",
+          "oklch(49% 0.01717 99.59)",
+          "oklch(61% 0.01717 99.59)",
+          "oklch(72% 0.01717 99.59)",
+          "oklch(84% 0.01717 99.59)",
+          "oklch(95% 0.01717 99.59)"
+        ]
+      },
+      "time-status": {
+        "role": "neutral",
+        "displayName": "Time Status",
+        "tonalRamp": [
+          "oklch(15% 0.04739 180.23)",
+          "oklch(26% 0.04739 180.23)",
+          "oklch(38% 0.04739 180.23)",
+          "oklch(49% 0.04739 180.23)",
+          "oklch(61% 0.04739 180.23)",
+          "oklch(72% 0.04739 180.23)",
+          "oklch(84% 0.04739 180.23)",
+          "oklch(95% 0.04739 180.23)"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Secondary",
+        "tonalRamp": [
+          "oklch(15% 0.00000 89.88 / 0.1882)",
+          "oklch(26% 0.00000 89.88 / 0.1882)",
+          "oklch(38% 0.00000 89.88 / 0.1882)",
+          "oklch(49% 0.00000 89.88 / 0.1882)",
+          "oklch(61% 0.00000 89.88 / 0.1882)",
+          "oklch(72% 0.00000 89.88 / 0.1882)",
+          "oklch(84% 0.00000 89.88 / 0.1882)",
+          "oklch(95% 0.00000 89.88 / 0.1882)"
+        ]
+      },
+      "secondary-border": {
+        "role": "neutral",
+        "displayName": "Secondary Border",
+        "tonalRamp": [
+          "oklch(15% 0.03601 230.96 / 0.5020)",
+          "oklch(26% 0.03601 230.96 / 0.5020)",
+          "oklch(38% 0.03601 230.96 / 0.5020)",
+          "oklch(49% 0.03601 230.96 / 0.5020)",
+          "oklch(61% 0.03601 230.96 / 0.5020)",
+          "oklch(72% 0.03601 230.96 / 0.5020)",
+          "oklch(84% 0.03601 230.96 / 0.5020)",
+          "oklch(95% 0.03601 230.96 / 0.5020)"
+        ]
+      },
+      "secondary-hover": {
+        "role": "neutral",
+        "displayName": "Secondary Hover",
+        "tonalRamp": [
+          "oklch(15% 0.00000 89.88 / 0.3765)",
+          "oklch(26% 0.00000 89.88 / 0.3765)",
+          "oklch(38% 0.00000 89.88 / 0.3765)",
+          "oklch(49% 0.00000 89.88 / 0.3765)",
+          "oklch(61% 0.00000 89.88 / 0.3765)",
+          "oklch(72% 0.00000 89.88 / 0.3765)",
+          "oklch(84% 0.00000 89.88 / 0.3765)",
+          "oklch(95% 0.00000 89.88 / 0.3765)"
+        ]
+      },
+      "night-secondary": {
+        "role": "neutral",
+        "displayName": "Night Secondary",
+        "tonalRamp": [
+          "oklch(15% 0.04712 250.66 / 0.2000)",
+          "oklch(26% 0.04712 250.66 / 0.2000)",
+          "oklch(38% 0.04712 250.66 / 0.2000)",
+          "oklch(49% 0.04712 250.66 / 0.2000)",
+          "oklch(61% 0.04712 250.66 / 0.2000)",
+          "oklch(72% 0.04712 250.66 / 0.2000)",
+          "oklch(84% 0.04712 250.66 / 0.2000)",
+          "oklch(95% 0.04712 250.66 / 0.2000)"
+        ]
+      },
+      "night-secondary-border": {
+        "role": "neutral",
+        "displayName": "Night Secondary Border",
+        "tonalRamp": [
+          "oklch(15% 0.03143 231.36 / 0.5490)",
+          "oklch(26% 0.03143 231.36 / 0.5490)",
+          "oklch(38% 0.03143 231.36 / 0.5490)",
+          "oklch(49% 0.03143 231.36 / 0.5490)",
+          "oklch(61% 0.03143 231.36 / 0.5490)",
+          "oklch(72% 0.03143 231.36 / 0.5490)",
+          "oklch(84% 0.03143 231.36 / 0.5490)",
+          "oklch(95% 0.03143 231.36 / 0.5490)"
+        ]
+      },
+      "night-secondary-hover": {
+        "role": "neutral",
+        "displayName": "Night Secondary Hover",
+        "tonalRamp": [
+          "oklch(15% 0.04939 238.66 / 0.4000)",
+          "oklch(26% 0.04939 238.66 / 0.4000)",
+          "oklch(38% 0.04939 238.66 / 0.4000)",
+          "oklch(49% 0.04939 238.66 / 0.4000)",
+          "oklch(61% 0.04939 238.66 / 0.4000)",
+          "oklch(72% 0.04939 238.66 / 0.4000)",
+          "oklch(84% 0.04939 238.66 / 0.4000)",
+          "oklch(95% 0.04939 238.66 / 0.4000)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Installation-dialog title."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default reading text."
+      },
+      "intro": {
+        "displayName": "Intro",
+        "purpose": "Hero product description."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Installation controls."
+      },
+      "command": {
+        "displayName": "Command",
+        "purpose": "Wrapping installation commands."
+      }
+    },
+    "shadows": [
+      {
+        "name": "installation-dialog",
+        "value": "0 24px 80px #001a2b50",
+        "purpose": "Native installation dialog elevation."
+      },
+      {
+        "name": "time-selector",
+        "value": "0 6px 24px #0a233d29",
+        "purpose": "Time control separation from scenery."
+      },
+      {
+        "name": "sun-light",
+        "value": "0 0 48px 16px #ffe6a975",
+        "purpose": "Decorative celestial lighting."
+      },
+      {
+        "name": "moon-light",
+        "value": "0 0 38px 10px #d9eeff25",
+        "purpose": "Decorative night lighting."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-state",
+        "value": "180ms",
+        "purpose": "Background, border and transform states."
+      },
+      {
+        "name": "landscape-crossfade",
+        "value": "opacity 1200ms ease",
+        "purpose": "Matching raster light plates."
+      },
+      {
+        "name": "copy-entrance",
+        "value": "1s power3.out; stagger 0.1s; translateY 18px",
+        "purpose": "GSAP hero-copy entrance, only without reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "headline-wrap",
+        "value": "900px"
+      },
+      {
+        "name": "mobile",
+        "value": "600px"
+      },
+      {
+        "name": "compact-header",
+        "value": "420px"
+      },
+      {
+        "name": "stacked-actions",
+        "value": "360px"
+      },
+      {
+        "name": "wide-landscape",
+        "value": "min-aspect-ratio: 19/10"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary installation action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Solid primary action; night theme reverses its contrast.",
+      "html": "<button class=\"ds-button ds-primary\">Get Nightfall</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:11px 22px;border:1px solid var(--field-border,#a6b9bd);border-radius:9px;font:550 15px/1.55 Figtree,system-ui,sans-serif;cursor:pointer;transition:background-color 180ms,transform 180ms,border-color 180ms}.ds-button:hover{transform:translateY(-1px)}.ds-button:active{transform:translateY(1px) scale(.985)}.ds-button:focus-visible{outline:2px solid var(--accent,#226653);outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}.ds-primary{background:var(--button,#0c443b);color:var(--on-button,#fffef6);border-color:var(--button,#0c443b);min-width:196px}.ds-primary:hover{background:var(--button-hover,#175a4e);border-color:var(--button-hover,#175a4e)}"
+    },
+    {
+      "name": "Secondary installation action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Translucent secondary installation choice.",
+      "html": "<button class=\"ds-button ds-secondary\">Install on Linux</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:11px 22px;border:1px solid var(--field-border,#a6b9bd);border-radius:9px;font:550 15px/1.55 Figtree,system-ui,sans-serif;cursor:pointer;transition:background-color 180ms,transform 180ms,border-color 180ms}.ds-button:hover{transform:translateY(-1px)}.ds-button:active{transform:translateY(1px) scale(.985)}.ds-button:focus-visible{outline:2px solid var(--accent,#226653);outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}.ds-secondary{background:#ffffff30;border-color:#526b7880;color:var(--ink,#0a2634);min-width:196px}.ds-secondary:hover{background:#ffffff60}"
+    },
+    {
+      "name": "Utility action",
+      "kind": "button",
+      "refersTo": "button-utility",
+      "description": "Field-colored command-copy or dialog utility control.",
+      "html": "<button class=\"ds-button ds-utility\">Copy commands</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:11px 22px;border:1px solid var(--field-border,#a6b9bd);border-radius:9px;font:550 15px/1.55 Figtree,system-ui,sans-serif;cursor:pointer;transition:background-color 180ms,transform 180ms,border-color 180ms}.ds-button:hover{transform:translateY(-1px)}.ds-button:active{transform:translateY(1px) scale(.985)}.ds-button:focus-visible{outline:2px solid var(--accent,#226653);outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-button{transition:none}}.ds-utility{background:var(--field,#e9f0ee);color:var(--ink,#0a2634);min-height:44px;padding:8px 12px}.ds-utility:hover{background:var(--field-hover,#d9e7e4)}"
+    },
+    {
+      "name": "Icon action",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "Circular pause control with a visible focus ring.",
+      "html": "<button class=\"ds-icon\" aria-label=\"Pause snowfall\"><svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"14\" y=\"3\" width=\"4\" height=\"18\" rx=\"1\"/><rect x=\"6\" y=\"3\" width=\"4\" height=\"18\" rx=\"1\"/></svg></button>",
+      "css": ".ds-icon{display:grid;place-items:center;min-width:44px;height:44px;padding:0;background:transparent;color:var(--ink,#0a2634);border:1px solid transparent;border-radius:50%;cursor:pointer;transition:background 180ms,transform 180ms}.ds-icon:hover{background:#ffffff30;transform:translateY(-1px)}.ds-icon:focus-visible{outline:2px solid var(--accent,#226653);outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-icon{transition:none}}"
+    },
+    {
+      "name": "Navigation link",
+      "kind": "nav",
+      "description": "Readable link with an understated hover underline.",
+      "html": "<a class=\"ds-nav\" href=\"https://github.com/romeirofernandes/nightfall\">GitHub</a>",
+      "css": ".ds-nav{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;font:400 14px/1.55 Figtree,system-ui,sans-serif;color:var(--ink,#0a2634);text-decoration:none}.ds-nav:hover{text-decoration:underline;text-underline-offset:5px}.ds-nav:focus-visible{outline:2px solid var(--accent,#226653);outline-offset:5px}"
+    },
+    {
+      "name": "Time selector",
+      "kind": "custom",
+      "refersTo": "time-switch",
+      "description": "Named phase choices with a filled selected state; preview shows the desktop control.",
+      "html": "<fieldset class=\"ds-time\"><legend class=\"ds-hidden\">Choose the time of day</legend><button aria-pressed=\"true\">Auto</button><button aria-pressed=\"false\">Morning</button><button aria-pressed=\"false\">Afternoon</button><button aria-pressed=\"false\">Evening</button><button aria-pressed=\"false\">Night</button></fieldset>",
+      "css": ".ds-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}.ds-time{display:flex;align-items:center;gap:4px;margin:0;padding:5px;border:1px solid #ffffff90;border-radius:14px;background:#f8f7efd9;color:#153e3d;box-shadow:0 6px 24px #0a233d29;backdrop-filter:blur(14px)}.ds-time button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 18px;border:1px solid transparent;border-radius:9px;background:transparent;color:inherit;font:400 13px/1.55 Figtree,system-ui,sans-serif;cursor:pointer;transition:background 180ms,transform 180ms}.ds-time button:hover{background:#b9ccc659;transform:translateY(-1px)}.ds-time button:active{transform:translateY(1px)}.ds-time button[aria-pressed=\"true\"]{background:#133e37;color:#fffdf0}.ds-time button:focus-visible{outline:2px solid #153e3d;outline-offset:2px}@media(prefers-reduced-motion:reduce){.ds-time button{transition:none}}"
+    },
+    {
+      "name": "Installation terminal",
+      "kind": "custom",
+      "refersTo": "terminal",
+      "description": "Bordered wrapping command surface, with a focusable command region.",
+      "html": "<div class=\"ds-terminal\"><div class=\"ds-terminal-bar\">Homebrew</div><pre tabindex=\"0\" aria-label=\"Installation commands\"><code>brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofernandes/nightfall\nbrew update-reset &quot;$(brew --repository romeirofernandes/nightfall)&quot;\nbrew install --cask romeirofernandes/nightfall/nightfall</code></pre></div>",
+      "css": ".ds-terminal{border:1px solid var(--line,#b7c8cc);border-radius:9px;background:var(--background,#eef4f8);color:var(--ink,#0a2634);overflow:hidden}.ds-terminal-bar{padding:8px 12px;border-bottom:1px solid var(--line,#b7c8cc);color:var(--muted,#334e5b);font:400 14px/1.55 Figtree,system-ui,sans-serif}.ds-terminal pre{margin:0;padding:18px;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.7 ui-monospace,monospace}.ds-terminal pre:focus-visible{outline:2px solid var(--accent,#226653);outline-offset:5px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Same Winter, Lit Four Ways",
+    "overview": "A detailed, softly illustrated alpine winter is the visual world: snowy mountains, pines, a snowman and small warm Christmas lights. Expressive Prata headlines sit in quiet sky, while Figtree keeps the product explanation, installation controls and time choices readable.\n\nThe same landscape is lit for morning, afternoon, evening and night. Local time provides the starting atmosphere; visitors can choose a phase or return to Auto. The interface is spacious and restrained so the winter scene carries the character.",
+    "keyCharacteristics": [
+      "Detailed alpine scenery with small warm light accents.",
+      "Editorial serif display paired with readable humanist sans controls.",
+      "Four clock-based lighting phases with an explicit manual override.",
+      "Semantic controls, visible keyboard focus and reduced-motion behavior."
+    ],
+    "rules": [
+      {
+        "name": "The Same Winter Rule",
+        "body": "Keep the scene and interface coordinated across lighting phases; morning and afternoon share the day plate, while evening and night use their corresponding plates.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Sky Rule",
+        "body": "Keep the expressive headline and installation controls in readable sky above the detailed scenery.",
+        "section": "typography"
+      },
+      {
+        "name": "The Material Depth Rule",
+        "body": "Let landscape layers carry the scene; reserve interface shadows and blur for the installation dialog and time selector.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve the detailed alpine landscape, snowman and warm Christmas lights.",
+      "Do use Prata for expressive headings and Figtree for navigation and controls.",
+      "Do preserve readable semantic installation actions and keyboard-operable named time controls.",
+      "Do keep local-time Auto and persistent manual phase selection available.",
+      "Do respect reduced motion and retain the snowman through the right-aligned mobile crop."
+    ],
+    "donts": [
+      "Don't replace the approved detailed illustration with flat cartoon scenery.",
+      "Don't let scenery or snow obscure installation controls.",
+      "Don't describe the clock-based celestial position as location-based astronomy."
+    ]
+  }
+}

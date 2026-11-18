@@ -15,3 +15,6 @@ desktop/src-tauri/gen/
 .taste-skill/
 
 /local-docs/
+
+# Local visual review captures and tool runtime state
+.impeccable/review/

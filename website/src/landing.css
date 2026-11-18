@@ -11,12 +11,12 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing button { font: inherit; color: inherit; cursor: pointer; }
 .landing a { color: inherit; text-decoration: none; }
 .landing :focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
-.landing-shell { width: min(1376px, calc(100% - clamp(40px, 7.2vw, 112px))); margin-inline: auto; }
+.landing-shell { width: min(1376px, calc(100% - clamp(40px, 9vw, 144px))); margin-inline: auto; }
 .landing-hero { position: relative; isolation: isolate; overflow: hidden; min-height: max(760px, 100svh); }
 .winter-world { position: absolute; inset: 0; z-index: -3; background: var(--sky); overflow: hidden; }
 .winter-landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
-.winter-sky { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky) 0%, transparent 40%); opacity: .25; }
-.winter-celestial { left: var(--orb-x); top: var(--orb-y); position: absolute; width: clamp(28px, 3vw, 44px); aspect-ratio: 1; border-radius: 50%; background: #fff9d6; box-shadow: 0 0 48px 16px #ffe6a975; }
+.winter-world::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky) 0%, transparent 40%); opacity: .25; }
+.winter-celestial { left: var(--orb-x); top: calc(110px - var(--orb-rise)); transform: translate(-50%, -50%); position: absolute; width: clamp(28px, 3vw, 44px); aspect-ratio: 1; border-radius: 50%; background: #fff9d6; box-shadow: 0 0 48px 16px #ffe6a975; }
 .landing-snow { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 .landing-snow canvas { display: block; width: 100%; height: 100%; }
 .landing-header { min-height: 96px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
@@ -65,6 +65,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
   .landing-copy h1 { font-size: clamp(58px, 8vw, 76px); }
   .landing-copy h1 span { display: block; }
   .landing-copy { padding-top: 26px; }
+  .winter-celestial { top: calc(100px - var(--orb-rise)); }
   .winter-landscape { object-position: 60% center; }
 }
 @media (max-width: 600px) {
@@ -81,8 +82,8 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
   .landing-actions { gap: 10px; }
   .landing .landing-actions .landing-button { min-width: 0; min-height: 48px; padding-inline: 16px; font-size: 14px; }
   .winter-landscape { height: 71%; top: auto; bottom: 0; object-position: 100% bottom; mask-image: linear-gradient(transparent, #000 20%); }
-  .winter-sky { background: linear-gradient(180deg, var(--sky) 0%, var(--sky) 24%, transparent 65%); opacity: .7; }
-  .winter-celestial { width: 25px; top: calc(var(--orb-y) * .25 + 43%); }
+  .winter-world::after { background: linear-gradient(180deg, var(--sky) 0%, var(--sky) 24%, transparent 65%); opacity: .7; }
+  .winter-celestial { width: 25px; top: calc(90px - var(--orb-rise) * .5); }
   .landing-footer { justify-content: center; text-align: center; padding-block: 24px; }
 }
 @media (max-width: 360px) { .landing-actions { flex-direction: column; align-items: center; gap: 8px; } .landing-actions .landing-button { width: 210px; } .landing-copy > p { font-size: 16px; } }
@@ -99,13 +100,13 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 }
 .winter-landscape { opacity: 0; transition: opacity 1200ms ease; }
 .winter-landscape[data-active="true"] { opacity: 1; }
-.landing[data-theme="morning"] .winter-sky { opacity: .5; background: linear-gradient(165deg, #ffeac833, transparent 55%); }
-.landing[data-theme="night"] .winter-sky { opacity: .12; }
+.landing[data-theme="morning"] .winter-world::after { opacity: .5; background: linear-gradient(165deg, #ffeac833, transparent 55%); }
+.landing[data-theme="night"] .winter-world::after { opacity: .12; }
 .landing[data-theme="night"] .winter-celestial { background: #f4f1d9; box-shadow: 0 0 38px 10px #d9eeff25; }
 .landing[data-theme="night"] .winter-celestial::after { content: ''; position: absolute; width: 20%; height: 20%; left: 24%; top: 23%; border-radius: 50%; background: #c2c9b955; box-shadow: 12px 7px 0 3px #c2c9b944, 3px 17px 0 -1px #c2c9b955; }
 .landing[data-theme="night"] .landing-secondary { border-color: #bfd7e48c; background: #081c3033; }
 .landing[data-theme="night"] .landing-secondary:hover { background: #48677c66; }
-.winter-time { position: absolute; bottom: 32px; inset-inline: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.winter-time { text-align: center; position: absolute; bottom: 32px; inset-inline: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .winter-time-status { margin: 0; padding: 2px 10px; color: #fffdf4; font-size: 12px; letter-spacing: .015em; text-shadow: 0 1px 6px #09223a, 0 1px 3px #09223a; }
 .winter-time-switch { display: flex; align-items: center; gap: 4px; margin: 0; padding: 5px; border: 1px solid #ffffff90; border-radius: 14px; background: #f8f7efd9; color: #153e3d; box-shadow: 0 6px 24px #0a233d29; backdrop-filter: blur(14px); }
 .winter-time-switch button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 9px 18px; border: 1px solid transparent; border-radius: 9px; background: transparent; font-size: 13px; transition: background 180ms, transform 180ms; }
@@ -115,12 +116,15 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-time-switch :focus-visible { outline-color: #153e3d; outline-offset: 2px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 @media (max-width: 600px) {
-  .winter-time { bottom: 22px; inset-inline: 20px; gap: 8px; }
+  .winter-time { bottom: 22px; inset-inline: 0; gap: 8px; }
   .winter-time-switch { width: 100%; max-width: 390px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; padding: 4px; }
   .winter-time-switch button { flex-direction: column; gap: 4px; min-height: 57px; padding: 5px 2px; font-size: 10px; }
   .winter-time-switch button svg { width: 16px; height: 16px; }
   .winter-time-status { font-size: 11px; }
-  .landing[data-theme="morning"] .winter-sky { background: linear-gradient(180deg, #c5def7 0%, transparent 75%); opacity: .4; }
-  .landing[data-theme="night"] .winter-sky { background: linear-gradient(180deg, #081a2d 0%, transparent 75%); opacity: .8; }
+  .landing[data-theme="morning"] .winter-world::after { background: linear-gradient(180deg, #c5def7 0%, transparent 75%); opacity: .4; }
+  .landing[data-theme="night"] .winter-world::after { background: linear-gradient(180deg, #081a2d 0%, transparent 75%); opacity: .8; }
 }
 @media (max-width: 420px) { .landing-github { width: 44px; } .landing-github span { display: none; } }
+
+.winter-time-status { background: #153e37; color: #fffdf0; padding: 4px 12px; border-radius: 6px; text-shadow: none; }
+.landing-footer > span { justify-content: center; }

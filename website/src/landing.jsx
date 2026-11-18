@@ -7,6 +7,7 @@ import {Snow} from './snow';
 import {useWinterTime} from './use-winter-time';
 import './landing.css';
 
+const scenery = {day: '/media/winter/alpine-day.jpg', evening: '/media/winter/alpine-evening.jpg', night: '/media/winter/alpine-night.jpg'};
 const repository = 'https://github.com/romeirofernandes/nightfall';
 const platforms = {
   mac: {
@@ -57,17 +58,16 @@ export function Landing() {
       <a className="landing-skip" href="#main-content">Skip to content</a>
       <main id="main-content" tabIndex={-1}>
         <section className="landing-hero hero" data-enter aria-labelledby="landing-title">
-          <div className="winter-world" aria-hidden="true">
+          <div className="winter-world hero__bg" aria-hidden="true">
             {['day', 'evening', 'night'].map(light => <img key={light}
               className={'winter-landscape winter-' + light}
               data-active={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme)}
-              src={'/media/winter/alpine-' + light + '.jpg'} width="1487" height="1058"
+              src={scenery[light]} width="1672" height="941"
               fetchPriority={light === (theme === 'morning' || theme === 'afternoon' ? 'day' : theme) ? 'high' : 'low'} alt=""/>)}
-            <div className="winter-sky"/>
-            <div className="winter-celestial" style={{'--orb-x':position.x + '%','--orb-y':position.y + '%'}}/>
+            <div className="winter-celestial" style={{'--orb-x':position.x + '%','--orb-y':position.y + '%','--orb-rise':((43-position.y)/38*8) + 'px'}}/>
           </div>
           <div className="landing-snow" aria-hidden="true"><Snow density={0} wind={5} paused={snowPaused}/></div>
-          <header className="landing-shell landing-header">
+          <header className="landing-shell wrap landing-header">
             <a className="landing-brand" href="/" aria-label="Nightfall home"><Snowflake aria-hidden="true" size={27}/>Nightfall</a>
             <div className="landing-header-actions">
               <a className="landing-link landing-github" href={repository} aria-label="Nightfall on GitHub"><Github aria-hidden="true" size={17}/><span>GitHub</span><ArrowUpRight aria-hidden="true" size={14}/></a>
@@ -82,17 +82,16 @@ export function Landing() {
               </button>
             </div>
           </header>
-          <div className="landing-shell landing-copy">
+          <div className="landing-shell wrap landing-copy">
             <h1 id="landing-title">A little winter.<span> All yours.</span></h1>
             <p>Free desktop snow for macOS &amp; Hyprland.</p>
             <div className="landing-actions">
               <button className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>
               <button className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></button>
             </div>
-            <a className="landing-link landing-download" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
           </div>
-          <div className="winter-time">
-            <p className="winter-time-status" aria-live="polite">{mode === 'auto' ? 'Your local time. Your little winter.' : 'A change of light. A change of pace.'}</p>
+          <div className="winter-time landing-shell wrap">
+            <p className="winter-time-status" aria-live="polite">{mode === 'auto' ? 'Following your local time' : 'Choose your winter light'}</p>
             <fieldset className="winter-time-switch">
               <legend className="sr-only">Choose the time of day</legend>
               {[[Sparkles,'auto','Auto'],[Sunrise,'morning','Morning'],[Sun,'afternoon','Afternoon'],[Sunset,'evening','Evening'],[Moon,'night','Night']].map(([Icon, value, label]) =>
@@ -104,8 +103,8 @@ export function Landing() {
           </div>
         </section>
       </main>
-      <footer className="landing-shell landing-footer">
-        <span><Snowflake aria-hidden="true" size={16}/>A little winter for your desktop.</span>
+      <footer className="landing-shell wrap landing-footer closing">
+        <a className="landing-link" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
         <p>crafted by <a href="https://romeiro.dev">romeiro</a>, <a href="https://russel.is-a.dev">russel</a> &amp; <a href="https://gavin-soares.vercel.app">gavin</a>'s agents</p>
       </footer>
       <dialog className="landing-dialog" ref={dialog} aria-labelledby="install-title">

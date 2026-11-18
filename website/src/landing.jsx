@@ -78,11 +78,11 @@ export function Landing() {
             <div className="landing-header-actions">
               <a className="landing-link landing-github" href={repository} aria-label="Nightfall on GitHub"><Github aria-hidden="true" size={17}/><span>GitHub</span><ArrowUpRight aria-hidden="true" size={14}/></a>
               <span className="landing-nav-divider" aria-hidden="true"/>
-              <button data-snow-surface className="landing-icon-button" onClick={() => setSnowPaused(!snowPaused)} aria-pressed={snowPaused}
+              <button className="landing-icon-button" onClick={() => setSnowPaused(!snowPaused)} aria-pressed={snowPaused}
                 aria-label={snowPaused ? 'Resume snowfall' : 'Pause snowfall'} title={snowPaused ? 'Resume snowfall' : 'Pause snowfall'}>
                 {snowPaused ? <Play aria-hidden="true" size={16}/> : <Pause aria-hidden="true" size={16}/>}
               </button>
-              <button data-snow-surface className="landing-icon-button" onClick={() => selectMode(theme === 'night' ? 'afternoon' : 'night')}
+              <button className="landing-icon-button" onClick={() => selectMode(theme === 'night' ? 'afternoon' : 'night')}
                 aria-label={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'} title={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'}>
                 {theme === 'night' ? <Sun aria-hidden="true" size={18}/> : <Moon aria-hidden="true" size={18}/>}
               </button>

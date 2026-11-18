@@ -15,15 +15,15 @@ export function SnowSurfaces({field, paused}) {
    root.querySelectorAll('[data-snow-surface]').forEach(node=>{
     const rect=node.getBoundingClientRect();if(!rect.width||!rect.height)return;
     present.add(node);let bank=banks.get(node);
-    if(!bank||Math.abs(bank.width-rect.width)>1){bank=createBank(rect.width);banks.set(node,bank);}
-    bank.x=rect.left-bounds.left;bank.y=rect.top-bounds.top+1;
+    if(!bank||Math.abs(bank.width-(rect.width-12))>1){bank=createBank(Math.max(1,rect.width-12));banks.set(node,bank);}
+    bank.x=rect.left-bounds.left+6;bank.y=rect.top-bounds.top+.5;
    });
    for(const node of banks.keys())if(!present.has(node))banks.delete(node);
   }
   function scatter(bank, chunks, direction=0){
    if(reduced.matches)return;
    for(const chunk of chunks){if(debris.length>=180)break;
-    debris.push({x:bank.x+chunk.x,y:bank.y-2,vx:direction+(Math.random()-.5)*65,vy:-12-Math.random()*40,r:Math.min(3.5,.6+Math.sqrt(chunk.amount)),life:1.3+Math.random()});
+    debris.push({x:bank.x+chunk.x,y:bank.y-2,vx:direction+(Math.random()-.5)*65,vy:-12-Math.random()*40,r:Math.min(2,.3+Math.sqrt(chunk.amount)*.5),life:1.3+Math.random()});
    }
   }
   const manager={land(x,before,after,size){
@@ -58,16 +58,45 @@ export function SnowSurfaces({field, paused}) {
    const dt=Math.min(.05,(now-last)/1000);last=now;if(document.hidden)return;
    measure();ctx.clearRect(0,0,width,height);
    const stopped=pause.current||reduced.matches||!!root.querySelector('dialog[open]');
-   ctx.fillStyle='#edf5fb';ctx.strokeStyle='#c5d9e9';ctx.lineWidth=.6;
+   const night=root.closest('.landing')?.dataset.theme==='night';
    for(const bank of banks.values()){
     if(!stopped)scatter(bank,settle(bank,dt));
-    ctx.beginPath();ctx.moveTo(bank.x,bank.y);
-    bank.depth.forEach((depth,i)=>{const x=bank.x+i/(bank.depth.length-1)*bank.width;const next=bank.depth[Math.min(i+1,bank.depth.length-1)];ctx.quadraticCurveTo(x,bank.y-depth,x+bank.width/(bank.depth.length-1)/2,bank.y-(depth+next)/2)});
-    ctx.lineTo(bank.x+bank.width,bank.y+1);ctx.lineTo(bank.x,bank.y+1);ctx.closePath();ctx.fill();ctx.stroke();
+    const step=bank.width/(bank.depth.length-1);
+    // Rounded powder drifts, not a stroked polygon or an overflowing ledge.
+    const outline=()=>{
+     ctx.beginPath();ctx.moveTo(bank.x,bank.y);
+     for(let i=0;i<bank.depth.length-1;i++){
+      const x=bank.x+i*step, next=bank.depth[i+1];
+      ctx.quadraticCurveTo(x,bank.y-bank.depth[i],x+step*.5,bank.y-(bank.depth[i]+next)*.5);
+     }
+     ctx.lineTo(bank.x+bank.width,bank.y);
+     // A slightly broken contact edge binds the powder to the underlying surface.
+     for(let i=bank.depth.length-1;i>=0;i--){
+      const u=i/(bank.depth.length-1);
+      ctx.lineTo(bank.x+i*step,bank.y+Math.min(bank.depth[i]*.22,.7)*Math.sin(u*31+bank.width));
+     }ctx.closePath();
+    };
+    const shade=ctx.createLinearGradient(0,bank.y-7,0,bank.y+1);
+    shade.addColorStop(0,night?'#eff6fa':'#fffdf5');
+    shade.addColorStop(.55,night?'#dbe8f1':'#f1f6f7');
+    shade.addColorStop(1,night?'#8da9bfaa':'#b8cdd699');
+    outline();ctx.fillStyle=shade;ctx.fill();
+    // Fine, stable granules give the surface a powder edge without frame-to-frame noise.
+    ctx.save();outline();ctx.clip();
+    for(let i=0;i<bank.depth.length*3;i++){
+     const u=(Math.sin(i*127.1+bank.width)*43758.5453)%1;
+     const x=Math.abs(u)*bank.width;
+     const index=Math.min(bank.depth.length-1,Math.floor(x/step));
+     const depth=bank.depth[index];if(depth<.3)continue;
+     const fraction=Math.abs(Math.sin(i*73.7));
+     ctx.globalAlpha=.14+fraction*.2;ctx.fillStyle=i%3?'#fffef4':'#7e9db2';
+     ctx.beginPath();ctx.ellipse(bank.x+x,bank.y-depth*fraction,.25+fraction*.35,.2+fraction*.25,0,0,Math.PI*2);ctx.fill();
+    }ctx.restore();ctx.globalAlpha=1;
    }
+   ctx.fillStyle=night?'#dcebf4':'#f2f7fa';
    for(let i=debris.length-1;i>=0;i--){const p=debris[i];if(!stopped){p.vy+=250*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}
     if(p.life<=0||p.y>height+10){debris.splice(i,1);continue;}
-    ctx.globalAlpha=Math.min(1,p.life);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=Math.min(.8,p.life*.65);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
    }ctx.globalAlpha=1;
   }raf=requestAnimationFrame(frame);
   return()=>{cancelAnimationFrame(raf);observer.disconnect();if(field.current===manager)field.current=null;

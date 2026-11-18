@@ -101,8 +101,12 @@ fn placement(s: &Settings, kind: &str, i: u8, count: u8) -> [f64; 2] {
     }
 }
 
+fn snow_only(ledge: &Ledge) -> bool {
+    ledge.id == "ground" || ledge.id.starts_with("folder-") || ledge.id.starts_with("widget-")
+}
+
 fn ornament_count(ledge: &Ledge) -> u8 {
-    if ledge.id == "ground" || ledge.width < 32. {
+    if snow_only(ledge) || ledge.width < 32. {
         return 0;
     }
     ((ledge.width - 20.) / 145.).round().clamp(1., 30.) as u8
@@ -128,7 +132,7 @@ pub fn scene(m: &Winter, s: &Settings) -> Scene {
             p.push([l.x + l.width, l.y]);
             poly(&mut v, p, SNOW);
         }
-        if l.id == "ground" {
+        if snow_only(l) {
             continue;
         }
         let seed =

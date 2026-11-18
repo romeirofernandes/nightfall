@@ -1,6 +1,7 @@
 import React, {useRef, useState} from 'react';
-import {ArrowDownToLine, ArrowUpRight, Check, Command, Copy, Github, Snowflake, Terminal, X} from 'lucide-react';
+import {ArrowDownToLine, ArrowUpRight, Check, Command, Copy, Github, Moon, Pause, Play, Snowflake, Sun, Terminal, X} from 'lucide-react';
 import {BREW, RELEASE} from './shared';
+import {Snow} from './snow';
 import './landing.css';
 
 const repository = 'https://github.com/romeirofernandes/nightfall';
@@ -27,9 +28,27 @@ const platforms = {
 
 export function Landing() {
   const dialog = useRef(null);
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('nightfall-theme') === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+  const [snowPaused, setSnowPaused] = useState(false);
   const [platform, setPlatform] = useState('mac');
   const [copyState, setCopyState] = useState('');
   const install = platforms[platform];
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    try {
+      localStorage.setItem('nightfall-theme', next);
+    } catch {
+      // Keep the theme switch usable if storage is unavailable.
+    }
+  }
 
   function openInstaller(platform) {
     setPlatform(platform);
@@ -47,11 +66,23 @@ export function Landing() {
   }
 
   return (
-    <div className="landing">
+    <div className="landing" data-theme={theme}>
+      <div className="landing-snow" aria-hidden="true"><Snow density={0} wind={5} paused={snowPaused}/></div>
       <a className="landing-skip" href="#main-content">Skip to content</a>
       <header className="landing-shell landing-header">
         <a className="landing-brand" href="/"><Snowflake aria-hidden="true" size={24}/>Nightfall</a>
-        <a className="landing-link" href={repository}><Github aria-hidden="true" size={17}/>GitHub<ArrowUpRight aria-hidden="true" size={14}/></a>
+        <div className="landing-header-actions">
+          <button className="landing-icon-button" onClick={() => setSnowPaused(!snowPaused)}
+            aria-label={snowPaused ? 'Resume snowfall' : 'Pause snowfall'} title={snowPaused ? 'Resume snowfall' : 'Pause snowfall'}>
+            {snowPaused ? <Play aria-hidden="true" size={16}/> : <Pause aria-hidden="true" size={16}/>}
+          </button>
+          <button className="landing-icon-button" onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+            {theme === 'dark' ? <Sun aria-hidden="true" size={18}/> : <Moon aria-hidden="true" size={18}/>}
+          </button>
+          <a className="landing-link" href={repository}><Github aria-hidden="true" size={17}/>GitHub<ArrowUpRight aria-hidden="true" size={14}/></a>
+        </div>
       </header>
 
       <main className="landing-shell landing-main" id="main-content" tabIndex={-1}>

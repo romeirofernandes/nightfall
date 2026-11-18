@@ -16,6 +16,7 @@ export function SnowSurfaces({field, paused}) {
     const rect=node.getBoundingClientRect();if(!rect.width||!rect.height)return;
     present.add(node);let bank=banks.get(node);
     if(!bank||Math.abs(bank.width-(rect.width-12))>1){bank=createBank(Math.max(1,rect.width-12));banks.set(node,bank);}
+    bank.scale=width>600?1.8:1;
     bank.x=rect.left-bounds.left+6;bank.y=rect.top-bounds.top+.5;
    });
    for(const node of banks.keys())if(!present.has(node))banks.delete(node);

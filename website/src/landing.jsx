@@ -4,6 +4,7 @@ import '@fontsource/prata/latin-400.css';
 import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
 import {Snow} from './snow';
+import {SnowFill} from './snow-fill';
 import {SnowSurfaces} from './snow-surfaces';
 import {Celestial} from './celestial';
 import {useWinterTime} from './use-winter-time';
@@ -89,11 +90,11 @@ export function Landing() {
             </div>
           </header>
           <div className="landing-shell wrap landing-copy">
-            <h1 id="landing-title">A little winter.<span> All yours.</span></h1>
+            <h1 id="landing-title" aria-label="A little winter. All yours."><span className="winter-title-first" aria-hidden="true">A little <span className="christmas-letter">w<svg className="letter-santa-hat" viewBox="0 0 70 58" fill="none"><path d="M12 42C15 27 21 9 39 7c15-2 22 11 24 22-9-9-15-9-18-5l4 18Z" fill="#aa2939"/><path d="M20 34c6-17 11-22 22-23-9 5-12 16-13 23" fill="#d35255"/><path d="M10 39q21-7 42 0l1 11q-21-5-44 0Z" fill="#f4f3e9"/><circle cx="62" cy="29" r="7" fill="#f4f3e9"/></svg></span>inter.</span><span className="winter-title-last" aria-hidden="true"> All y<span className="snowball-letter">o</span>urs.</span></h1>
             <p>Free desktop snow for macOS &amp; Hyprland.</p>
             <div className="landing-actions">
               <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller('mac')}><ArrowDownToLine aria-hidden="true" size={18}/>Get Nightfall</button>
-              <button data-snow-surface className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></button>
+              <button data-snow-surface className="landing-button landing-secondary" aria-haspopup="dialog" onClick={() => openInstaller('linux')}><SnowFill paused={snowPaused}/><span className="snow-button-label"><Terminal aria-hidden="true" size={17}/>Install on Linux<ArrowUpRight aria-hidden="true" size={15}/></span><span className="snow-button-label snow-button-label-filled" aria-hidden="true"><Terminal size={17}/>Install on Linux<ArrowUpRight size={15}/></span></button>
             </div>
           </div>
           <SnowSurfaces field={snowField} paused={snowPaused}/>

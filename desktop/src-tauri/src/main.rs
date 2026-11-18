@@ -1,5 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 mod control;
 mod engine;
 #[cfg(target_os = "macos")]
@@ -9,6 +8,8 @@ mod linux;
 #[cfg(target_os = "macos")]
 mod macos;
 mod scene;
+#[cfg(windows)]
+mod windows;
 use engine::{Settings, Winter};
 use std::{
     collections::HashMap,
@@ -62,7 +63,9 @@ fn save_settings(
             }
         }
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(windows)]
+    windows::set_interaction(&app, capture)?;
+    #[cfg(target_os = "linux")]
     let _ = (app, capture);
     Ok(())
 }
@@ -183,8 +186,19 @@ fn frame(
             );
         }
     }
-    world.step(dt, &state.settings.lock().unwrap());
+    #[cfg(windows)]
+    {
+        let (width, height) = (width.clamp(1., 16000.), height.clamp(1., 16000.));
+        if (world.width, world.height) != (width, height) {
+            *world = Winter::new(width, height);
+        }
+        state.ornament_slots.lock().unwrap().insert(
+            window.label().into(),
+            scene::visible_ornament_slots(&world.ledges),
+        );
+    }
     let settings = state.settings.lock().unwrap();
+    world.step(dt, &settings);
     Ok(
         serde_json::json!({"scene":scene::scene(world, &settings),"flakes":world.flakes,"time":world.time}),
     )
@@ -223,7 +237,6 @@ fn quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 fn main() {
-    #[cfg(any(target_os = "linux", target_os = "macos"))]
     if !std::env::args().any(|a| a == "--daemon") && control::show_existing() {
         return;
     }
@@ -262,8 +275,9 @@ fn main() {
                 #[cfg(target_os = "macos")]
                 folder_bounds: Default::default(),
             });
-            #[cfg(any(target_os = "linux", target_os = "macos"))]
             control::start(app.handle())?;
+            #[cfg(windows)]
+            windows::start(app.handle())?;
             #[cfg(target_os = "linux")]
             linux::start(settings, ornament_slots);
             #[cfg(target_os = "macos")]

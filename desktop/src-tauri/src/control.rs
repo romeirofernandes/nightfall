@@ -1,24 +1,40 @@
-//! Local, per-user CLI control. The socket lives in Tauri's private config directory.
+//! Local CLI control through a user-private filesystem socket.
+#[cfg(unix)]
+use std::os::unix::{
+    fs::PermissionsExt,
+    net::{UnixListener, UnixStream},
+};
 use std::{
     io::{Read, Write},
-    os::unix::{fs::PermissionsExt, net::UnixListener},
     path::PathBuf,
     time::Duration,
 };
 use tauri::Manager;
-fn path() -> PathBuf {
-    let home = std::env::var_os("HOME").expect("HOME is required");
+#[cfg(windows)]
+use uds_windows::{UnixListener, UnixStream};
+
+#[cfg(unix)]
+fn path() -> std::io::Result<PathBuf> {
+    let home = std::env::var_os("HOME").ok_or_else(|| std::io::Error::other("HOME is required"))?;
     #[cfg(target_os = "macos")]
     let base = PathBuf::from(home).join("Library/Application Support");
     #[cfg(target_os = "linux")]
     let base = std::env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(home).join(".config"));
-    base.join("app.nightfall.desktop/control.sock")
+    Ok(base.join("app.nightfall.desktop/control.sock"))
 }
+
+#[cfg(windows)]
+fn path() -> std::io::Result<PathBuf> {
+    // Windows AF_UNIX needs a local filesystem path of at most 107 UTF-8 bytes.
+    let base = std::env::var_os("LOCALAPPDATA")
+        .ok_or_else(|| std::io::Error::other("LOCALAPPDATA is required"))?;
+    Ok(PathBuf::from(base).join("Nightfall.sock"))
+}
+
 pub fn show_existing() -> bool {
-    use std::os::unix::net::UnixStream;
-    let Ok(mut stream) = UnixStream::connect(path()) else {
+    let Ok(mut stream) = path().and_then(UnixStream::connect) else {
         return false;
     };
     let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
@@ -32,7 +48,7 @@ pub fn show_existing() -> bool {
     reply.starts_with("Settings opened")
 }
 pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
-    let socket = path();
+    let socket = path()?;
     let lock = std::fs::OpenOptions::new()
         .create(true)
         .truncate(false)
@@ -43,12 +59,14 @@ pub fn start(app: &tauri::AppHandle) -> std::io::Result<()> {
         .map_err(|e| std::io::Error::other(e.to_string()))?;
     let _ = std::fs::remove_file(&socket);
     let listener = UnixListener::bind(&socket)?;
+    #[cfg(unix)]
     std::fs::set_permissions(&socket, std::fs::Permissions::from_mode(0o600))?;
     let app = app.clone();
     std::thread::spawn(move || {
         let _lock = lock;
         for mut stream in listener.incoming().flatten() {
             let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
+            let _ = stream.set_write_timeout(Some(Duration::from_secs(2)));
             let mut command = String::new();
             if std::io::Read::by_ref(&mut stream)
                 .take(16 * 1024)

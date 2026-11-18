@@ -22,6 +22,9 @@ gtk-layer-shell = { version = "0.8", features = ["v0_6"] }
 [target.'cfg(target_os = "macos")'.dependencies]
 core-graphics = "0.24"
 core-foundation = "0.10"
+[target.'cfg(target_os = "windows")'.dependencies]
+uds_windows = "1.2.1"
+
 [profile.release]
 panic = "abort"
 codegen-units = 1

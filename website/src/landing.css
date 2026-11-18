@@ -168,4 +168,4 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing-header { position: relative; z-index: 4; }
 
 .winter-near img { opacity: 0; transition: opacity 2600ms ease; }
-.winter-near img[data-active="true"] { opacity: 1; }
+.winter-near img[data-active="true"][data-ready="true"] { opacity: 1; }

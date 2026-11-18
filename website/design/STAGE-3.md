@@ -11,3 +11,9 @@ Scope of this first Stage 3 milestone: scroll foundation and depth. Do not call 
 ## Theme correction
 
 User requires separate foreground artwork for each time phase, matching the existing themed landscape. Preserve branch geometry across real morning/day/evening/night lighting plates. Remove CSS colour filters. Crossfade the matching plate with the same 2.6-second duration as the distant scenery. Do not reuse a daylight foreground with a generic dark tint.
+
+## First milestone verification
+
+Build and nine existing model tests pass. One Impeccable detector pass returned no findings. Desktop full passage and mobile reduced-motion captures inspected. Live in-app browser: scrolled from hero through passage to footer; confirmed headline/buttons/rim hide together; Pause at top retains copy opacity1; resumed snowfall; switched afternoon/night and verified loaded matching foreground files. Morning and evening art inspected as assets; not claiming full browser coverage of all phase/viewport combinations.
+
+Review correction: paused timeline keeps scroll-controlled scrub instead of autoplay. Dedicated foreground images replace colour filters in all four themes and crossfade after decode, with cached-image readiness handled. Only visited foreground phases are loaded. New foreground assets are built-in image_gen outputs; exact prompts are embedded in each PNG. Character choreography remains the next part of Stage3.

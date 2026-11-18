@@ -37,9 +37,18 @@ jobs:
         with:
           workspaces: desktop/src-tauri
       - if: runner.os == 'Linux'
+        name: Install desktop dependencies
+        timeout-minutes: 6
+        shell: bash
         run: |
-          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 update
-          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 install -y libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf
+          packages=(libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf xvfb xauth xdotool xcompmgr dbus-x11)
+          if [[ "${{ matrix.os }}" == 'ubuntu-24.04' ]]; then
+            # The Azure mirror can stall before APT reaches its fallback.
+            sudo sed -i -E 's|mirror\+file:/etc/apt/apt-mirrors\.txt|https://archive.ubuntu.com/ubuntu/|g; s|http://azure\.archive\.ubuntu\.com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list.d/ubuntu.sources
+            packages+=(sway)
+          fi
+          sudo apt-get update
+          sudo apt-get install -y "${packages[@]}"
       - if: runner.os != 'Windows'
         run: python3 scripts/test-installer.py
       - run: npm ci
@@ -66,13 +75,11 @@ jobs:
         name: Smoke test on the Ubuntu runner
         shell: bash
         run: |
-          sudo apt-get install -y xvfb xauth xdotool xcompmgr dbus-x11
           bash scripts/test-linux-desktop.sh x11 desktop/src-tauri/target/release/nightfall
           dbus-run-session -- xvfb-run -a python3 scripts/test-tui.py desktop/src-tauri/target/release/nightfall
       - if: matrix.os == 'ubuntu-24.04'
         name: Test Wayland layer-shell and uncomposited X11
         run: |
-          sudo apt-get install -y sway
           bash scripts/test-linux-desktop.sh wayland desktop/src-tauri/target/release/nightfall
           bash scripts/test-linux-desktop.sh settings-only desktop/src-tauri/target/release/nightfall
       - if: matrix.os == 'ubuntu-22.04'

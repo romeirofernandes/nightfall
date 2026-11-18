@@ -18,5 +18,8 @@ brew tap --custom-remote romeirofernandes/nightfall https://github.com/romeirofe
 brew install --cask romeirofernandes/nightfall/nightfall
 ```
 
+Open **Nightfall** from your app launcher, choose **Nightfall settings** in the
+tray or menu bar, or run `nightfall settings`.
+
 Run `nightfall` for terminal controls. Arrows change settings, `q` closes the
 controls, and `x` stops the snow. `nightfall disable` clears your desktop.

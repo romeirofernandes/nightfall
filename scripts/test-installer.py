@@ -31,7 +31,7 @@ class Installer(unittest.TestCase):
             binary = root / 'nightfall'
             binary.write_text('#!/bin/sh\necho fixture\n')
             binary.chmod(0o755)
-            asset = root / f'Nightfall-0.4.0-{platform}.tar.gz'
+            asset = root / f'Nightfall-0.4.3-{platform}.tar.gz'
             with tarfile.open(asset, 'w:gz') as archive:
                 archive.add(binary, arcname='nightfall')
                 if split:
@@ -44,7 +44,7 @@ class Installer(unittest.TestCase):
                 tool.chmod(0o755)
             env = {**os.environ, 'HOME': str(home), 'XDG_BIN_HOME': str(home / '.local/bin'),
                    'XDG_DATA_HOME': str(home / '.local/share'), 'PATH': f'{tools}:{os.environ["PATH"]}',
-                   'NIGHTFALL_TAG': 'v0.4.0', 'FIXTURE': str(root)}
+                   'NIGHTFALL_TAG': 'v0.4.3', 'FIXTURE': str(root)}
             def run():
                 return subprocess.run(['bash', str(INSTALLER)], env=env, capture_output=True, text=True)
             result = run()
@@ -52,9 +52,9 @@ class Installer(unittest.TestCase):
             installed = home / '.local/bin/nightfall'
             self.assertEqual(subprocess.check_output([installed], text=True), 'fixture\n')
             launcher = home / '.local/share/applications/nightfall.desktop'
-            self.assertIn(f'Exec="{installed}"', launcher.read_text())
+            self.assertIn(f'Exec="{installed}" settings', launcher.read_text())
             self.assertFalse((home / '.config/autostart/nightfall.desktop').exists())
-            self.assertIn('Terminal=true', launcher.read_text())
+            self.assertIn('Terminal=false', launcher.read_text())
             if split:
                 self.assertTrue((home / '.local/lib/nightfall/nightfall-renderer').is_file())
             installed.write_text('existing user binary')

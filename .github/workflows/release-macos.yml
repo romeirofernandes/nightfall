@@ -90,12 +90,12 @@ jobs:
           mkdir mac-package
           cp -R "$APP" mac-package/Nightfall.app
           cp nightfall mac-package/
-          ditto -c -k --sequesterRsrc mac-package "Nightfall-0.4.2-${{ matrix.arch }}.zip"
-          shasum -a 256 "Nightfall-0.4.2-${{ matrix.arch }}.zip"
+          ditto -c -k --sequesterRsrc mac-package "Nightfall-0.4.3-${{ matrix.arch }}.zip"
+          shasum -a 256 "Nightfall-0.4.3-${{ matrix.arch }}.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: Nightfall-${{ matrix.arch }}
-          path: Nightfall-0.4.2-${{ matrix.arch }}.zip
+          path: Nightfall-0.4.3-${{ matrix.arch }}.zip
           retention-days: 7
       - name: Remove signing material
         if: always() && inputs.notarize

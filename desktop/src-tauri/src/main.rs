@@ -50,6 +50,49 @@ fn save_settings(
     let _ = (app, capture);
     Ok(())
 }
+// Open lazily: terminal-only runs don't allocate a settings webview.
+fn show_settings(app: &tauri::AppHandle) -> Result<(), String> {
+    let state = app.state::<State>();
+    let playing = state.settings.lock().unwrap().interactive;
+    if playing {
+        end_interaction(app.clone(), state)?;
+    }
+    let window = if let Some(w) = app.get_webview_window("main") {
+        w
+    } else {
+        tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
+            .title("Nightfall")
+            .inner_size(860., 720.)
+            .min_inner_size(700., 560.)
+            .resizable(true)
+            .center()
+            .build()
+            .map_err(|e| e.to_string())?
+    };
+    window.show().map_err(|e| e.to_string())?;
+    window.unminimize().map_err(|e| e.to_string())?;
+    window.set_focus().map_err(|e| e.to_string())
+}
+#[tauri::command]
+fn update_settings(
+    app: tauri::AppHandle,
+    changes: serde_json::Map<String, serde_json::Value>,
+    state: tauri::State<State>,
+) -> Result<Settings, String> {
+    let mut value =
+        serde_json::to_value(state.settings.lock().unwrap().clone()).map_err(|e| e.to_string())?;
+    let object = value.as_object_mut().ok_or("Invalid settings")?;
+    for (key, value) in changes {
+        if !object.contains_key(&key) {
+            return Err(format!("Unknown setting: {key}"));
+        }
+        object.insert(key, value);
+    }
+    let settings: Settings = serde_json::from_value(value).map_err(|e| e.to_string())?;
+    save_settings(app, settings, state.clone())?;
+    let saved = state.settings.lock().unwrap().clone();
+    Ok(saved)
+}
 #[tauri::command]
 fn frame(
     window: tauri::WebviewWindow,
@@ -122,10 +165,15 @@ fn quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 fn main() {
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
+    if !std::env::args().any(|a| a == "--daemon") && control::show_existing() {
+        return;
+    }
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_settings,
             save_settings,
+            update_settings,
             frame,
             send_plow,
             snow_pointer,
@@ -182,14 +230,20 @@ fn main() {
                 menu::{Menu, MenuItem},
                 tray::TrayIconBuilder,
             };
-            let show = MenuItem::with_id(app, "show", "Toggle snow", true, None::<&str>)?;
+            let show = MenuItem::with_id(app, "show", "Nightfall settings…", true, None::<&str>)?;
+            let toggle = MenuItem::with_id(app, "toggle", "Toggle snow", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit Nightfall", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&show, &quit])?;
+            let menu = Menu::with_items(app, &[&show, &toggle, &quit])?;
             TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => {
+                        if let Err(error) = show_settings(app) {
+                            eprintln!("Nightfall: {error}");
+                        }
+                    }
+                    "toggle" => {
                         let state = app.state::<State>();
                         let mut s = state.settings.lock().unwrap().clone();
                         s.enabled = !s.enabled;
@@ -201,8 +255,26 @@ fn main() {
                     _ => {}
                 })
                 .build(app)?;
+            if !std::env::args().any(|a| a == "--daemon") {
+                show_settings(app.handle()).map_err(std::io::Error::other)?;
+            }
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("Nightfall failed to start");
+        .on_window_event(|window, event| {
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
+        })
+        .build(tauri::generate_context!())
+        .expect("Nightfall failed to start")
+        .run(|app, event| {
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen { .. } = event {
+                let _ = show_settings(app);
+            }
+            let _ = (app, event);
+        });
 }

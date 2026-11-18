@@ -78,6 +78,7 @@ jobs:
             tar -czf "release-assets/Nightfall-$version-${{ matrix.platform }}.tar.gz" -C linux-package nightfall nightfall-renderer
           else
             app=desktop/src-tauri/target/release/bundle/macos/Nightfall.app
+            cp nightfall "$app/Contents/MacOS/nightfall"
             codesign --force --deep --sign - "$app"
             codesign --verify --deep --strict "$app"
             test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$app/Contents/Info.plist")" = "$version"

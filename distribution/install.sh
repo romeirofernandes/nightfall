@@ -45,13 +45,19 @@ if [[ $platform == linux-* ]]; then
   apps=${XDG_DATA_HOME:-$HOME/.local/share}/applications
   mkdir -p "$apps"
   [[ $bin != *$'\n'* && $bin != *$'\r'* && $bin != *'"'* && $bin != *'%'* && $bin != *'`'* && $bin != *'$'* && $bin != *'\\'* ]] || { echo 'Unsupported launcher path' >&2; exit 1; }
+  args=
+  terminal=true
+  case "$tag" in
+    v0.[0-3].*|v0.4.[0-2]) ;;
+    *) args=' settings'; terminal=false ;;
+  esac
   cat > "$apps/nightfall.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
 Name=Nightfall
 Comment=A little winter for your desktop
-Exec="$bin/nightfall"
-Terminal=true
+Exec="$bin/nightfall"$args
+Terminal=$terminal
 Categories=Utility;
 DESKTOP
 else

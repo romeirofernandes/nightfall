@@ -137,10 +137,19 @@ func run(args []string) error {
 		fmt.Println("nightfall", version)
 		return nil
 	case "--help", "-h", "help":
-		fmt.Println("nightfall [tui|enable|disable|toggle|status|quit]\n\nNo arguments opens terminal controls.\nArrows select/change; q closes controls; x stops snow; c sweeps.\nThe desktop overlay keeps running after you close the terminal.")
+		fmt.Println("nightfall [settings|tui|enable|disable|toggle|status|quit]\n\nNo arguments opens terminal controls. Use nightfall settings for the desktop window.\nArrows select/change; q closes controls; x stops snow; c sweeps.\nThe desktop overlay keeps running after you close the terminal.")
 		return nil
 	case "tui":
 		return tui()
+	case "settings":
+		if err := ensureRenderer(); err != nil {
+			return err
+		}
+		reply, err := request("show")
+		if err == nil {
+			fmt.Print(reply)
+		}
+		return err
 	case "enable":
 		if err := ensureRenderer(); err != nil {
 			return err

@@ -20,7 +20,7 @@ export function useWinterScroll(root, paused) {
     const journey=host.querySelector('.winter-journey');
     const passage=gsap.timeline({scrollTrigger:{trigger:journey,start:'top top',end:'bottom bottom',scrub:paused?false:.65,invalidateOnRefresh:true}});
     // Copy holds its position. Only the scenery supplies depth.
-    passage.to('.landing-copy',{autoAlpha:0,duration:.22,ease:'none'},.05)
+    passage.to('.landing-copy, .snow-surfaces',{autoAlpha:0,duration:.22,ease:'none'},.05)
       .to('.winter-scroll-cue',{autoAlpha:0,duration:.12,ease:'none'},0);
     if(!paused){
      passage.to('.winter-distance',{scale:1.08,yPercent:-3,duration:1,ease:'none'},0)

@@ -166,3 +166,5 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  .winter-passage-shade { display: none; }
  .winter-near { display: none; }
 }
+
+.landing-header { position: relative; z-index: 4; }

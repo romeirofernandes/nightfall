@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {ArrowDown, ArrowDownToLine, ArrowUpRight, Check, ChevronRight, Copy, Github, Moon, Snowflake, Sun, X} from 'lucide-react';
+import {ArrowDown, ArrowDownToLine, ArrowUpRight, Check, ChevronRight, Copy, Github, Snowflake, X} from 'lucide-react';
 import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
 import {Snow} from './snow';
@@ -188,8 +188,11 @@ export function Landing() {
             <div className="landing-header-actions">
               <button className="landing-icon-button landing-theme-toggle" onClick={toggleTheme} aria-keyshortcuts="D"
                 aria-label={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'} title={theme === 'night' ? 'Switch to afternoon (D)' : 'Switch to night (D)'}>
-                <Sun aria-hidden="true" size={18} data-active={theme === 'night'}/>
-                <Moon aria-hidden="true" size={18} data-active={theme !== 'night'}/>
+                <svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.65" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="9.25"/>
+                  <path d="M12 2.75v18.5m0-13.875h8m-8 4.625h9.25M12 16.625h8"/>
+                </svg>
               </button>
             </div>
           </header>

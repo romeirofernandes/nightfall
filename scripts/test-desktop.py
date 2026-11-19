@@ -62,6 +62,23 @@ def window_exists(title):
     ).returncode == 0
 
 
+def screenshot(name):
+    directory = os.getenv("NIGHTFALL_SCREENSHOTS")
+    if not directory:
+        return
+    from PIL import ImageGrab
+
+    output = Path(directory)
+    output.mkdir(parents=True, exist_ok=True)
+    if WINDOWS:
+        image = ImageGrab.grab(include_layered_windows=True)
+    else:
+        image = ImageGrab.grab(xdisplay=os.environ["DISPLAY"])
+    assert any(low != high for low, high in image.getextrema()), "blank screenshot"
+    image.save(output / (name + ".png"))
+
+
+
 def smoke(cli, config_dir):
     def command(*args, check=True):
         return subprocess.run(
@@ -83,6 +100,10 @@ def smoke(cli, config_dir):
         renderer = cli.with_name("nightfall-renderer.exe" if WINDOWS else "nightfall-renderer")
         subprocess.run([renderer], check=True, capture_output=True, timeout=20)
         wait_for(lambda: window_exists("Nightfall"), "settings window")
+        if os.getenv("NIGHTFALL_SCREENSHOTS"):
+            # Let the settings webview paint and the running simulation fill the desktop.
+            time.sleep(4)
+            screenshot("settings")
         if WINDOWS:
             user32 = windows_ui()
             settings_window = user32.FindWindowW(None, "Nightfall")
@@ -91,6 +112,9 @@ def smoke(cli, config_dir):
             wait_for(lambda: not window_exists("Nightfall"), "settings window to close")
             expect("snow enabled", "status")
             assert window_exists("Nightfall snow"), "closing settings removed the overlay"
+            if os.getenv("NIGHTFALL_SCREENSHOTS"):
+                time.sleep(2)
+                screenshot("desktop-snow")
             expect("Settings opened", "settings")
             wait_for(lambda: window_exists("Nightfall"), "settings window to reopen")
         log = config_dir / "renderer.log"

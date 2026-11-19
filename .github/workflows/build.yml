@@ -69,13 +69,28 @@ jobs:
           CGO_ENABLED=0 go build -trimpath -o "../desktop/src-tauri/target/release/$cli" .
         working-directory: cli
       - if: runner.os == 'Windows'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - if: runner.os == 'Windows'
+        name: Install screenshot support
+        run: python -m pip install Pillow==13.0.0
+      - if: runner.os == 'Windows'
         name: Test the Windows portable ZIP
+        env:
+          NIGHTFALL_SCREENSHOTS: ${{ runner.temp }}/nightfall-windows-screenshots
         shell: pwsh
         run: |
           $bin = "desktop/src-tauri/target/release"
           $archive = python scripts/package-windows.py "$bin/nightfall.exe" "$bin/nightfall-renderer.exe" "$env:RUNNER_TEMP/nightfall-package"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python scripts/test-desktop.py "$archive"
+      - if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-screenshots
+          path: ${{ runner.temp }}/nightfall-windows-screenshots/*.png
+          if-no-files-found: error
       - if: runner.os == 'Linux'
         name: Smoke test on the Ubuntu runner
         shell: bash
@@ -89,7 +104,15 @@ jobs:
           bash scripts/test-linux-desktop.sh settings-only desktop/src-tauri/target/release/nightfall
       - if: matrix.os == 'ubuntu-22.04'
         name: Run the Ubuntu-built binaries on Debian, Fedora, and Arch
+        env:
+          NIGHTFALL_SCREENSHOTS: ${{ runner.temp }}/nightfall-linux-screenshots
         run: bash scripts/test-linux-distros.sh
+      - if: matrix.os == 'ubuntu-22.04'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-distro-screenshots
+          path: ${{ runner.temp }}/nightfall-linux-screenshots
+          if-no-files-found: error
   website:
     runs-on: ubuntu-latest
     steps:

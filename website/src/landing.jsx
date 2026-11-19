@@ -38,6 +38,7 @@ export function Landing() {
   const dialog = useRef(null);
   const hero = useRef(null);
   const snowField = useRef(null);
+  const previewSnowField = useRef(null);
   const {phase: theme, selectMode, position} = useWinterTime();
   const [seenThemes, setSeenThemes] = useState([theme]);
   useEffect(() => { setSeenThemes(previous => previous.includes(theme) ? previous : [...previous, theme]); }, [theme]);
@@ -121,6 +122,11 @@ export function Landing() {
             <figure className="winter-desktop-preview">
               <img src="/nightfall-desktop.webp" width="1600" height="1041" loading="lazy" decoding="async"
                 alt="Nightfall running on macOS, with falling snow, Christmas lights, and snow settled along the top of its Weather window."/>
+              <div className="winter-preview-weather" aria-hidden="true">
+                <div className="winter-preview-ledge" data-snow-surface/>
+                <Snow density={0} wind={7} paused={snowPaused} surfaces={previewSnowField}/>
+                <SnowSurfaces field={previewSnowField} paused={snowPaused}/>
+              </div>
             </figure>
           </div>
         </section>

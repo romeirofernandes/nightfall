@@ -11,7 +11,7 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
   let stillPassage=null;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const flakes=Array.from({length:atmosphere?310:95},()=>({x:Math.random(),y:Math.random(),z:Math.random(),p:Math.random()*6.28}));
-  const resize=()=>{const r=el.getBoundingClientRect();w=r.width;h=r.height;mobile=atmosphere&&w<=600;if(mobile&&flakes.length>90)flakes.length=90;const d=Math.min(devicePixelRatio||1,1.5);el.width=w*d;el.height=h*d;ctx.setTransform(d,0,0,d,0,0);stillPassage=null;};
+  const resize=()=>{w=el.clientWidth;h=el.clientHeight;mobile=(atmosphere||surfaces)&&w<=600;if(mobile&&flakes.length>90)flakes.length=90;const d=Math.min(devicePixelRatio||1,1.5);el.width=w*d;el.height=h*d;ctx.setTransform(d,0,0,d,0,0);stillPassage=null;};
   const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const io=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting});io.observe(el);
   const loop=now=>{
@@ -25,7 +25,7 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
    let ob=c.obstacle;if(ob&&lastObstacle&&(Math.abs(ob.x-lastObstacle.x)+Math.abs(ob.y-lastObstacle.y)>.001))bank.fill(1);lastObstacle=ob;
    ctx.clearRect(0,0,w,h);
    const daylight=passage&&c.passageTheme!=='night';
-   const count=passage?Math.min(flakes.length,target):flakes.length;
+   const count=Math.min(flakes.length,target);
    for(let i=0;i<count;i++){
     const f=flakes[i];
     if(!stopped){const old=f.y;f.y+=(14+f.z*35)*dt/Math.max(h,1);f.x=(f.x+(c.wind+Math.sin(t*.7+f.p)*12)*dt/Math.max(w,1)+1)%1;

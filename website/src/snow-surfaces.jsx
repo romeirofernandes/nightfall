@@ -7,17 +7,19 @@ export function SnowSurfaces({field, paused}) {
  useEffect(()=>{
   const el=canvas.current, root=el.parentElement, ctx=el.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const banks=new Map(), debris=[], strokes=[];let width=1,height=1,raf,last=0,previous=null,gesture=null,suppressUntil=0;
+  const banks=new Map(), debris=[], strokes=[];let width=1,height=1,raf,last=0,previous=null,gesture=null,suppressUntil=0,visible=false;
   function measure(){
-   const bounds=root.getBoundingClientRect();width=bounds.width;height=bounds.height;
+   const bounds=root.getBoundingClientRect();width=root.clientWidth;height=root.clientHeight;
+   const scaleX=width/Math.max(1,bounds.width),scaleY=height/Math.max(1,bounds.height);
    const d=Math.min(devicePixelRatio||1,2);if(el.width!==Math.round(width*d)||el.height!==Math.round(height*d)){el.width=Math.round(width*d);el.height=Math.round(height*d);ctx.setTransform(d,0,0,d,0,0);}
    const present=new Set();
    root.querySelectorAll('[data-snow-surface]').forEach(node=>{
     const rect=node.getBoundingClientRect();if(!rect.width||!rect.height||getComputedStyle(node).visibility==='hidden')return;
     present.add(node);let bank=banks.get(node);
-    if(!bank||Math.abs(bank.width-(rect.width-12))>1){bank=createBank(Math.max(1,rect.width-12));banks.set(node,bank);}
+    const ledgeWidth=Math.max(1,rect.width*scaleX-12);
+    if(!bank||Math.abs(bank.width-ledgeWidth)>1){bank=createBank(ledgeWidth);banks.set(node,bank);}
     bank.scale=width>600?1.8:1;
-    bank.x=rect.left-bounds.left+6;bank.y=rect.top-bounds.top+.5;
+    bank.x=(rect.left-bounds.left)*scaleX+6;bank.y=(rect.top-bounds.top)*scaleY+.5;
    });
    for(const node of banks.keys())if(!present.has(node))banks.delete(node);
   }
@@ -85,7 +87,9 @@ export function SnowSurfaces({field, paused}) {
   function pointer(event){
    if(pause.current||reduced.matches||root.closest('.landing')?.querySelector('dialog[open]'))return;
    if(event.pointerType==='touch'&&!gesture)return;
-   const bounds=root.getBoundingClientRect(),x=event.clientX-bounds.left,y=event.clientY-bounds.top;
+   const bounds=root.getBoundingClientRect();
+   const x=(event.clientX-bounds.left)*width/Math.max(1,bounds.width);
+   const y=(event.clientY-bounds.top)*height/Math.max(1,bounds.height);
    if(gesture&&Math.hypot(x-gesture.x,y-gesture.y)>12)gesture.moved=true;
    const now=performance.now();
    if(previous){
@@ -96,14 +100,20 @@ export function SnowSurfaces({field, paused}) {
    previous={x,y,time:now};
   }
 
-  function down(e){const r=root.getBoundingClientRect();gesture={x:e.clientX-r.left,y:e.clientY-r.top,moved:false};previous=null;pointer(e);}
+  function down(e){
+   const r=root.getBoundingClientRect();
+   gesture={x:(e.clientX-r.left)*width/Math.max(1,r.width),y:(e.clientY-r.top)*height/Math.max(1,r.height),moved:false};
+   previous=null;pointer(e);
+  }
   function up(){if(gesture?.moved)suppressUntil=performance.now()+350;gesture=null;previous=null;}
   function click(e){if(performance.now()<suppressUntil){e.preventDefault();e.stopPropagation();}}
   root.addEventListener('pointermove',pointer,{passive:true});root.addEventListener('pointerdown',down,{passive:true});
   window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);root.addEventListener('click',click,true);
   const observer=new ResizeObserver(measure);observer.observe(root);measure();
+  const intersection=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting});
+  intersection.observe(root);
   function frame(now){
-   raf=requestAnimationFrame(frame);if(now-last<32)return;
+   raf=requestAnimationFrame(frame);if(!visible||now-last<32)return;
    const dt=Math.min(.05,(now-last)/1000);last=now;if(document.hidden)return;
    measure();ctx.clearRect(0,0,width,height);
    const stopped=pause.current||reduced.matches||!!root.closest('.landing')?.querySelector('dialog[open]');
@@ -172,7 +182,7 @@ export function SnowSurfaces({field, paused}) {
     ctx.restore();
    }ctx.globalAlpha=1;
   }raf=requestAnimationFrame(frame);
-  return()=>{cancelAnimationFrame(raf);observer.disconnect();if(field.current===manager)field.current=null;
+  return()=>{cancelAnimationFrame(raf);observer.disconnect();intersection.disconnect();if(field.current===manager)field.current=null;
    root.removeEventListener('pointermove',pointer);root.removeEventListener('pointerdown',down);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);root.removeEventListener('click',click,true);
   };
  },[field]);

@@ -26,8 +26,11 @@ export function useWinterScroll(root, paused) {
      passage.to('.winter-distance',{scale:1.08,yPercent:-3,duration:1,ease:'none'},0)
       .to('.winter-near-left',{xPercent:-16,yPercent:10,scale:1.12,duration:1,ease:'none'},0)
       .to('.winter-near-right',{xPercent:16,yPercent:10,scale:1.12,duration:1,ease:'none'},0);
+     passage.fromTo('.winter-desktop-preview',{scale:.965},{scale:1,duration:.46,ease:'sine.out'},.36);
     }
-    passage.to('.winter-passage-shade',{opacity:.72,duration:.65,ease:'none'},.35);
+    // Reach the passage color before the sticky landscape gives way to the footer.
+    passage.to('.winter-passage-shade',{opacity:1,duration:.82,ease:'sine.inOut'},.18)
+      .fromTo('.winter-desktop-preview',{opacity:0},{opacity:1,duration:.34,ease:'sine.out'},.30);
    },host);
    const refresh=()=>ScrollTrigger.refresh();
    document.fonts.ready.then(refresh);

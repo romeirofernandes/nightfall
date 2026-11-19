@@ -113,8 +113,12 @@ export function Landing() {
         </section>
         <section id="winter-passage" className="winter-passage" aria-labelledby="winter-passage-title">
           <div className="landing-shell winter-passage-copy">
-            <h2 id="winter-passage-title">A snow day.<br/><em>On your desktop.</em></h2>
-            <p>Snow gathers on your windows.<br/>Lights hang from the ledges.<br/>A little winter, while you carry on.</p>
+            <h2 id="winter-passage-title">A snow day on your desktop.</h2>
+            <p>Snow falls across your desktop and gathers on your windows.</p>
+            <figure className="winter-desktop-preview">
+              <img src="/nightfall-desktop.webp" width="1600" height="1041" loading="lazy" decoding="async"
+                alt="Nightfall running on macOS, with falling snow, Christmas lights, and snow settled along the top of its Weather window."/>
+            </figure>
           </div>
         </section>
         </div>

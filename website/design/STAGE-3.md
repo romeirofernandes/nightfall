@@ -17,3 +17,7 @@ User requires separate foreground artwork for each time phase, matching the exis
 Build and nine existing model tests pass. One Impeccable detector pass returned no findings. Desktop full passage and mobile reduced-motion captures inspected. Live in-app browser: scrolled from hero through passage to footer; confirmed headline/buttons/rim hide together; Pause at top retains copy opacity1; resumed snowfall; switched afternoon/night and verified loaded matching foreground files. Morning and evening art inspected as assets; not claiming full browser coverage of all phase/viewport combinations.
 
 Review correction: paused timeline keeps scroll-controlled scrub instead of autoplay. Dedicated foreground images replace colour filters in all four themes and crossfade after decode, with cached-image readiness handled. Only visited foreground phases are loaded. New foreground assets are built-in image_gen outputs; exact prompts are embedded in each PNG.
+
+## Desktop preview handoff
+
+The second passage reveals the existing macOS capture. The sticky panorama fades into the active theme's background on the same reversible ScrollTrigger timeline as the reveal. A vertical gradient carries that color through the moving section edge, and the final shade matches the footer background. With reduced motion, a short gradient at the bottom of the hero joins the two sections while the capture stays visible in normal flow.

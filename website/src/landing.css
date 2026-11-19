@@ -433,15 +433,15 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing[data-theme="evening"] { --footer-sky: #233e63; --footer-snow: #6b8bca; }
 .landing[data-theme="night"] { --footer-sky: #091b2e; --footer-snow: #436caa; --install-ink: #fffdf2; }
 
-.winter-closing {
+.winter-ending {
  position: relative;
  isolation: isolate;
  display: grid;
  align-content: end;
  min-block-size: max(410px, 46vw);
  margin-block-start: calc(-1 * clamp(8px, 1.7vw, 24px));
- padding-block-end: clamp(72px, 6.5vw, 112px);
- color: var(--install-ink);
+ row-gap: clamp(24px, 3.2vw, 50px);
+ padding-block-end: clamp(36px, 4vw, 68px);
  background: linear-gradient(transparent,
    color-mix(in srgb, var(--footer-sky) 55%, transparent) 21%,
    var(--footer-sky) 45%, var(--footer-snow));
@@ -470,6 +470,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  display: grid;
  justify-items: center;
  gap: 8px;
+ color: var(--install-ink);
  text-align: center;
 }
 .winter-install-tray h2 {
@@ -506,12 +507,12 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 }
 .winter-platform svg { flex-shrink: 0; color: #f2cf8e; }
 .landing .winter-platform:hover { background: #26475d; }
-.winter-closing :focus-visible { outline-color: currentColor; }
+.winter-ending :focus-visible { outline-color: currentColor; }
+.landing #get-nightfall:focus { outline: none; }
 .winter-platform:focus-visible { outline-offset: -3px; }
 .winter-footer {
- padding-block: 12px 24px;
- background: #e8eff5;
  color: #0a2634;
+ text-shadow: 0 0 5px #f5f9ff, 0 1px 2px #f5f9ff;
 }
 .winter-footer-content {
  display: grid;
@@ -535,15 +536,13 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-credits a:nth-of-type(3) { --credit-underline: #6f4708; }
 
 @media (max-width: 840px) {
- .winter-closing {
+ .winter-ending {
   min-block-size: 0;
   padding-block: max(116px, calc(38vw - 16px)) 46px;
   background: linear-gradient(transparent, var(--footer-sky) max(80px, 18vw), var(--footer-snow) max(155px, 42vw));
  }
  .winter-footer-art {
-  height: auto;
-  aspect-ratio: 2;
-  mask-image: linear-gradient(transparent, #0003 16%, #000 33%, #000 75%, transparent);
+  mask-image: linear-gradient(transparent, #0003 16%, #000 33%);
  }
 }
 @media (max-width: 360px) {

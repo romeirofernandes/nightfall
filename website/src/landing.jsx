@@ -71,7 +71,7 @@ function GithubSnowLink({field}) {
   );
 }
 
-function WinterInstallSection({theme, themes, openInstaller, sweepTarget, field}) {
+function WinterEnding({theme, themes, openInstaller, sweepTarget, field}) {
   const [loaded, setLoaded] = useState([]);
   const [displayed, setDisplayed] = useState(theme);
   useEffect(() => {
@@ -79,7 +79,7 @@ function WinterInstallSection({theme, themes, openInstaller, sweepTarget, field}
   }, [loaded, theme]);
 
   return (
-    <section className="winter-closing" aria-labelledby="platform-install-title">
+    <div className="winter-ending">
       <div className="winter-footer-art" aria-hidden="true">
         {themes.map(light => (
           <img key={light} className="winter-footer-scene" data-active={displayed === light}
@@ -88,8 +88,8 @@ function WinterInstallSection({theme, themes, openInstaller, sweepTarget, field}
             onLoad={() => setLoaded(previous => previous.includes(light) ? previous : [...previous, light])}/>
         ))}
       </div>
-      <div id="get-nightfall" className="landing-shell winter-install-tray" ref={sweepTarget} tabIndex={-1}>
-        <h2 id="platform-install-title">Get Nightfall</h2>
+      <section className="landing-shell winter-install-tray" ref={sweepTarget} aria-labelledby="get-nightfall">
+        <h2 id="get-nightfall" tabIndex={-1}>Get Nightfall</h2>
         <ul className="winter-platforms" aria-label="Installation platforms">
           {Object.entries(platforms).map(([key, platform]) => (
             <li key={key}>
@@ -100,9 +100,19 @@ function WinterInstallSection({theme, themes, openInstaller, sweepTarget, field}
             </li>
           ))}
         </ul>
-      </div>
+      </section>
+      <footer className="winter-footer">
+        <div className="landing-shell winter-footer-content">
+          <nav className="landing-footer-links" aria-label="Footer">
+            <a className="landing-link" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
+            <a className="landing-link" href={repository}>GitHub<ArrowUpRight aria-hidden="true" size={13}/></a>
+            <a className="landing-link" href="/mac-help/">macOS help</a>
+          </nav>
+          <p className="winter-credits">crafted by <a href="https://romeiro.dev">romeiro</a>, <a href="https://russel.is-a.dev">russel</a> &amp; <a href="https://gavin-soares.vercel.app">gavin</a>'s agents</p>
+        </div>
+      </footer>
       <SnowSurfaces field={field}/>
-    </section>
+    </div>
   );
 }
 
@@ -257,19 +267,9 @@ export function Landing() {
           </section>
           <SnowSurfaces field={featureSnowField}/>
         </div>
-        <WinterInstallSection theme={theme} themes={foregroundThemes}
-          openInstaller={openInstaller} sweepTarget={installSnowTarget} field={footerSnowField}/>
       </main>
-      <footer className="winter-footer">
-        <div className="landing-shell winter-footer-content">
-          <nav className="landing-footer-links" aria-label="Footer">
-            <a className="landing-link" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
-            <a className="landing-link" href={repository}>GitHub<ArrowUpRight aria-hidden="true" size={13}/></a>
-            <a className="landing-link" href="/mac-help/">macOS help</a>
-          </nav>
-          <p className="winter-credits">crafted by <a href="https://romeiro.dev">romeiro</a>, <a href="https://russel.is-a.dev">russel</a> &amp; <a href="https://gavin-soares.vercel.app">gavin</a>'s agents</p>
-        </div>
-      </footer>
+      <WinterEnding theme={theme} themes={foregroundThemes}
+        openInstaller={openInstaller} sweepTarget={installSnowTarget} field={footerSnowField}/>
       <dialog className="landing-dialog" ref={dialog} aria-labelledby="install-title"
         onPointerDown={event => { pressedBackdrop.current = isBackdropEvent(event); }}
         onClick={event => {

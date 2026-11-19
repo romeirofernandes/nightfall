@@ -1,0 +1,6 @@
+{
+  "prompt": "Create a wider production background plate by OUTPAINTING this illustration HORIZONTALLY to a 16:9 landscape canvas, at least 1792 pixels wide. Preserve the existing central 1.4:1 composition exactly at the same scale: all mountains, valley, snowman, path, pines and village stay unchanged. Extend the image naturally at left and right edges with more snow-covered pine branches and snowy foreground only. Do not zoom out, move, shrink, crop, relight or rearrange existing scene. Keep the same pale blue sky, white snow and deep green firs, warm amber lights. Output is a wide horizontal scenic image, 16:9 aspect ratio. No text, controls, logos, watermarks or falling flakes. This high resolution wide plate will be cropped responsively around the central original painting.",
+  "tool": "built-in image_gen",
+  "output": "website/public/media/winter/alpine-day.jpg",
+  "dimensions": "1672x941"
+}

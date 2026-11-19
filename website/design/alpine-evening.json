@@ -1,0 +1,6 @@
+{
+  "prompt": "Change ONLY lighting and time of day of this EXACT alpine illustration into late afternoon SUNSET / EVENING. Preserve all geometry and composition pixel-aligned: same mountain silhouettes, same pines, same snowman, village, path, berries and Christmas bulbs. Quiet upper 40 percent sky warm pale ivory peach with a gentle muted apricot horizon, delicate peach-gold clouds. Mountains catch last warm light, snow has creamy warm highlights and clean powder-blue shadows, trees remain deep evergreen. Lights glow amber. No violet or pink-purple cast. No sun disc, we will draw one separately. Still premium softly illustrated near-real dimensional winter painting. NO typography, logos, controls, borders or airborne falling flakes. Exact same aspect ratio and layout as reference, avoid changing any scene objects. Output wide 16:9, preserve EXACT reference composition. High resolution, at least 1672 pixels wide.",
+  "tool": "built-in image_gen",
+  "output": "website/public/media/winter/alpine-evening.jpg",
+  "dimensions": "1672x941"
+}

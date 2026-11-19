@@ -33,6 +33,8 @@ jobs:
       - run: go vet ./...
         working-directory: cli
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: desktop/src-tauri
@@ -53,6 +55,9 @@ jobs:
         run: python3 scripts/test-installer.py
       - run: npm ci
         working-directory: desktop
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Lint the Rust renderer
+        run: cargo clippy --manifest-path desktop/src-tauri/Cargo.toml --locked -- -D warnings
       - run: cargo test --manifest-path desktop/src-tauri/Cargo.toml --locked
       - run: npm --prefix desktop run build -- --no-bundle
       - if: runner.os != 'macOS'

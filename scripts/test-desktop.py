@@ -25,13 +25,22 @@ def wait_for(check, description, timeout=20):
     raise AssertionError(f"Timed out waiting for {description}")
 
 
+def windows_ui():
+    user32 = ctypes.WinDLL("user32", use_last_error=True)
+    user32.FindWindowW.argtypes = (wintypes.LPCWSTR, wintypes.LPCWSTR)
+    user32.FindWindowW.restype = wintypes.HWND
+    user32.IsWindowVisible.argtypes = (wintypes.HWND,)
+    user32.IsWindowVisible.restype = wintypes.BOOL
+    user32.PostMessageW.argtypes = (
+        wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM
+    )
+    user32.PostMessageW.restype = wintypes.BOOL
+    return user32
+
+
 def window_exists(title):
     if WINDOWS:
-        user32 = ctypes.WinDLL("user32", use_last_error=True)
-        user32.FindWindowW.argtypes = (wintypes.LPCWSTR, wintypes.LPCWSTR)
-        user32.FindWindowW.restype = wintypes.HWND
-        user32.IsWindowVisible.argtypes = (wintypes.HWND,)
-        user32.IsWindowVisible.restype = wintypes.BOOL
+        user32 = windows_ui()
         handle = user32.FindWindowW(None, title)
         if not handle or not user32.IsWindowVisible(handle):
             return False
@@ -41,6 +50,7 @@ def window_exists(title):
             styles = user32.GetWindowLongW(handle, -20)  # GWL_EXSTYLE
             passive_styles = 0x08080020  # NOACTIVATE | LAYERED | TRANSPARENT
             assert styles & passive_styles == passive_styles, f"Overlay style: {styles:#x}"
+            assert styles & 0x8 == 0, f"Passive overlay is topmost: {styles:#x}"
         return True
     if os.getenv("SWAYSOCK"):
         result = subprocess.check_output(["swaymsg", "-t", "get_tree"], text=True)
@@ -73,6 +83,16 @@ def smoke(cli, config_dir):
         renderer = cli.with_name("nightfall-renderer.exe" if WINDOWS else "nightfall-renderer")
         subprocess.run([renderer], check=True, capture_output=True, timeout=20)
         wait_for(lambda: window_exists("Nightfall"), "settings window")
+        if WINDOWS:
+            user32 = windows_ui()
+            settings_window = user32.FindWindowW(None, "Nightfall")
+            if not user32.PostMessageW(settings_window, 0x0010, 0, 0):  # WM_CLOSE
+                raise ctypes.WinError(ctypes.get_last_error())
+            wait_for(lambda: not window_exists("Nightfall"), "settings window to close")
+            expect("snow enabled", "status")
+            assert window_exists("Nightfall snow"), "closing settings removed the overlay"
+            expect("Settings opened", "settings")
+            wait_for(lambda: window_exists("Nightfall"), "settings window to reopen")
         log = config_dir / "renderer.log"
         if settings_only:
             assert not window_exists("Nightfall snow"), "overlay on uncomposited X11"

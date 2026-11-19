@@ -151,9 +151,8 @@ pub fn start(
         let (tx, rx) = std::sync::mpsc::sync_channel(1);
         std::thread::spawn(move || loop {
             if let Some(surfaces) = surfaces(geo.x(), geo.y(), geo.width(), geo.height()) {
-                match tx.try_send(surfaces) {
-                    Err(std::sync::mpsc::TrySendError::Disconnected(_)) => break,
-                    _ => {}
+                if let Err(std::sync::mpsc::TrySendError::Disconnected(_)) = tx.try_send(surfaces) {
+                    break;
                 }
             }
             std::thread::sleep(Duration::from_millis(500));

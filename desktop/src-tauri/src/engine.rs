@@ -252,7 +252,7 @@ impl Winter {
                             y: old.y - depth,
                             r: (depth / 3.).clamp(1., 3.),
                             speed: 70.,
-                            phase: self.rng.gen_range(0.0..6.28),
+                            phase: self.rng.gen_range(0.0..std::f64::consts::TAU),
                         });
                     }
                 }
@@ -275,7 +275,7 @@ impl Winter {
                 y,
                 r: self.rng.gen_range(0.8..2.4),
                 speed: self.rng.gen_range(45.0..120.0),
-                phase: self.rng.gen_range(0.0..6.28),
+                phase: self.rng.gen_range(0.0..std::f64::consts::TAU),
             });
         }
     }
@@ -410,7 +410,7 @@ impl Winter {
                     y: -8.,
                     r: self.rng.gen_range(0.7..2.7),
                     speed: self.rng.gen_range(20.0..60.0),
-                    phase: self.rng.gen_range(0.0..6.28),
+                    phase: self.rng.gen_range(0.0..std::f64::consts::TAU),
                 });
             }
         }

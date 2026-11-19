@@ -31,7 +31,7 @@ export function useWinterScroll(root, paused) {
     // Reach the passage color before the sticky landscape gives way to the footer.
     passage.to('.winter-passage-shade',{opacity:1,duration:.82,ease:'sine.inOut'},.18)
       .fromTo('.winter-passage-snow',{opacity:0},{opacity:1,duration:.33,ease:'sine.out'},.12)
-      .fromTo('.winter-desktop-preview',{opacity:0},{opacity:1,duration:.34,ease:'sine.out'},.30);
+      .fromTo('.winter-desktop-preview, .winter-passage > .snow-surfaces',{opacity:0},{opacity:1,duration:.34,ease:'sine.out'},.30);
    },host);
    const refresh=()=>ScrollTrigger.refresh();
    document.fonts.ready.then(refresh);

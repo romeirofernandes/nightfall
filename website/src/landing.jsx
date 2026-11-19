@@ -114,21 +114,20 @@ export function Landing() {
         </section>
         <section id="winter-passage" className="winter-passage" aria-labelledby="winter-passage-title">
           <div className="winter-passage-snow" aria-hidden="true">
-            <Snow density={1} wind={8} paused={snowPaused} passageTheme={theme}/>
+            <Snow density={1} wind={8} paused={snowPaused} passageTheme={theme} surfaces={previewSnowField}/>
           </div>
           <div className="landing-shell winter-passage-copy">
             <h2 id="winter-passage-title">A snow day on your desktop.</h2>
             <p>Snow falls across your desktop and gathers on your windows.</p>
-            <figure className="winter-desktop-preview">
+            <figure className="winter-desktop-preview" data-snow-surface="preview">
               <img src="/nightfall-desktop.webp" width="1600" height="1041" loading="lazy" decoding="async"
                 alt="Nightfall running on macOS, with falling snow, Christmas lights, and snow settled along the top of its Weather window."/>
               <div className="winter-preview-weather" aria-hidden="true">
-                <div className="winter-preview-ledge" data-snow-surface="preview"/>
-                <Snow density={1} wind={7} paused={snowPaused} surfaces={previewSnowField}/>
-                <SnowSurfaces field={previewSnowField} paused={snowPaused}/>
+                <Snow density={0} atmosphere wind={7} paused={snowPaused}/>
               </div>
             </figure>
           </div>
+          <SnowSurfaces field={previewSnowField} paused={snowPaused}/>
         </section>
         </div>
       </main>

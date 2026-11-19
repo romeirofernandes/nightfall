@@ -71,7 +71,7 @@ function GithubSnowLink({field}) {
   );
 }
 
-function ChristmasFooter({theme, themes, openInstaller, sweepTarget, field}) {
+function WinterInstallSection({theme, themes, openInstaller, sweepTarget, field}) {
   const [loaded, setLoaded] = useState([]);
   const [displayed, setDisplayed] = useState(theme);
   useEffect(() => {
@@ -79,7 +79,7 @@ function ChristmasFooter({theme, themes, openInstaller, sweepTarget, field}) {
   }, [loaded, theme]);
 
   return (
-    <footer className="winter-closing" aria-label="Install Nightfall and resources">
+    <section className="winter-closing" aria-labelledby="platform-install-title">
       <div className="winter-footer-art" aria-hidden="true">
         {themes.map(light => (
           <img key={light} className="winter-footer-scene" data-active={displayed === light}
@@ -100,20 +100,21 @@ function ChristmasFooter({theme, themes, openInstaller, sweepTarget, field}) {
             </li>
           ))}
         </ul>
-        <nav className="landing-footer-links" aria-label="Footer">
-          <a className="landing-link" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
-          <a className="landing-link" href={repository}>GitHub<ArrowUpRight aria-hidden="true" size={13}/></a>
-          <a className="landing-link" href="/mac-help/">macOS help</a>
-        </nav>
-        <p className="winter-credits">crafted by <a href="https://romeiro.dev">romeiro</a>, <a href="https://russel.is-a.dev">russel</a> &amp; <a href="https://gavin-soares.vercel.app">gavin</a>'s agents</p>
       </div>
       <SnowSurfaces field={field}/>
-    </footer>
+    </section>
   );
+}
+
+function isBackdropEvent(event) {
+  if (event.target !== event.currentTarget) return false;
+  const {left, right, top, bottom} = event.currentTarget.getBoundingClientRect();
+  return event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom;
 }
 
 export function Landing() {
   const dialog = useRef(null);
+  const pressedBackdrop = useRef(false);
   const hero = useRef(null);
   const snowField = useRef(null);
   const previewSnowField = useRef(null);
@@ -158,6 +159,7 @@ export function Landing() {
   }, [toggleTheme]);
 
   function openInstaller(platform) {
+    pressedBackdrop.current = false;
     setPlatform(platform); setCopyState(''); dialog.current.showModal();
   }
   async function copyCommands() {
@@ -253,10 +255,25 @@ export function Landing() {
           </section>
           <SnowSurfaces field={featureSnowField}/>
         </div>
+        <WinterInstallSection theme={theme} themes={foregroundThemes}
+          openInstaller={openInstaller} sweepTarget={installSnowTarget} field={footerSnowField}/>
       </main>
-      <ChristmasFooter theme={theme} themes={foregroundThemes}
-        openInstaller={openInstaller} sweepTarget={installSnowTarget} field={footerSnowField}/>
-      <dialog className="landing-dialog" ref={dialog} aria-labelledby="install-title">
+      <footer className="winter-footer">
+        <div className="landing-shell winter-footer-content">
+          <nav className="landing-footer-links" aria-label="Footer">
+            <a className="landing-link" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
+            <a className="landing-link" href={repository}>GitHub<ArrowUpRight aria-hidden="true" size={13}/></a>
+            <a className="landing-link" href="/mac-help/">macOS help</a>
+          </nav>
+          <p className="winter-credits">crafted by <a href="https://romeiro.dev">romeiro</a>, <a href="https://russel.is-a.dev">russel</a> &amp; <a href="https://gavin-soares.vercel.app">gavin</a>'s agents</p>
+        </div>
+      </footer>
+      <dialog className="landing-dialog" ref={dialog} aria-labelledby="install-title"
+        onPointerDown={event => { pressedBackdrop.current = isBackdropEvent(event); }}
+        onClick={event => {
+          if (pressedBackdrop.current && isBackdropEvent(event)) event.currentTarget.close();
+          pressedBackdrop.current = false;
+        }}>
         <header className="landing-dialog-header">
           <h2 id="install-title">Install on {install.name}</h2>
           <form method="dialog">

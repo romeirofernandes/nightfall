@@ -16,7 +16,7 @@
 @property --secondary-border { syntax: '<color>'; inherits: true; initial-value: #526b7880; }
 @property --footer-sky { syntax: '<color>'; inherits: true; initial-value: #719fd1; }
 @property --footer-snow { syntax: '<color>'; inherits: true; initial-value: #91adde; }
-@property --footer-ink { syntax: '<color>'; inherits: true; initial-value: #0a2634; }
+@property --install-ink { syntax: '<color>'; inherits: true; initial-value: #0a2634; }
 html:has(.landing) { scrollbar-width: thin; scrollbar-color: light-dark(#627e91, #7897ad) light-dark(transparent, #081827); }
 body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing {
@@ -33,7 +33,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
   transition:
    --background 2600ms ease, --sky 2600ms ease, --sky-wash 2600ms ease,
    --passage-drift 2600ms ease, --passage-light 2600ms ease, --footer-snow 2600ms ease,
-   --footer-sky 2600ms ease, --footer-ink 240ms ease-in-out 660ms,
+   --footer-sky 2600ms ease, --install-ink 240ms ease-in-out 660ms,
    --button 2600ms ease, --button-hover 2600ms ease, --on-button 240ms ease-in-out 660ms,
    --secondary 2600ms ease, --secondary-hover 2600ms ease, --secondary-border 2600ms ease,
    --scene-ink 240ms ease-in-out 660ms, --scene-muted 240ms ease-in-out 660ms;
@@ -433,7 +433,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 
 .landing[data-theme="morning"] { --footer-sky: #6c8fbe; --footer-snow: #7b98ce; }
 .landing[data-theme="evening"] { --footer-sky: #233e63; --footer-snow: #6b8bca; }
-.landing[data-theme="night"] { --footer-sky: #091b2e; --footer-snow: #436caa; --footer-ink: #fffdf2; }
+.landing[data-theme="night"] { --footer-sky: #091b2e; --footer-snow: #436caa; --install-ink: #fffdf2; }
 
 .winter-closing {
  position: relative;
@@ -443,7 +443,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  min-block-size: max(410px, 46vw);
  margin-block-start: calc(-1 * clamp(8px, 1.7vw, 24px));
  padding-block-end: clamp(72px, 6.5vw, 112px);
- color: var(--footer-ink);
+ color: var(--install-ink);
  background: linear-gradient(transparent,
    color-mix(in srgb, var(--footer-sky) 55%, transparent) 21%,
    var(--footer-sky) 45%, var(--footer-snow));
@@ -510,6 +510,18 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing .winter-platform:hover { background: #26475d; }
 .winter-closing :focus-visible { outline-color: currentColor; }
 .winter-platform:focus-visible { outline-offset: -3px; }
+.winter-footer {
+ padding-block: 12px 24px;
+ background: #e8eff5;
+ color: #0a2634;
+}
+.winter-footer-content {
+ display: grid;
+ justify-items: center;
+ gap: 6px;
+ text-align: center;
+}
+.winter-footer :focus-visible { outline-color: currentColor; }
 .landing-footer-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 clamp(14px, 2vw, 28px); }
 .landing-footer-links .landing-link { font-weight: 600; }
 .winter-credits { margin: 0; font-size: clamp(16px, 1.4vw, 18px); font-weight: 600; text-wrap: balance; }
@@ -520,9 +532,9 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  text-decoration-thickness: 1.5px;
  text-underline-offset: 4px;
 }
-.winter-credits a:nth-of-type(1) { --credit-underline: light-dark(#80313e, #ff9a9e); }
-.winter-credits a:nth-of-type(2) { --credit-underline: light-dark(#1b5a3e, #9be7bc); }
-.winter-credits a:nth-of-type(3) { --credit-underline: light-dark(#6f4708, #ffdc8e); }
+.winter-credits a:nth-of-type(1) { --credit-underline: #80313e; }
+.winter-credits a:nth-of-type(2) { --credit-underline: #1b5a3e; }
+.winter-credits a:nth-of-type(3) { --credit-underline: #6f4708; }
 
 @media (max-width: 840px) {
  .winter-closing {

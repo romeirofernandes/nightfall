@@ -44,7 +44,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing button { font: inherit; color: inherit; cursor: pointer; }
 .landing a { color: inherit; text-decoration: none; }
 .landing :focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
-.landing-shell { width: min(1376px, calc(100% - clamp(40px, 9vw, 144px))); margin-inline: auto; }
+.landing-shell { width: min(1190px, calc(100% - clamp(40px, 9vw, 144px))); margin-inline: auto; }
 .landing > main { position: relative; isolation: isolate; z-index: 1; }
 .winter-snowfall { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: clip; }
 .winter-snowfall .snow-canvas { position: sticky; inset: 0 auto auto; display: block; width: 100%; height: 100dvh; }
@@ -287,14 +287,16 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-passage-copy { position: relative; z-index: 3; padding-block: clamp(76px, 12vh, 120px) 42px; text-align: center; }
 .winter-passage h2 { margin: 0; font: 400 clamp(36px, 5vw, 70px)/1.18 Jua, system-ui, sans-serif; letter-spacing: normal; text-wrap: balance; }
 .winter-passage p { margin: 14px auto 0; max-width: 44ch; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; text-wrap: pretty; }
-.winter-desktop-preview {
+.winter-image-frame {
  position: relative;
- width: min(100%, 1080px, max(720px, 110svh));
- margin: clamp(24px, 4vh, 42px) auto 0;
  overflow: hidden;
- border-radius: clamp(11px, 1.3vw, 17px);
+ border: 1px solid var(--field-border);
+ border-radius: 14px;
  background: var(--panel);
- box-shadow: 0 26px 58px -23px #08182782;
+}
+.winter-desktop-preview {
+ width: 100%;
+ margin: clamp(24px, 4vh, 42px) 0 0;
  pointer-events: auto;
 }
 .winter-desktop-preview img { display: block; width: 100%; height: auto; }
@@ -372,7 +374,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  0%, 4.6%, 100% { opacity: .14; scale: .97; }
  2.1% { opacity: .46; scale: 1.1; }
 }
-.winter-features-content { position: relative; z-index: 3; max-width: 1190px; }
+.winter-features-content { position: relative; z-index: 3; }
 .winter-features h2 {
  margin: 0;
  text-align: center;
@@ -388,21 +390,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  padding: 0;
  margin: clamp(36px, 6vw, 72px) 0 0;
 }
-.winter-feature-frame {
- padding: clamp(7px, 1vw, 13px);
- padding-block-end: clamp(20px, 2.5vw, 34px);
- border: 1px solid #ded9ce;
- border-radius: 4px;
- background: #fffcf3;
- box-shadow: 0 12px 26px -14px #071a29aa;
-}
-.winter-feature-capture {
- position: relative;
- overflow: hidden;
- aspect-ratio: 1.8;
- border-radius: 2px;
- background: var(--panel);
-}
+.winter-feature-capture { aspect-ratio: 1.8; }
 .winter-feature-capture::before {
  content: '';
  position: absolute;
@@ -424,7 +412,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-feature p { margin: 8px 0 0; max-width: 32ch; font-size: 16px; text-wrap: pretty; }
 @media (max-width: 700px) {
  .winter-features { padding-block: 100px 34px; }
- .winter-feature-list { grid-template-columns: minmax(0, 1fr); gap: 38px; max-width: 430px; margin-inline: auto; }
+ .winter-feature-list { grid-template-columns: minmax(0, 1fr); gap: 38px; }
  .winter-feature-lights { inset-inline: -16%; }
  .winter-feature-lights img { height: auto; }
 }
@@ -440,7 +428,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  align-content: end;
  min-block-size: max(410px, 46vw);
  margin-block-start: calc(-1 * clamp(8px, 1.7vw, 24px));
- row-gap: clamp(24px, 3.2vw, 50px);
+ row-gap: clamp(64px, 7vw, 112px);
  padding-block-end: clamp(36px, 4vw, 68px);
  background: linear-gradient(transparent,
    color-mix(in srgb, var(--footer-sky) 55%, transparent) 21%,
@@ -512,7 +500,6 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-platform:focus-visible { outline-offset: -3px; }
 .winter-footer {
  color: #0a2634;
- text-shadow: 0 0 5px #f5f9ff, 0 1px 2px #f5f9ff;
 }
 .winter-footer-content {
  display: grid;

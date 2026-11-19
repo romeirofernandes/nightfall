@@ -228,7 +228,7 @@ export function Landing() {
           <div className="landing-shell winter-passage-copy">
             <h2 id="winter-passage-title">A snow day on your desktop.</h2>
             <p>Snow falls across your desktop and gathers on your windows.</p>
-            <figure className="winter-desktop-preview" data-snow-surface="preview" data-snow-occluder>
+            <figure className="winter-image-frame winter-desktop-preview" data-snow-surface="preview" data-snow-occluder>
               <img src="/nightfall-desktop.webp" width="1600" height="1041" loading="lazy" decoding="async"
                 alt="Nightfall running on macOS, with falling snow, Christmas lights, and snow settled along the top of its Weather window."/>
             </figure>
@@ -255,9 +255,8 @@ export function Landing() {
               <ul className="winter-feature-list">
                 {winterFeatures.map(({id, title, description}) => (
                   <li key={id} className="winter-feature">
-                    <div className="winter-feature-frame" data-snow-surface="feature" data-snow-occluder aria-hidden="true">
-                      <div className="winter-feature-capture" data-detail={id}/>
-                    </div>
+                    <div className="winter-image-frame winter-feature-capture" data-detail={id}
+                      data-snow-surface="feature" data-snow-occluder aria-hidden="true"/>
                     <h3>{title}</h3>
                     <p>{description}</p>
                   </li>

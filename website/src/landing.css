@@ -151,8 +151,8 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-scroll-cue { position: absolute; bottom: 28px; left: calc(50% - 22px); width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #ffffff70; border-radius: 50%; background: #12332f99; color: #fffdf0!important; z-index: 3; transition: background 180ms; }
 .winter-scroll-cue:hover { background: #12332fe6; }
 .winter-passage {
- --passage-drift: #b2cbde;
- --passage-light: #f3f8ff;
+ --passage-drift: #8bafca;
+ --passage-light: #d7e8f5;
  position: relative;
  z-index: 3;
  min-height: 100svh;
@@ -160,8 +160,8 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  align-items: center;
  pointer-events: none;
 }
-.landing[data-theme="morning"] .winter-passage { --passage-drift: #aac6df; --passage-light: #fff2e6; }
-.landing[data-theme="evening"] .winter-passage { --passage-drift: #c4bdcd; --passage-light: #ffe4cc; }
+.landing[data-theme="morning"] .winter-passage { --passage-drift: #93b5ce; --passage-light: #edf0ed; }
+.landing[data-theme="evening"] .winter-passage { --passage-drift: #a69bb5; --passage-light: #fae3d4; }
 .landing[data-theme="night"] .winter-passage { --passage-drift: #284f73; --passage-light: #264461; }
 .winter-passage::before {
  content: '';
@@ -175,7 +175,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  inset: 0;
  background:
   radial-gradient(ellipse at 50% 28%, var(--passage-light), transparent 64%),
-  radial-gradient(ellipse at 50% 68%, var(--passage-drift), transparent 81%);
+  radial-gradient(ellipse at 50% 68%, var(--passage-drift) 33%, transparent 100%);
  mask-image: linear-gradient(transparent, #000 29%, #000 73%, transparent);
 }
 .winter-passage-snow { position: absolute; z-index: 1; inset: 0; }

@@ -20,7 +20,7 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
    const passage=c.passageTheme!==undefined;
    if(passage&&stopped&&stillPassage===c)return;
    stillPassage=passage&&stopped?c:null;
-   const target=passage?(w<=600?56:138):mobile?[30,60,90][c.density]:[65,145,310][c.density];
+   const target=passage?(w<=600?64:176):mobile?[30,60,90][c.density]:[65,145,310][c.density];
    if(!stopped){t+=dt;if(flakes.length<target)for(let i=0;i<3;i++)flakes.push({x:Math.random(),y:-.01,z:Math.random(),p:Math.random()*6.28});if(flakes.length>target)flakes.length=target;}
    let ob=c.obstacle;if(ob&&lastObstacle&&(Math.abs(ob.x-lastObstacle.x)+Math.abs(ob.y-lastObstacle.y)>.001))bank.fill(1);lastObstacle=ob;
    ctx.clearRect(0,0,w,h);
@@ -33,17 +33,18 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
      if(ob&&f.x>=ob.x&&f.x<ob.x+ob.width){const i=Math.min(69,Math.floor((f.x-ob.x)/ob.width*69));if(old<=ob.y-bank[i]/h&&f.y>=ob.y-bank[i]/h){bank[i]=Math.min(13,bank[i]+.6);f.y=-.01;f.x=Math.random();}}
      if(f.y>1.01){f.y=-.01;f.x=Math.random();}}
     const x=f.x*w, y=f.y*h, angle=Math.sin(t+f.p)*.3;
-    const rx=(mobile?.45:atmosphere?.7:.45)+f.z*(mobile?1.3:atmosphere?3.4:1.5);
-    const ry=(mobile?.55:atmosphere?.8:.6)+f.z*(mobile?1.6:atmosphere?3.8:1.8);
-    ctx.globalAlpha=mobile?.3+f.z*.5:atmosphere?.5+f.z*.48:.25+f.z*.65;
+    const passageRadius=1.05+f.z*f.z*(w<=600?2:3.4);
+    const rx=passage?passageRadius:(mobile?.45:atmosphere?.7:.45)+f.z*(mobile?1.3:atmosphere?3.4:1.5);
+    const ry=passage?passageRadius*.9:(mobile?.55:atmosphere?.8:.6)+f.z*(mobile?1.6:atmosphere?3.8:1.8);
+    ctx.globalAlpha=passage?.51+f.z*.47:mobile?.3+f.z*.5:atmosphere?.5+f.z*.48:.25+f.z*.65;
     if(daylight){
      // Offset the shaded underside so each flake reads as a speck, even on pale mist.
-     ctx.fillStyle=c.passageTheme==='evening'?'#75667c85':'#3c668885';
+     ctx.fillStyle=c.passageTheme==='evening'?'#716482a0':'#365b7ba0';
      ctx.beginPath();
-     ctx.ellipse(x+.45,y+.75,rx,ry,angle,0,Math.PI*2);
+     ctx.ellipse(x+.55,y+1,rx,ry,angle,0,Math.PI*2);
      ctx.fill();
     }
-    ctx.fillStyle=flat?'#e4ead6':'#edf6fa';
+    ctx.fillStyle=passage?'#fbfdff':flat?'#e4ead6':'#edf6fa';
     ctx.beginPath();
     ctx.ellipse(x,y,rx,ry,angle,0,Math.PI*2);
     ctx.fill();

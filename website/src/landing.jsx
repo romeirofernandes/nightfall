@@ -1,6 +1,5 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {ArrowDown, ArrowDownToLine, ArrowUpRight, Check, Copy, Github, Moon, Snowflake, Sun, X} from 'lucide-react';
-import '@fontsource/prata/latin-400.css';
 import gsap from 'gsap';
 import {BREW, RELEASE} from './shared';
 import {Snow} from './snow';
@@ -141,6 +140,22 @@ export function Landing() {
     }, hero);
     return () => context.revert();
   }, []);
+  const toggleTheme = useCallback(() => {
+    selectMode(theme === 'night' ? 'afternoon' : 'night');
+  }, [selectMode, theme]);
+
+  useEffect(() => {
+    function handleThemeShortcut(event) {
+      if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey ||
+          event.ctrlKey || event.metaKey || event.shiftKey || event.key?.toLowerCase() !== 'd' ||
+          dialog.current.open || event.target instanceof HTMLElement &&
+          (event.target.isContentEditable || event.target.closest('input, textarea, select, [role="textbox"]'))) return;
+      toggleTheme();
+    }
+    window.addEventListener('keydown', handleThemeShortcut);
+    return () => window.removeEventListener('keydown', handleThemeShortcut);
+  }, [toggleTheme]);
+
   function openInstaller(platform) {
     setPlatform(platform); setCopyState(''); dialog.current.showModal();
   }
@@ -170,8 +185,8 @@ export function Landing() {
           <header className="landing-shell wrap landing-header">
             <a className="landing-brand" href="/" aria-label="Nightfall home"><Snowflake aria-hidden="true" size={27}/>Nightfall</a>
             <div className="landing-header-actions">
-              <button className="landing-icon-button landing-theme-toggle" onClick={() => selectMode(theme === 'night' ? 'afternoon' : 'night')}
-                aria-label={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'} title={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'}>
+              <button className="landing-icon-button landing-theme-toggle" onClick={toggleTheme} aria-keyshortcuts="D"
+                aria-label={theme === 'night' ? 'Switch to afternoon' : 'Switch to night'} title={theme === 'night' ? 'Switch to afternoon (D)' : 'Switch to night (D)'}>
                 <Sun aria-hidden="true" size={18} data-active={theme === 'night'}/>
                 <Moon aria-hidden="true" size={18} data-active={theme !== 'night'}/>
               </button>

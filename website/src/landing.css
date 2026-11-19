@@ -1,3 +1,4 @@
+@font-face { font-family: Jua; src: url('/fonts/jua.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: Figtree; src: url('/fonts/figtree.woff2') format('woff2'); font-weight: 300 900; font-display: swap; }
 /* Share a single interpolated palette across the scroll handoff. */
 @property --background { syntax: '<color>'; inherits: true; initial-value: #eef4f8; }
@@ -16,6 +17,7 @@
 @property --footer-sky { syntax: '<color>'; inherits: true; initial-value: #719fd1; }
 @property --footer-snow { syntax: '<color>'; inherits: true; initial-value: #91adde; }
 @property --footer-ink { syntax: '<color>'; inherits: true; initial-value: #0a2634; }
+html:has(.landing) { scrollbar-width: thin; scrollbar-color: light-dark(#627e91, #7897ad) transparent; }
 body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing {
   --background: #eef4f8; --sky: #b8dafe; --panel: #f7f9f7; --ink: #0a2634; --muted: #334e5b;
@@ -51,7 +53,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
 .winter-world::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky-wash) 0%, transparent 40%); opacity: .25; }
 .landing-header { min-height: 96px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-.landing-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font: 400 28px/1 Prata, Georgia, serif; letter-spacing: -.04em; }
+.landing-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font: 400 28px/1 Jua, system-ui, sans-serif; letter-spacing: normal; }
 @media (prefers-reduced-motion: no-preference) {
  .landing-brand > svg { transform-origin: center; transition: transform 500ms cubic-bezier(.2, .75, .25, 1); }
  .landing-brand:is(:hover, :focus-visible) > svg { transform: rotate(60deg); }
@@ -65,7 +67,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing-theme-toggle svg { grid-area: 1 / 1; transition: opacity 320ms ease, transform 320ms ease; }
 .landing-theme-toggle svg[data-active="false"] { opacity: 0; transform: rotate(-38deg) scale(.82); }
 .landing-copy { position: relative; padding-top: clamp(32px, 5vh, 64px); text-align: center; }
-.landing-copy h1 { margin: 0; font: 400 clamp(64px, 6.65vw, 110px)/1.22 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
+.landing-copy h1 { margin: 0; font: 400 clamp(64px, 6.65vw, 110px)/1.22 Jua, system-ui, sans-serif; letter-spacing: normal; text-wrap: balance; }
 .landing-copy h1 span { white-space: nowrap; }
 .landing-copy > p { margin: 18px 0 28px; color: var(--muted); font-size: clamp(18px, 1.8vw, 26px); line-height: 1.5; }
 .landing-header, .landing-copy h1, .winter-passage h2, .winter-features { color: var(--scene-ink); }
@@ -92,7 +94,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing-dialog { width: min(640px, calc(100% - 32px)); max-height: calc(100% - 32px); color: var(--ink); background: var(--panel); margin: auto; padding: clamp(18px, 4vw, 30px); border: 1px solid var(--field-border); border-radius: 16px; box-shadow: 0 24px 80px #001a2b50; }
 .landing-dialog::backdrop { background: #051423a8; backdrop-filter: blur(7px); }
 .landing-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
-.landing-dialog h2 { font: 400 clamp(24px, 5vw, 32px)/1.35 Prata, Georgia, serif; margin: 0; letter-spacing: -.03em; }
+.landing-dialog h2 { font: 400 clamp(24px, 5vw, 32px)/1.35 Jua, system-ui, sans-serif; margin: 0; letter-spacing: normal; }
 .landing-close { width: 44px; min-height: 44px; padding: 0; flex-shrink: 0; }
 .landing-terminal { border: 1px solid var(--line); border-radius: 9px; background: var(--background); overflow: hidden; }
 .landing-terminal-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
@@ -207,7 +209,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  mask-image: linear-gradient(transparent, #000 29%, #000 73%, transparent);
 }
 .winter-passage-copy { position: relative; z-index: 3; padding-block: clamp(76px, 12vh, 120px) 42px; text-align: center; }
-.winter-passage h2 { margin: 0; font: 400 clamp(36px, 5vw, 70px)/1.18 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
+.winter-passage h2 { margin: 0; font: 400 clamp(36px, 5vw, 70px)/1.18 Jua, system-ui, sans-serif; letter-spacing: normal; text-wrap: balance; }
 .winter-passage p { margin: 14px auto 0; max-width: 44ch; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; text-wrap: pretty; }
 .winter-desktop-preview {
  position: relative;
@@ -249,7 +251,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  position: relative;
  isolation: isolate;
  overflow: clip;
- padding-block: clamp(154px, 18vw, 225px) clamp(34px, 5vw, 67px);
+ padding-block: clamp(154px, 14.5vw, 255px) clamp(34px, 5vw, 67px);
 }
 .winter-finale { position: relative; isolation: isolate; }
 .winter-finale::before {
@@ -265,14 +267,13 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  position: absolute;
  z-index: -1;
  inset: 13px 0 auto;
- width: min(100%, 1600px);
- margin-inline: auto;
+ width: 100%;
  pointer-events: none;
 }
 .winter-feature-lights img {
  display: block;
  width: 100%;
- height: auto;
+ height: min(16.93vw, 260px);
  filter: brightness(.88);
 }
 .winter-feature-bulb {
@@ -301,8 +302,8 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  margin: 0;
  text-align: center;
  text-wrap: balance;
- font: 400 clamp(38px, 5.2vw, 72px)/1.18 Prata, Georgia, serif;
- letter-spacing: -.04em;
+ font: 400 clamp(38px, 5.2vw, 72px)/1.18 Jua, system-ui, sans-serif;
+ letter-spacing: normal;
 }
 .winter-feature-list {
  list-style: none;
@@ -344,7 +345,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 }
 .winter-feature h3 {
  margin: 19px 0 0;
- font: 400 clamp(21px, 2vw, 28px)/1.3 Prata, Georgia, serif;
+ font: 400 clamp(21px, 2vw, 28px)/1.3 Jua, system-ui, sans-serif;
  letter-spacing: -.025em;
 }
 .winter-feature p { margin: 8px 0 0; max-width: 32ch; font-size: 16px; text-wrap: pretty; }
@@ -352,6 +353,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  .winter-features { padding-block: 100px 34px; }
  .winter-feature-list { grid-template-columns: minmax(0, 1fr); gap: 38px; max-width: 430px; margin-inline: auto; }
  .winter-feature-lights { inset-inline: -16%; width: auto; }
+ .winter-feature-lights img { height: auto; }
 }
 
 .landing[data-theme="morning"] { --footer-sky: #6c8fbe; --footer-snow: #7b98ce; }

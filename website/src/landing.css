@@ -150,14 +150,37 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-passage-shade { position: absolute; inset: 0; pointer-events: none; z-index: 0; background: var(--background); opacity: 0; }
 .winter-scroll-cue { position: absolute; bottom: 28px; left: calc(50% - 22px); width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #ffffff70; border-radius: 50%; background: #12332f99; color: #fffdf0!important; z-index: 3; transition: background 180ms; }
 .winter-scroll-cue:hover { background: #12332fe6; }
-.winter-passage { position: relative; z-index: 3; min-height: 100svh; display: grid; align-items: center; pointer-events: none; }
+.winter-passage {
+ --passage-drift: #b2cbde;
+ --passage-light: #f3f8ff;
+ position: relative;
+ z-index: 3;
+ min-height: 100svh;
+ display: grid;
+ align-items: center;
+ pointer-events: none;
+}
+.landing[data-theme="morning"] .winter-passage { --passage-drift: #aac6df; --passage-light: #fff2e6; }
+.landing[data-theme="evening"] .winter-passage { --passage-drift: #c4bdcd; --passage-light: #ffe4cc; }
+.landing[data-theme="night"] .winter-passage { --passage-drift: #284f73; --passage-light: #264461; }
 .winter-passage::before {
  content: '';
  position: absolute;
  inset: 0;
  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--background) 88%, transparent) 24%, var(--background) 84%);
 }
-.winter-passage-copy { position: relative; padding-block: clamp(76px, 12vh, 120px) 66px; text-align: center; }
+.winter-passage::after {
+ content: '';
+ position: absolute;
+ inset: 0;
+ background:
+  radial-gradient(ellipse at 50% 28%, var(--passage-light), transparent 64%),
+  radial-gradient(ellipse at 50% 68%, var(--passage-drift), transparent 81%);
+ mask-image: linear-gradient(transparent, #000 29%, #000 73%, transparent);
+}
+.winter-passage-snow { position: absolute; z-index: 1; inset: 0; }
+.winter-passage-snow canvas { display: block; width: 100%; height: 100%; }
+.winter-passage-copy { position: relative; z-index: 2; padding-block: clamp(76px, 12vh, 120px) 66px; text-align: center; }
 .winter-passage h2 { margin: 0; font: 400 clamp(36px, 5vw, 70px)/1.18 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
 .winter-passage p { margin: 14px auto 0; max-width: 44ch; color: var(--muted); font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; text-wrap: pretty; }
 .winter-desktop-preview {

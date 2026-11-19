@@ -112,6 +112,9 @@ export function Landing() {
           <SnowSurfaces field={snowField} paused={snowPaused}/>
         </section>
         <section id="winter-passage" className="winter-passage" aria-labelledby="winter-passage-title">
+          <div className="winter-passage-snow" aria-hidden="true">
+            <Snow density={1} wind={8} paused={snowPaused} passageTheme={theme}/>
+          </div>
           <div className="landing-shell winter-passage-copy">
             <h2 id="winter-passage-title">A snow day on your desktop.</h2>
             <p>Snow falls across your desktop and gathers on your windows.</p>

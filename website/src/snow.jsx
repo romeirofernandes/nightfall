@@ -3,28 +3,50 @@ import {Snowflake,Minus,Square,X,Play,Pause,Wind,RotateCcw,ArrowUpRight,Music,Fo
 
 export function Contours({className=''}){return <svg className={'contour-map '+className} viewBox="0 0 1200 800" preserveAspectRatio="none" fill="none" aria-hidden="true"><g stroke="currentColor" strokeWidth=".7">{Array.from({length:19},(_,i)=><path key={i} d={`M${-180+i*18},${850-i*15} C${100+i*4},${500-i*25} ${800-i*30},${800-i*13} ${900-i*12},${420-i*18} S${1250-i*9},${60+i*3} ${1310-i*10},${-160+i*18}`}/>)}</g></svg>}
 
-export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false,atmosphere=false,surfaces=null}){
- const canvas=useRef(null),config=useRef({density,wind,paused,obstacle,onCount});
- useEffect(()=>{config.current={density,wind,paused,obstacle,onCount};},[density,wind,paused,obstacle,onCount]);
+export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false,atmosphere=false,surfaces=null,passageTheme}){
+ const canvas=useRef(null),config=useRef({density,wind,paused,obstacle,onCount,passageTheme});
+ useEffect(()=>{config.current={density,wind,paused,obstacle,onCount,passageTheme};},[density,wind,paused,obstacle,onCount,passageTheme]);
  useEffect(()=>{
   const el=canvas.current,ctx=el.getContext('2d');let w=1,h=1,raf,last=0,t=0,frame=0,bank=Array(70).fill(1),lastObstacle=null,visible=true,mobile=false;
+  let stillPassage=null;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const flakes=Array.from({length:atmosphere?310:95},()=>({x:Math.random(),y:Math.random(),z:Math.random(),p:Math.random()*6.28}));
-  const resize=()=>{const r=el.getBoundingClientRect();w=r.width;h=r.height;mobile=atmosphere&&w<=600;if(mobile&&flakes.length>90)flakes.length=90;const d=Math.min(devicePixelRatio||1,1.5);el.width=w*d;el.height=h*d;ctx.setTransform(d,0,0,d,0,0);};
+  const resize=()=>{const r=el.getBoundingClientRect();w=r.width;h=r.height;mobile=atmosphere&&w<=600;if(mobile&&flakes.length>90)flakes.length=90;const d=Math.min(devicePixelRatio||1,1.5);el.width=w*d;el.height=h*d;ctx.setTransform(d,0,0,d,0,0);stillPassage=null;};
   const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const io=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting});io.observe(el);
   const loop=now=>{
    raf=requestAnimationFrame(loop);if(now-last<32||!visible||document.hidden)return;
-   const dt=Math.min((now-last)/1000,.05);last=now;const c=config.current;const stopped=c.paused||reduced.matches;const target=mobile?[30,60,90][c.density]:[65,145,310][c.density];
+   const dt=Math.min((now-last)/1000,.05);last=now;const c=config.current;const stopped=c.paused||reduced.matches;
+   const passage=c.passageTheme!==undefined;
+   if(passage&&stopped&&stillPassage===c)return;
+   stillPassage=passage&&stopped?c:null;
+   const target=passage?(w<=600?56:138):mobile?[30,60,90][c.density]:[65,145,310][c.density];
    if(!stopped){t+=dt;if(flakes.length<target)for(let i=0;i<3;i++)flakes.push({x:Math.random(),y:-.01,z:Math.random(),p:Math.random()*6.28});if(flakes.length>target)flakes.length=target;}
    let ob=c.obstacle;if(ob&&lastObstacle&&(Math.abs(ob.x-lastObstacle.x)+Math.abs(ob.y-lastObstacle.y)>.001))bank.fill(1);lastObstacle=ob;
    ctx.clearRect(0,0,w,h);
-   for(const f of flakes){
+   const daylight=passage&&c.passageTheme!=='night';
+   const count=passage?Math.min(flakes.length,target):flakes.length;
+   for(let i=0;i<count;i++){
+    const f=flakes[i];
     if(!stopped){const old=f.y;f.y+=(14+f.z*35)*dt/Math.max(h,1);f.x=(f.x+(c.wind+Math.sin(t*.7+f.p)*12)*dt/Math.max(w,1)+1)%1;
      if(surfaces?.current?.land(f.x*w,old*h,f.y*h,f.z)){f.y=-.01;f.x=Math.random();}
      if(ob&&f.x>=ob.x&&f.x<ob.x+ob.width){const i=Math.min(69,Math.floor((f.x-ob.x)/ob.width*69));if(old<=ob.y-bank[i]/h&&f.y>=ob.y-bank[i]/h){bank[i]=Math.min(13,bank[i]+.6);f.y=-.01;f.x=Math.random();}}
      if(f.y>1.01){f.y=-.01;f.x=Math.random();}}
-    ctx.fillStyle=flat?'#e4ead6':'#edf6fa';ctx.globalAlpha=mobile?.3+f.z*.5:atmosphere?.5+f.z*.48:.25+f.z*.65;ctx.beginPath();ctx.ellipse(f.x*w,f.y*h,(mobile?.45:atmosphere?.7:.45)+f.z*(mobile?1.3:atmosphere?3.4:1.5),(mobile?.55:atmosphere?.8:.6)+f.z*(mobile?1.6:atmosphere?3.8:1.8),Math.sin(t+f.p)*.3,0,Math.PI*2);ctx.fill();
+    const x=f.x*w, y=f.y*h, angle=Math.sin(t+f.p)*.3;
+    const rx=(mobile?.45:atmosphere?.7:.45)+f.z*(mobile?1.3:atmosphere?3.4:1.5);
+    const ry=(mobile?.55:atmosphere?.8:.6)+f.z*(mobile?1.6:atmosphere?3.8:1.8);
+    ctx.globalAlpha=mobile?.3+f.z*.5:atmosphere?.5+f.z*.48:.25+f.z*.65;
+    if(daylight){
+     // Offset the shaded underside so each flake reads as a speck, even on pale mist.
+     ctx.fillStyle=c.passageTheme==='evening'?'#75667c85':'#3c668885';
+     ctx.beginPath();
+     ctx.ellipse(x+.45,y+.75,rx,ry,angle,0,Math.PI*2);
+     ctx.fill();
+    }
+    ctx.fillStyle=flat?'#e4ead6':'#edf6fa';
+    ctx.beginPath();
+    ctx.ellipse(x,y,rx,ry,angle,0,Math.PI*2);
+    ctx.fill();
    }
    ctx.globalAlpha=1;
    if(ob){const copy=bank.slice();if(!stopped)bank=bank.map((v,i)=>v+(copy[Math.max(0,i-1)]+copy[Math.min(69,i+1)]-2*v)*dt);

@@ -245,7 +245,9 @@ export function Landing() {
               <ul className="winter-feature-list">
                 {winterFeatures.map(({id, title, description}) => (
                   <li key={id} className="winter-feature">
-                    <div className="winter-feature-capture" data-detail={id} data-snow-surface="feature" data-snow-occluder aria-hidden="true"/>
+                    <div className="winter-feature-frame" data-snow-surface="feature" data-snow-occluder aria-hidden="true">
+                      <div className="winter-feature-capture" data-detail={id}/>
+                    </div>
                     <h3>{title}</h3>
                     <p>{description}</p>
                   </li>

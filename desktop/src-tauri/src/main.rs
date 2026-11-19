@@ -8,6 +8,8 @@ mod linux;
 #[cfg(target_os = "macos")]
 mod macos;
 mod scene;
+#[cfg(any(windows, test))]
+mod window_ledges;
 #[cfg(windows)]
 mod windows;
 use engine::{Settings, Winter};
@@ -196,10 +198,21 @@ fn frame(
         if (world.width, world.height) != (width, height) {
             *world = Winter::new(width, height);
         }
-        state.ornament_slots.lock().unwrap().insert(
-            window.label().into(),
-            scene::visible_ornament_slots(&world.ledges),
-        );
+        if world.geometry_time == 0. || world.time - world.geometry_time >= 0.12 {
+            world.geometry_time = world.time.max(f64::EPSILON);
+            let scale = window.scale_factor().map_err(|e| e.to_string())?;
+            let pos = window.inner_position().map_err(|e| e.to_string())?;
+            world.surfaces(windows::surfaces(
+                [f64::from(pos.x), f64::from(pos.y)],
+                scale,
+                width,
+                height,
+            ));
+            state.ornament_slots.lock().unwrap().insert(
+                window.label().into(),
+                scene::visible_ornament_slots(&world.ledges),
+            );
+        }
     }
     let settings = state.settings.lock().unwrap();
     world.step(dt, &settings);

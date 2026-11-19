@@ -52,8 +52,9 @@ Extract both executables into the same folder. Open `nightfall-renderer.exe` for
 the tray app and settings. In PowerShell, use `.\nightfall.exe` for terminal
 controls or `.\nightfall.exe status` to check the running app.
 
-The snow fits each monitor's work area so the taskbar stays usable. Snow
-accumulates on the ground. Restart Nightfall after changing the monitor layout.
+The snow fits each monitor's work area so the taskbar stays usable. It collects
+on the ground and on exposed top edges of visible windows. Snowball mode gives keyboard focus
+to the overlay under your pointer. Restart Nightfall after changing the monitor layout.
 Settings live in `%APPDATA%\app.nightfall.desktop`. The CLI uses a private
 socket at `%LOCALAPPDATA%\Nightfall.sock` on a local NTFS volume. Windows
 limits that socket path to 107 UTF-8 bytes. To remove Nightfall, quit from the

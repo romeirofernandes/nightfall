@@ -1,12 +1,13 @@
 # nightfall terminal controls
 
-The Go CLI talks to the native desktop renderer over a private Unix socket.
+The Go CLI talks to the native desktop renderer over a private local socket on Linux, macOS, and Windows.
 
 ```sh
 CGO_ENABLED=0 go build -trimpath -o nightfall .
 NIGHTFALL_RENDERER=/absolute/path/to/nightfall-renderer ./nightfall
 ```
 
+On Windows, run `.\nightfall.exe` with `nightfall-renderer.exe` next to it.
 Installed copies find the renderer automatically. `NIGHTFALL_RENDERER` is useful
 for source builds. The terminal binary needs no GTK libraries or cgo; rendering
 still needs the native desktop dependencies.

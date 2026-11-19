@@ -271,7 +271,7 @@ fn snowman(v: &mut Scene, x: f64, y: f64, z: f64, i: u8) {
     for (cy, r) in [(18., 18.), (43., 14.), (64., 10.)] {
         ellipse(v, x, y - cy * z, r * z, r * z, SNOW);
     }
-    let scarf = if i % 2 == 0 {
+    let scarf = if i.is_multiple_of(2) {
         RED
     } else {
         [0.18, 0.49, 0.42, 1.]
@@ -349,7 +349,7 @@ fn tree(v: &mut Scene, x: f64, y: f64, z: f64) {
     }
 }
 fn gift(v: &mut Scene, x: f64, y: f64, z: f64, i: u8) {
-    let c = if i % 2 == 0 {
+    let c = if i.is_multiple_of(2) {
         RED
     } else {
         [0.14, 0.46, 0.37, 1.]

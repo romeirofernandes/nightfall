@@ -12,8 +12,8 @@ pub fn start(
     let display = gdk::Display::default().expect("Graphical display required");
     let layer_shell = gtk_layer_shell::is_supported();
     let x11 = display.type_().name() == "GdkX11Display";
-    if !layer_shell && !x11 {
-        eprintln!("Nightfall: desktop overlay requires a Wayland layer-shell compositor. Settings remain available.");
+    if !layer_shell && (!x11 || !display.default_screen().is_composited()) {
+        eprintln!("Nightfall: desktop snow requires Wayland layer-shell or composited X11. Settings remain available.");
         return;
     }
     for index in 0..display.n_monitors() {
@@ -58,6 +58,12 @@ pub fn start(
             geo.width() as f64,
             geo.height() as f64,
         )));
+        let slots = ornament_slots.clone();
+        let display_key = index.to_string();
+        slots.lock().unwrap().insert(
+            display_key.clone(),
+            crate::scene::visible_ornament_slots(&winter.borrow().ledges),
+        );
         let model = winter.clone();
         let config = settings.clone();
         area.connect_draw(move |widget, cr| {
@@ -145,15 +151,12 @@ pub fn start(
         let (tx, rx) = std::sync::mpsc::sync_channel(1);
         std::thread::spawn(move || loop {
             if let Some(surfaces) = surfaces(geo.x(), geo.y(), geo.width(), geo.height()) {
-                match tx.try_send(surfaces) {
-                    Err(std::sync::mpsc::TrySendError::Disconnected(_)) => break,
-                    _ => {}
+                if let Err(std::sync::mpsc::TrySendError::Disconnected(_)) = tx.try_send(surfaces) {
+                    break;
                 }
             }
             std::thread::sleep(Duration::from_millis(500));
         });
-        let slots = ornament_slots.clone();
-        let display_key = index.to_string();
         glib::timeout_add_local(Duration::from_millis(16), move || {
             frames += 1;
             let s = config.lock().unwrap().clone();

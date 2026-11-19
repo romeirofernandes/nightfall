@@ -5,14 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -26,11 +24,11 @@ func configDir() (string, error) {
 	return filepath.Join(base, "app.nightfall.desktop"), nil
 }
 func request(command string) (string, error) {
-	dir, err := configDir()
+	path, err := controlPath()
 	if err != nil {
 		return "", err
 	}
-	conn, err := net.DialTimeout("unix", filepath.Join(dir, "control.sock"), time.Second)
+	conn, err := net.DialTimeout("unix", path, time.Second)
 	if err != nil {
 		return "", fmt.Errorf("Nightfall is stopped: %w", err)
 	}
@@ -38,20 +36,17 @@ func request(command string) (string, error) {
 	if err = conn.SetDeadline(time.Now().Add(5 * time.Second)); err != nil {
 		return "", err
 	}
-	if _, err = io.WriteString(conn, command); err != nil {
-		return "", err
-	}
-	if err = conn.(*net.UnixConn).CloseWrite(); err != nil {
-		return "", err
-	}
-	reply, err := io.ReadAll(io.LimitReader(conn, 65536))
+	reply, err := exchangeCommand(conn.(*net.UnixConn), command)
 	if err != nil {
 		return "", err
 	}
-	if strings.HasPrefix(string(reply), "error:") {
-		return "", errors.New(strings.TrimSpace(string(reply)))
+	if len(reply) == 0 {
+		return "", errors.New("Nightfall closed the connection without replying")
 	}
-	return string(reply), nil
+	if strings.HasPrefix(reply, "error:") {
+		return "", errors.New(strings.TrimSpace(reply))
+	}
+	return reply, nil
 }
 func rendererPath() (string, error) {
 	if override := os.Getenv("NIGHTFALL_RENDERER"); override != "" {
@@ -65,13 +60,7 @@ func rendererPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	home, _ := os.UserHomeDir()
-	for _, p := range []string{
-		filepath.Join(filepath.Dir(executable), "nightfall-renderer"),
-		filepath.Join(filepath.Dir(executable), "../lib/nightfall/nightfall-renderer"),
-		filepath.Join(home, "Applications/Nightfall.app/Contents/MacOS/nightfall-renderer"),
-		"/Applications/Nightfall.app/Contents/MacOS/nightfall-renderer",
-	} {
+	for _, p := range rendererCandidates(filepath.Dir(executable)) {
 		if info, err := os.Stat(p); err == nil && !info.IsDir() {
 			return p, nil
 		}
@@ -101,7 +90,7 @@ func ensureRenderer() error {
 	cmd := exec.Command(renderer, "--daemon")
 	cmd.Stdout = log
 	cmd.Stderr = log
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	detachRenderer(cmd)
 	if err = cmd.Start(); err != nil {
 		return err
 	}
@@ -165,8 +154,8 @@ func run(args []string) error {
 	return err
 }
 func main() {
-	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
-		fmt.Fprintln(os.Stderr, "Nightfall supports Linux and macOS")
+	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" && runtime.GOOS != "windows" {
+		fmt.Fprintln(os.Stderr, "Nightfall supports Linux, macOS, and Windows")
 		os.Exit(1)
 	}
 	if err := run(os.Args[1:]); err != nil {

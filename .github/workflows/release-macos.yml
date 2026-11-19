@@ -10,6 +10,7 @@ permissions:
   contents: read
 jobs:
   bundle:
+    if: github.ref_type == 'tag'
     strategy:
       fail-fast: false
       matrix:
@@ -23,6 +24,11 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: "11.0"
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check tag and versions
+        run: python scripts/check-release-version.py
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -90,12 +96,12 @@ jobs:
           mkdir mac-package
           cp -R "$APP" mac-package/Nightfall.app
           cp nightfall mac-package/
-          ditto -c -k --sequesterRsrc mac-package "Nightfall-0.4.7-${{ matrix.arch }}.zip"
-          shasum -a 256 "Nightfall-0.4.7-${{ matrix.arch }}.zip"
+          ditto -c -k --sequesterRsrc mac-package "Nightfall-${version}-${{ matrix.arch }}.zip"
+          shasum -a 256 "Nightfall-${version}-${{ matrix.arch }}.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: Nightfall-${{ matrix.arch }}
-          path: Nightfall-0.4.7-${{ matrix.arch }}.zip
+          path: Nightfall-*-${{ matrix.arch }}.zip
           retention-days: 7
       - name: Remove signing material
         if: always() && inputs.notarize

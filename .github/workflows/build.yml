@@ -1,12 +1,22 @@
 name: Desktop checks
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: desktop-checks-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-latest]
+        os: [ubuntu-22.04, ubuntu-24.04, macos-latest, windows-2025]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,19 +28,68 @@ jobs:
         with:
           go-version-file: cli/go.mod
           cache-dependency-path: cli/go.sum
-      - run: go test ./...
+      - run: go test -race ./...
+        working-directory: cli
+      - run: go vet ./...
         working-directory: cli
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: desktop/src-tauri
       - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf
-      - run: python3 scripts/test-installer.py
+        name: Install desktop dependencies
+        timeout-minutes: 6
+        shell: bash
+        run: |
+          packages=(libwebkit2gtk-4.1-dev libgtk-3-dev libgtk-layer-shell-dev librsvg2-dev libayatana-appindicator3-dev patchelf xvfb xauth xdotool xcompmgr dbus-x11)
+          if [[ "${{ matrix.os }}" == 'ubuntu-24.04' ]]; then
+            # The Azure mirror can stall before APT reaches its fallback.
+            sudo sed -i -E 's|mirror\+file:/etc/apt/apt-mirrors\.txt|https://archive.ubuntu.com/ubuntu/|g; s|http://azure\.archive\.ubuntu\.com/ubuntu/?|https://archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list.d/ubuntu.sources
+            packages+=(sway)
+          fi
+          sudo apt-get update
+          sudo apt-get install -y "${packages[@]}"
+      - if: runner.os != 'Windows'
+        run: python3 scripts/test-installer.py
       - run: npm ci
         working-directory: desktop
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Lint the Rust renderer
+        run: cargo clippy --manifest-path desktop/src-tauri/Cargo.toml --locked -- -D warnings
       - run: cargo test --manifest-path desktop/src-tauri/Cargo.toml --locked
       - run: npm --prefix desktop run build -- --no-bundle
+      - if: runner.os != 'macOS'
+        name: Build terminal controls
+        shell: bash
+        run: |
+          cli=nightfall
+          if [[ $RUNNER_OS == Windows ]]; then cli+=.exe; fi
+          CGO_ENABLED=0 go build -trimpath -o "../desktop/src-tauri/target/release/$cli" .
+        working-directory: cli
+      - if: runner.os == 'Windows'
+        name: Test the Windows portable ZIP
+        shell: pwsh
+        run: |
+          $bin = "desktop/src-tauri/target/release"
+          $archive = python scripts/package-windows.py "$bin/nightfall.exe" "$bin/nightfall-renderer.exe" "$env:RUNNER_TEMP/nightfall-package"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/test-desktop.py "$archive"
+      - if: runner.os == 'Linux'
+        name: Smoke test on the Ubuntu runner
+        shell: bash
+        run: |
+          bash scripts/test-linux-desktop.sh x11 desktop/src-tauri/target/release/nightfall
+          dbus-run-session -- xvfb-run -a python3 scripts/test-tui.py desktop/src-tauri/target/release/nightfall
+      - if: matrix.os == 'ubuntu-24.04'
+        name: Test Wayland layer-shell and uncomposited X11
+        run: |
+          bash scripts/test-linux-desktop.sh wayland desktop/src-tauri/target/release/nightfall
+          bash scripts/test-linux-desktop.sh settings-only desktop/src-tauri/target/release/nightfall
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Run the Ubuntu-built binaries on Debian, Fedora, and Arch
+        run: bash scripts/test-linux-distros.sh
   website:
     runs-on: ubuntu-latest
     steps:

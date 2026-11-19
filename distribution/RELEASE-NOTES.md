@@ -1,3 +1,4 @@
 - Nightfall now looks for desktop widgets and for the Dock along the bottom or sides of the screen on macOS.
 - Turn on **Weather → Snow on desktop folders** and allow Finder access to try snow buildup on folder icons.
 - Desktop snow depends on the geometry macOS reports for each surface.
+- The Windows x64 portable ZIP includes buildup on visible window edges, tray settings, and terminal controls.

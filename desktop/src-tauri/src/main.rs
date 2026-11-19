@@ -1,5 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#[cfg(any(target_os = "linux", target_os = "macos"))]
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 mod control;
 mod engine;
 #[cfg(target_os = "macos")]
@@ -9,6 +8,10 @@ mod linux;
 #[cfg(target_os = "macos")]
 mod macos;
 mod scene;
+#[cfg(any(windows, test))]
+mod window_ledges;
+#[cfg(windows)]
+mod windows;
 use engine::{Settings, Winter};
 use std::{
     collections::HashMap,
@@ -62,11 +65,24 @@ fn save_settings(
             }
         }
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(windows)]
+    windows::set_interaction(&app, capture)?;
+    #[cfg(target_os = "linux")]
     let _ = (app, capture);
     Ok(())
 }
-// Open lazily: terminal-only runs don't allocate a settings webview.
+fn create_settings_window(app: &tauri::AppHandle) -> tauri::Result<tauri::WebviewWindow> {
+    tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
+        .title("Nightfall")
+        .inner_size(860., 720.)
+        .min_inner_size(700., 560.)
+        .resizable(true)
+        .center()
+        .visible(false)
+        .build()
+}
+
+// Linux and macOS open lazily to avoid allocating a webview for terminal-only runs.
 fn show_settings(app: &tauri::AppHandle) -> Result<(), String> {
     let state = app.state::<State>();
     let playing = state.settings.lock().unwrap().interactive;
@@ -76,14 +92,7 @@ fn show_settings(app: &tauri::AppHandle) -> Result<(), String> {
     let window = if let Some(w) = app.get_webview_window("main") {
         w
     } else {
-        tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
-            .title("Nightfall")
-            .inner_size(860., 720.)
-            .min_inner_size(700., 560.)
-            .resizable(true)
-            .center()
-            .build()
-            .map_err(|e| e.to_string())?
+        create_settings_window(app).map_err(|e| e.to_string())?
     };
     window.show().map_err(|e| e.to_string())?;
     window.unminimize().map_err(|e| e.to_string())?;
@@ -183,8 +192,30 @@ fn frame(
             );
         }
     }
-    world.step(dt, &state.settings.lock().unwrap());
+    #[cfg(windows)]
+    {
+        let (width, height) = (width.clamp(1., 16000.), height.clamp(1., 16000.));
+        if (world.width, world.height) != (width, height) {
+            *world = Winter::new(width, height);
+        }
+        if world.geometry_time == 0. || world.time - world.geometry_time >= 0.12 {
+            world.geometry_time = world.time.max(f64::EPSILON);
+            let scale = window.scale_factor().map_err(|e| e.to_string())?;
+            let pos = window.inner_position().map_err(|e| e.to_string())?;
+            world.surfaces(windows::surfaces(
+                [f64::from(pos.x), f64::from(pos.y)],
+                scale,
+                width,
+                height,
+            ));
+            state.ornament_slots.lock().unwrap().insert(
+                window.label().into(),
+                scene::visible_ornament_slots(&world.ledges),
+            );
+        }
+    }
     let settings = state.settings.lock().unwrap();
+    world.step(dt, &settings);
     Ok(
         serde_json::json!({"scene":scene::scene(world, &settings),"flakes":world.flakes,"time":world.time}),
     )
@@ -223,7 +254,6 @@ fn quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 fn main() {
-    #[cfg(any(target_os = "linux", target_os = "macos"))]
     if !std::env::args().any(|a| a == "--daemon") && control::show_existing() {
         return;
     }
@@ -262,8 +292,13 @@ fn main() {
                 #[cfg(target_os = "macos")]
                 folder_bounds: Default::default(),
             });
-            #[cfg(any(target_os = "linux", target_os = "macos"))]
             control::start(app.handle())?;
+            #[cfg(windows)]
+            {
+                // Create WebView2 during setup, before processing tray or socket events.
+                create_settings_window(app.handle())?;
+                windows::start(app.handle())?;
+            }
             #[cfg(target_os = "linux")]
             linux::start(settings, ornament_slots);
             #[cfg(target_os = "macos")]

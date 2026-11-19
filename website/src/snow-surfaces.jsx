@@ -48,20 +48,28 @@ export function SnowSurfaces({field, paused}) {
     bank.depth.forEach((depth,i)=>{
      const distance=Math.abs(i*step-center);
      const falloff=Math.max(0,1-distance/radius);
-     const amount=depth*falloff*.65;bank.depth[i]-=amount;
-     if(amount>.025)pieces.push({x:6+i*step,amount,area:amount*step,depth});
+     const amount=depth*falloff*.65;
+     if(amount<=.025)return;
+     bank.depth[i]-=amount;
+     pieces.push({x:6+i*step,amount,area:amount*step,depth});
     });return pieces;
    },
-   spill(node,dt,released){
+   spill(node,released,outlet){
     if(pause.current||reduced.matches||released<=0)return;
     const bank=banks.get(node);if(!bank)return;
     const rect=node.getBoundingClientRect(),bounds=root.getBoundingClientRect();
-    const count=Math.min(12,Math.ceil(released*rect.width*3));
+    bank.spillMass=(bank.spillMass??0)+released;
+    const burst=bank.spillMass;
+    if(burst<.023)return;
+    bank.spillMass=0;
+    const count=Math.min(14,Math.round(burst*490));
+    const source=rect.left-bounds.left+outlet*rect.width;
     for(let i=0;i<count&&debris.length<180;i++){
-     const life=1.2+Math.random()*.7;
-     debris.push({x:rect.left-bounds.left+5+Math.random()*(rect.width-10),y:rect.bottom-bounds.top-1,
-      vx:(Math.random()-.5)*30,vy:20+Math.random()*35,r:.6+Math.random()*1.8,
-      life,initial:life,angle:Math.random()*6.28,spin:(Math.random()-.5)*4,dust:i%4===0});
+     const spread=(Math.random()-.5)*2;
+     const life=.65+Math.random()*.6;
+     debris.push({x:source+spread*(5+Math.random()*8),y:rect.bottom-bounds.top-1,
+      vx:spread*(5+Math.random()*15),vy:9+Math.random()*28,r:.45+Math.random()*1.25,
+      life,initial:life,angle:Math.random()*6.28,spin:(Math.random()-.5)*5,dust:i%4===0});
     }
    },
    land(x,before,after,size){

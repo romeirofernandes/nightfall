@@ -129,11 +129,11 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 
 .snow-surfaces { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
 
-/* Holiday lettering stays part of the live, accessible headline. */
+/* The snow surface clips the contrasting label along the same contour. */
 .landing .landing-secondary { position: relative; isolation: isolate; overflow: hidden; }
 .button-snow-fill { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
 .snow-button-label { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
-.snow-button-label-filled { position: absolute; inset: 0; color: #173c43; pointer-events: none; clip-path: inset(calc(100% - var(--snow-fill, 0%)) 0 0); }
+.snow-button-label-filled { position: absolute; inset: 0; color: #173c43; pointer-events: none; clip-path: var(--snow-fill-shape, inset(100% 0 0)); }
 
 /* One continuous passage from the sky into the winter landscape. */
 .winter-journey { position: relative; isolation: isolate; }

@@ -62,6 +62,33 @@ def window_exists(title):
     ).returncode == 0
 
 
+def prepare_windows_screenshots():
+    user32 = windows_ui()
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        # Keep the hosted runner's log window out of the desktop screenshots.
+        terminal = user32.FindWindowW("CASCADIA_HOSTING_WINDOW_CLASS", None)
+        if terminal:
+            user32.ShowWindowAsync.argtypes = (wintypes.HWND, ctypes.c_int)
+            user32.ShowWindowAsync(terminal, 6)  # SW_MINIMIZE
+            user32.IsIconic.argtypes = (wintypes.HWND,)
+            wait_for(lambda: user32.IsIconic(terminal), "runner terminal to minimize")
+
+    area = wintypes.RECT()
+    user32.SystemParametersInfoW.argtypes = (
+        wintypes.UINT, wintypes.UINT, ctypes.c_void_p, wintypes.UINT
+    )
+    if not user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(area), 0):  # SPI_GETWORKAREA
+        raise ctypes.WinError(ctypes.get_last_error())
+    window = user32.FindWindowW(None, "Nightfall")
+    width = min(860, area.right - area.left - 40)
+    height = min(751, area.bottom - area.top - 36)
+    x = (area.left + area.right - width) // 2
+    y = (area.top + area.bottom - height) // 2
+    user32.MoveWindow.argtypes = (wintypes.HWND, *(ctypes.c_int,) * 4, wintypes.BOOL)
+    if not user32.MoveWindow(window, x, y, width, height, True):
+        raise ctypes.WinError(ctypes.get_last_error())
+
+
 def screenshot(name):
     directory = os.getenv("NIGHTFALL_SCREENSHOTS")
     if not directory:
@@ -101,6 +128,8 @@ def smoke(cli, config_dir):
         subprocess.run([renderer], check=True, capture_output=True, timeout=20)
         wait_for(lambda: window_exists("Nightfall"), "settings window")
         if os.getenv("NIGHTFALL_SCREENSHOTS"):
+            if WINDOWS:
+                prepare_windows_screenshots()
             # Let the settings webview paint and the running simulation fill the desktop.
             time.sleep(4)
             screenshot("settings")

@@ -29,9 +29,9 @@ const bulbCycle = featureBulbs.length * bulbInterval;
 const platforms = {
   mac: {
     name: 'macOS',
-    method: 'Homebrew',
+    method: 'Terminal',
     command: BREW,
-    instruction: 'When it finishes, open Nightfall from Applications.',
+    instruction: 'With Homebrew installed, run these commands in Terminal. Then open Nightfall from Applications.',
     links: [
       ['Get Homebrew', 'https://brew.sh/'],
       ['First-launch help', '/mac-help/'],
@@ -39,30 +39,36 @@ const platforms = {
     ],
   },
   linux: {
-    name: 'Arch + Hyprland',
+    name: 'Linux',
     method: 'Terminal',
     command: 'curl -fsSL https://raw.githubusercontent.com/romeirofernandes/nightfall/main/distribution/install.sh -o /tmp/nightfall-install.sh\nbash /tmp/nightfall-install.sh',
-    instruction: 'When it finishes, open Nightfall from your app launcher.',
+    instruction: 'Check the Linux requirements, then run these commands in your terminal and open Nightfall from your app launcher.',
     links: [['Linux requirements', repository + '/blob/main/distribution/README.md']],
+  },
+  windows: {
+    name: 'Windows',
+    method: 'PowerShell',
+    command: `& {
+  $script = Join-Path $env:TEMP 'nightfall-download-windows.ps1'
+  Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/romeirofernandes/nightfall/main/distribution/download-windows.ps1' -OutFile $script -ErrorAction Stop
+  & $script
+}`,
+    instruction: 'Once a Windows x64 release is published, run these commands in PowerShell or the PowerShell profile in Windows Terminal. Then open Nightfall from the extracted folder in Downloads.',
+    links: [['Windows requirements', repository + '/blob/main/distribution/README.md#windows'], ['Release downloads', RELEASE]],
   },
 };
 
-const windowsSetup = repository + '/tree/windows-support#download-nightfall-for-windows-x64';
-
 function InstallAction({openInstaller, platform}) {
-  const label = {mac: 'Install on macOS', linux: 'Install on Linux', windows: 'Windows setup'}[platform] ?? 'View desktop downloads';
-
-  if (platform === 'mac' || platform === 'linux') {
-    return (
-      <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller(platform)}>
-        <ArrowDownToLine aria-hidden="true" size={18}/>{label}
-      </button>
-    );
+  if (!platform) {
+    return <a data-snow-surface className="landing-button landing-primary" href="#get-nightfall">
+      <ArrowDownToLine aria-hidden="true" size={18}/>See install options
+    </a>;
   }
+
   return (
-    <a data-snow-surface className="landing-button landing-primary" href={platform === 'windows' ? windowsSetup : RELEASE}>
-      {label}<ArrowUpRight aria-hidden="true" size={15}/>
-    </a>
+    <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller(platform)}>
+      <ArrowDownToLine aria-hidden="true" size={18}/>Install on {platforms[platform].name}
+    </button>
   );
 }
 
@@ -77,7 +83,7 @@ function GithubSnowLink({field}) {
   );
 }
 
-function ChristmasFooter({theme, themes, platform, openInstaller, sweepTarget, field}) {
+function ChristmasFooter({theme, themes, openInstaller, sweepTarget, field}) {
   const [loaded, setLoaded] = useState([]);
   const [displayed, setDisplayed] = useState(theme);
   useEffect(() => {
@@ -95,8 +101,11 @@ function ChristmasFooter({theme, themes, platform, openInstaller, sweepTarget, f
         ))}
       </div>
       <div className="landing-shell winter-install-tray" ref={sweepTarget}>
-        <div className="landing-actions">
-          <InstallAction platform={platform} openInstaller={openInstaller}/>
+        <h2 id="platform-install-title">Get Nightfall</h2>
+        <div className="landing-actions" role="group" aria-labelledby="platform-install-title">
+          {Object.keys(platforms).map(platform => (
+            <InstallAction key={platform} platform={platform} openInstaller={openInstaller}/>
+          ))}
         </div>
         <nav className="landing-footer-links" aria-label="Footer">
           <a className="landing-link" href={RELEASE}>All downloads<ArrowUpRight aria-hidden="true" size={13}/></a>
@@ -248,29 +257,31 @@ export function Landing() {
           <SnowSurfaces field={featureSnowField}/>
         </div>
       </main>
-      <ChristmasFooter theme={theme} themes={foregroundThemes} platform={devicePlatform}
+      <ChristmasFooter theme={theme} themes={foregroundThemes}
         openInstaller={openInstaller} sweepTarget={installSnowTarget} field={footerSnowField}/>
       <dialog className="landing-dialog" ref={dialog} aria-labelledby="install-title">
         <div className="landing-dialog-header">
-          <h2 id="install-title">Install on {install.name}</h2>
+          <h2 id="install-title"><Snowflake size={28} aria-hidden="true"/>Install on {install.name}</h2>
           <form method="dialog"><button className="landing-button landing-close" aria-label="Close installation instructions"><X size={20} aria-hidden="true"/></button></form>
         </div>
-        <div className="landing-terminal">
-          <div className="landing-terminal-bar">
-            <span>{install.method}</span>
-            <button className="landing-button landing-copy-button" onClick={copyCommands}>
-              {copyState === 'copied' ? <Check size={15} aria-hidden="true"/> : <Copy size={15} aria-hidden="true"/>}
-              {copyState === 'copied' ? 'Copied' : 'Copy commands'}
-            </button>
+        <div className="landing-dialog-body">
+          <p>{install.instruction}</p>
+          <div className="landing-terminal">
+            <div className="landing-terminal-bar">
+              <span>{install.method}</span>
+              <button className="landing-button landing-copy-button" onClick={copyCommands}>
+                {copyState === 'copied' ? <Check size={15} aria-hidden="true"/> : <Copy size={15} aria-hidden="true"/>}
+                {copyState === 'copied' ? 'Copied' : 'Copy commands'}
+              </button>
+            </div>
+            <pre tabIndex={0} aria-label="Installation commands"><code>{install.command}</code></pre>
           </div>
-          <pre tabIndex={0} aria-label="Installation commands"><code>{install.command}</code></pre>
-        </div>
-        <span className="landing-status" role="status">
-          {copyState === 'error' ? 'Select and copy the commands above.' : copyState === 'copied' ? 'Installation commands copied.' : ''}
-        </span>
-        <p>{install.instruction}</p>
-        <div className="landing-help-links">
-          {install.links.map(([label, href]) => <a className="landing-link" key={href} href={href}>{label}<ArrowUpRight aria-hidden="true" size={14}/></a>)}
+          <span className="landing-status" role="status">
+            {copyState === 'error' ? 'Select and copy the commands above.' : copyState === 'copied' ? 'Installation commands copied.' : ''}
+          </span>
+          <div className="landing-help-links">
+            {install.links.map(([label, href]) => <a className="landing-link" key={href} href={href}>{label}<ArrowUpRight aria-hidden="true" size={14}/></a>)}
+          </div>
         </div>
       </dialog>
     </div>

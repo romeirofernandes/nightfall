@@ -46,11 +46,13 @@ or `~/Library/Application Support/app.nightfall.desktop` on macOS.
 
 ## Windows
 
-The portable x64 ZIP targets Windows 10 (1809 or later) and Windows 11 with
-[Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
-Extract both executables into the same folder. Open `nightfall-renderer.exe` for
-the tray app and settings. In PowerShell, use `.\nightfall.exe` for terminal
-controls or `.\nightfall.exe status` to check the running app.
+The x64 setup executable and portable ZIP target Windows 10 (1809 or later)
+and Windows 11 with [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
+The setup executable installs for the current user and adds Nightfall to the
+Start menu. It downloads the WebView2 bootstrapper if needed. For a portable
+setup, extract both executables into the same folder and open
+`nightfall-renderer.exe`. See the [Windows download instructions](../README.md#download-nightfall-for-windows-x64)
+for PowerShell, Command Prompt, and Git Bash commands.
 
 The snow fits each monitor's work area so the taskbar stays usable. It collects
 on the ground and on exposed top edges of visible windows. Snowball mode gives keyboard focus
@@ -58,9 +60,10 @@ to the overlay under your pointer. Restart Nightfall after changing the monitor 
 Settings live in `%APPDATA%\app.nightfall.desktop`. The CLI uses a private
 socket at `%LOCALAPPDATA%\Nightfall.sock` on a local NTFS volume. Windows
 limits that socket path to 107 UTF-8 bytes. To remove Nightfall, quit from the
-tray and delete the extracted folder. Settings stay in AppData.
+tray. If you used the installer, uninstall Nightfall from Windows Settings.
+For a portable copy, delete the extracted folder. Settings stay in AppData.
 
-The ZIP contains unsigned executables. Windows may show a SmartScreen prompt.
+The installer and portable executables are unsigned. Windows may show a SmartScreen prompt.
 
 ## Homebrew on macOS
 
@@ -92,8 +95,8 @@ NIGHTFALL_RENDERER="$PWD/../desktop/src-tauri/target/release/nightfall-renderer"
 
 A push of a matching `vMAJOR.MINOR.PATCH` tag triggers publication. The release
 workflow builds Linux x64 and ARM64, Apple Silicon and Intel Mac, and Windows x64.
-It verifies Mac signatures, smoke-tests the Windows ZIP, and publishes all five
-archives with SHA256SUMS after every release job passes. Branch and PR runs build
+It verifies Mac signatures, smoke-tests the Windows ZIP, and publishes all platform downloads
+with SHA256SUMS after every release job passes. Branch and PR runs build
 and test without uploading release archives.
 
 The separate macOS workflow supports optional Developer ID signing on a

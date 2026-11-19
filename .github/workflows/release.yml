@@ -62,12 +62,19 @@ jobs:
           cli=nightfall
           if [[ $RUNNER_OS == Windows ]]; then cli+=.exe; fi
           go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_REF_NAME#v}" -o "../$cli" .
+      - if: runner.os == 'Windows'
+        name: Build and test the Windows installer
+        shell: pwsh
+        run: |
+          ./scripts/build-windows-installer.ps1 -Cli nightfall.exe -OutputDirectory release-assets
+          $version = $env:GITHUB_REF_NAME.Substring(1)
+          python scripts/test-desktop.py "release-assets/Nightfall-$version-windows-x64-setup.exe"
       - name: Archive
         shell: bash
         run: |
           set -euo pipefail
           version=${GITHUB_REF_NAME#v}
-          mkdir release-assets
+          mkdir -p release-assets
           if [[ $RUNNER_OS == Linux ]]; then
             ldd desktop/src-tauri/target/release/nightfall-renderer | tee /tmp/nightfall-libraries
             ! grep 'not found' /tmp/nightfall-libraries
@@ -122,6 +129,7 @@ jobs:
             "Nightfall-$version-arm64.zip"
             "Nightfall-$version-x64.zip"
             "Nightfall-$version-windows-x64.zip"
+            "Nightfall-$version-windows-x64-setup.exe"
           )
           for asset in "${assets[@]}"; do test -s "$asset"; done
           sha256sum "${assets[@]}" > SHA256SUMS

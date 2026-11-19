@@ -22,19 +22,18 @@ Snow works on Hyprland, other Wayland compositors with layer-shell, and composit
 
 ### download Nightfall for Windows (x64)
 
-[Find the Windows download on GitHub Releases](https://github.com/romeirofernandes/nightfall/releases/latest) and look for `Nightfall-<version>-windows-x64.zip` under **Assets**. The ZIP will be available with the first tagged Windows release.
+Open [GitHub Releases](https://github.com/romeirofernandes/nightfall/releases/latest) and look under **Assets** once a tagged Windows release is available.
 
-1. Extract the ZIP into a folder.
-2. Double-click `nightfall-renderer.exe` to open Nightfall.
-3. For terminal controls, open PowerShell in that folder and run `.\nightfall.exe`.
+- **Installer:** Download `Nightfall-<version>-windows-x64-setup.exe`, double-click it, then open **Nightfall** from the Start menu.
+- **Portable:** Download and extract `Nightfall-<version>-windows-x64.zip`, then double-click `nightfall-renderer.exe`.
 
-**using PowerShell?** Save [download-windows.ps1](distribution/download-windows.ps1) and run this from the folder where you saved it.
+To download the portable ZIP from a shell, save [download-windows.ps1](distribution/download-windows.ps1) and run the command for your shell from the folder where you saved it. The script verifies the checksum and extracts Nightfall to a versioned folder under Downloads.
 
-```powershell
-.\download-windows.ps1
-```
-
-The script checks the ZIP against the release checksum and extracts it into a versioned folder under Downloads.
+| Shell | Download the portable ZIP | Open terminal controls from the app folder |
+| --- | --- | --- |
+| PowerShell | `.\download-windows.ps1` | `.\nightfall.exe` |
+| Command Prompt | `powershell.exe -NoProfile -File .\download-windows.ps1` | `nightfall.exe` |
+| Git Bash | `powershell.exe -NoProfile -File ./download-windows.ps1` | `winpty ./nightfall.exe` |
 
 See the [Windows setup details](distribution/README.md#windows) for the WebView2 requirement.
 

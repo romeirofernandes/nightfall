@@ -200,11 +200,22 @@ def main():
             os.environ["LOCALAPPDATA"] = str(local)
             config_dir = Path(os.environ["APPDATA"]) / "app.nightfall.desktop"
             install = root / "Nightfall Portable"
-            with zipfile.ZipFile(path) as archive:
-                assert set(archive.namelist()) == {"nightfall.exe", "nightfall-renderer.exe"}
-                assert archive.testzip() is None
-                archive.extractall(install)
-            smoke(install / "nightfall.exe", config_dir)
+            if path.suffix.lower() == ".exe":
+                # NSIS requires the last /D argument to be unquoted, even with spaces.
+                subprocess.run(f'"{path}" /S /D={install}', check=True, timeout=180)
+                uninstaller = install / "uninstall.exe"
+                assert uninstaller.is_file(), "installer did not create the uninstaller"
+                try:
+                    smoke(install / "nightfall.exe", config_dir)
+                finally:
+                    subprocess.run([uninstaller, "/S"], check=True, timeout=120)
+                    wait_for(lambda: not (install / "nightfall.exe").exists(), "uninstall")
+            else:
+                with zipfile.ZipFile(path) as archive:
+                    assert set(archive.namelist()) == {"nightfall.exe", "nightfall-renderer.exe"}
+                    assert archive.testzip() is None
+                    archive.extractall(install)
+                smoke(install / "nightfall.exe", config_dir)
         else:
             os.environ["XDG_CONFIG_HOME"] = str(root)
             smoke(path, root / "app.nightfall.desktop")

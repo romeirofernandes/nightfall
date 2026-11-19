@@ -1,0 +1,12 @@
+{
+  "bundle": {
+    "resources": {
+      "target/release/nightfall.exe": "nightfall.exe"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}

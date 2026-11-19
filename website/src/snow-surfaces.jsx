@@ -18,7 +18,8 @@ export function SnowSurfaces({field, paused}) {
     present.add(node);let bank=banks.get(node);
     const ledgeWidth=Math.max(1,rect.width*scaleX-12);
     if(!bank||Math.abs(bank.width-ledgeWidth)>1){bank=createBank(ledgeWidth);banks.set(node,bank);}
-    bank.scale=width>600?1.8:1;
+    bank.preview=node.dataset.snowSurface==='preview';
+    bank.scale=bank.preview?(width>600?3.4:1.65):width>600?1.8:1;
     bank.x=(rect.left-bounds.left)*scaleX+6;bank.y=(rect.top-bounds.top)*scaleY+.5;
    });
    for(const node of banks.keys())if(!present.has(node))banks.delete(node);
@@ -80,7 +81,18 @@ export function SnowSurfaces({field, paused}) {
     if(x<bank.x||x>bank.x+bank.width)continue;
     const i=Math.min(bank.depth.length-1,Math.floor((x-bank.x)/bank.width*(bank.depth.length-1)));
     const top=bank.y-bank.depth[i];
-    if(before<=top&&after>=top){deposit(bank,x-bank.x,.24+size*.4);return true;}
+    if(before<=top&&after>=top){
+     const localX=x-bank.x;
+     if(bank.preview){
+      // A cluster sticks across several samples instead of growing a row of spikes.
+      const sampleWidth=bank.width/(bank.depth.length-1);
+      const amount=3.1+size*2.4;
+      for(let offset=-3;offset<=3;offset++){
+       deposit(bank,localX+offset*sampleWidth,amount*(1-Math.abs(offset)/4));
+      }
+     }else deposit(bank,localX,.24+size*.4);
+     return true;
+    }
    }return false;
   }};
   field.current=manager;

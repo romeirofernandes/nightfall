@@ -1,11 +1,30 @@
 @font-face { font-family: Figtree; src: url('/fonts/figtree.woff2') format('woff2'); font-weight: 300 900; font-display: swap; }
+/* Share a single interpolated palette across the scroll handoff. */
+@property --background { syntax: '<color>'; inherits: true; initial-value: #eef4f8; }
+@property --sky { syntax: '<color>'; inherits: true; initial-value: #b8dafe; }
+@property --passage-drift { syntax: '<color>'; inherits: true; initial-value: #8bafca; }
+@property --passage-light { syntax: '<color>'; inherits: true; initial-value: #d7e8f5; }
+@property --sky-wash { syntax: '<color>'; inherits: true; initial-value: #b8dafe; }
+@property --scene-ink { syntax: '<color>'; inherits: true; initial-value: #0a2634; }
+@property --scene-muted { syntax: '<color>'; inherits: true; initial-value: #334e5b; }
 body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing {
   --background: #eef4f8; --sky: #b8dafe; --panel: #f7f9f7; --ink: #0a2634; --muted: #334e5b;
   --line: #b7c8cc; --field: #e9f0ee; --field-border: #a6b9bd; --field-hover: #d9e7e4;
   --accent: #226653; --button: #0c443b; --button-hover: #175a4e; --on-button: #fffef6;
+  --sky-wash: var(--sky);
+  --scene-ink: var(--ink); --scene-muted: var(--muted);
   isolation: isolate; color: var(--ink); background: var(--background); color-scheme: light;
   font: 400 16px/1.55 Figtree, system-ui, sans-serif;
+}
+@media (prefers-reduced-motion: no-preference) {
+ .landing {
+  transition:
+   --background 2600ms ease, --sky 2600ms ease, --sky-wash 2600ms ease,
+   --passage-drift 2600ms ease, --passage-light 2600ms ease,
+   --scene-ink 780ms step-end, --scene-muted 780ms step-end;
+ }
+ .winter-world::after { transition: opacity 2600ms ease; }
 }
 .landing *, .landing *::before, .landing *::after { box-sizing: border-box; }
 .landing button { font: inherit; color: inherit; cursor: pointer; }
@@ -15,7 +34,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing-hero { position: relative; isolation: isolate; overflow: hidden; min-height: max(760px, 100svh); }
 .winter-world { position: absolute; inset: 0; z-index: -3; background: var(--sky); overflow: hidden; }
 .winter-landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
-.winter-world::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky) 0%, transparent 40%); opacity: .25; }
+.winter-world::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky-wash) 0%, transparent 40%); opacity: .25; }
 .landing-snow { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 .landing-snow canvas { display: block; width: 100%; height: 100%; }
 .landing-header { min-height: 96px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
@@ -34,6 +53,8 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing-copy h1 { margin: 0; font: 400 clamp(64px, 6.65vw, 110px)/1.22 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
 .landing-copy h1 span { white-space: nowrap; }
 .landing-copy > p { margin: 18px 0 28px; color: var(--muted); font-size: clamp(18px, 1.8vw, 26px); line-height: 1.5; }
+.landing-header, .landing-copy h1, .winter-passage h2 { color: var(--scene-ink); }
+.landing-copy > p, .winter-passage p, .landing .landing-footer { color: var(--scene-muted); }
 .landing-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; }
 .landing-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 11px 22px; border: 1px solid var(--field-border); border-radius: 9px; background: var(--field); font-weight: 550; font-size: 15px; transition: background-color 180ms, transform 180ms, border-color 180ms; }
 .landing-button:hover { background: var(--field-hover); transform: translateY(-1px); }
@@ -91,24 +112,26 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 @media (prefers-reduced-motion: reduce) { .landing *, .landing *::before, .landing *::after { animation: none!important; transition: none!important; scroll-behavior: auto!important; } }
 
 /* The same winter, lit four ways. Imagery changes with the atmosphere. */
-.landing[data-theme="morning"] { --sky: #c5def7; }
-.landing[data-theme="evening"] { --sky: #f4dfca; --background: #f7eee3; --panel: #fff8ef; --ink: #352f2b; --muted: #55473d; --accent: #8b422c; }
+.landing[data-theme="morning"] { --sky: #c5def7; --sky-wash: #ffeac866; --passage-drift: #93b5ce; --passage-light: #edf0ed; }
+.landing[data-theme="evening"] { --sky: #f4dfca; --background: #f7eee3; --panel: #fff8ef; --ink: #352f2b; --muted: #55473d; --accent: #8b422c; --passage-drift: #a69bb5; --passage-light: #fae3d4; }
 .landing[data-theme="night"] {
   --sky: #081a2d; --background: #081827; --panel: #122b3e; --ink: #f6f4e9; --muted: #c5d6e2;
   --line: #365165; --field: #1e3b4e; --field-border: #587184; --field-hover: #2b4b60;
   --accent: #f2cf8e; --button: #f0e8cf; --button-hover: #fff6df; --on-button: #183a35;
+  --passage-drift: #284f73; --passage-light: #264461;
   color-scheme: dark;
 }
 .winter-landscape { opacity: 0; transition: opacity 1200ms ease; }
 .winter-landscape[data-active="true"] { opacity: 1; }
-.landing[data-theme="morning"] .winter-world::after { opacity: .5; background: linear-gradient(165deg, #ffeac833, transparent 55%); }
+.landing[data-theme="morning"] .winter-world::after { opacity: .5; }
 .landing[data-theme="night"] .winter-world::after { opacity: .12; }
 .landing[data-theme="night"] .landing-secondary { border-color: #bfd7e48c; background: #081c3033; }
 .landing[data-theme="night"] .landing-secondary:hover { background: #48677c66; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 @media (max-width: 600px) {
-  .landing[data-theme="morning"] .winter-world::after { background: linear-gradient(180deg, #c5def7 0%, transparent 75%); opacity: .4; }
-  .landing[data-theme="night"] .winter-world::after { background: linear-gradient(180deg, #081a2d 0%, transparent 75%); opacity: .8; }
+  .winter-world::after { background: linear-gradient(180deg, var(--sky) 0%, transparent 75%); }
+  .landing[data-theme="morning"] .winter-world::after { opacity: .4; }
+  .landing[data-theme="night"] .winter-world::after { opacity: .8; }
 }
 @media (max-width: 420px) { .landing-github { width: 44px; } .landing-github span { display: none; } }
 
@@ -151,8 +174,6 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-scroll-cue { position: absolute; bottom: 28px; left: calc(50% - 22px); width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid #ffffff70; border-radius: 50%; background: #12332f99; color: #fffdf0!important; z-index: 3; transition: background 180ms; }
 .winter-scroll-cue:hover { background: #12332fe6; }
 .winter-passage {
- --passage-drift: #8bafca;
- --passage-light: #d7e8f5;
  position: relative;
  z-index: 3;
  min-height: 100svh;
@@ -160,9 +181,6 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  align-items: center;
  pointer-events: none;
 }
-.landing[data-theme="morning"] .winter-passage { --passage-drift: #93b5ce; --passage-light: #edf0ed; }
-.landing[data-theme="evening"] .winter-passage { --passage-drift: #a69bb5; --passage-light: #fae3d4; }
-.landing[data-theme="night"] .winter-passage { --passage-drift: #284f73; --passage-light: #264461; }
 .winter-passage::before {
  content: '';
  position: absolute;
@@ -182,7 +200,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-passage-snow canvas { display: block; width: 100%; height: 100%; }
 .winter-passage-copy { position: relative; z-index: 2; padding-block: clamp(76px, 12vh, 120px) 42px; text-align: center; }
 .winter-passage h2 { margin: 0; font: 400 clamp(36px, 5vw, 70px)/1.18 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
-.winter-passage p { margin: 14px auto 0; max-width: 44ch; color: var(--muted); font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; text-wrap: pretty; }
+.winter-passage p { margin: 14px auto 0; max-width: 44ch; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; text-wrap: pretty; }
 .winter-desktop-preview {
  position: relative;
  width: min(100%, 1080px, max(720px, 110svh));

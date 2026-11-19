@@ -123,8 +123,8 @@ export function Landing() {
               <img src="/nightfall-desktop.webp" width="1600" height="1041" loading="lazy" decoding="async"
                 alt="Nightfall running on macOS, with falling snow, Christmas lights, and snow settled along the top of its Weather window."/>
               <div className="winter-preview-weather" aria-hidden="true">
-                <div className="winter-preview-ledge" data-snow-surface/>
-                <Snow density={0} wind={7} paused={snowPaused} surfaces={previewSnowField}/>
+                <div className="winter-preview-ledge" data-snow-surface="preview"/>
+                <Snow density={1} wind={7} paused={snowPaused} surfaces={previewSnowField}/>
                 <SnowSurfaces field={previewSnowField} paused={snowPaused}/>
               </div>
             </figure>

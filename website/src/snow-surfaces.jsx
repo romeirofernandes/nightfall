@@ -7,19 +7,29 @@ export function SnowSurfaces({field, paused}) {
  useEffect(()=>{
   const el=canvas.current, root=el.parentElement, ctx=el.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const banks=new Map(), debris=[], strokes=[];let width=1,height=1,raf,last=0,previous=null,gesture=null,suppressUntil=0,visible=false;
+  const banks=new Map(), debris=[], strokes=[];
+  let occluders=[];let width=1,height=1,raf,last=0,previous=null,gesture=null,suppressUntil=0,visible=false;
   function measure(){
    const bounds=root.getBoundingClientRect();width=root.clientWidth;height=root.clientHeight;
    const scaleX=width/Math.max(1,bounds.width),scaleY=height/Math.max(1,bounds.height);
    const d=Math.min(devicePixelRatio||1,2);if(el.width!==Math.round(width*d)||el.height!==Math.round(height*d)){el.width=Math.round(width*d);el.height=Math.round(height*d);ctx.setTransform(d,0,0,d,0,0);}
    const present=new Set();
+   occluders=[];
    root.querySelectorAll('[data-snow-surface]').forEach(node=>{
-    const rect=node.getBoundingClientRect();if(!rect.width||!rect.height||getComputedStyle(node).visibility==='hidden')return;
+    const rect=node.getBoundingClientRect(), style=getComputedStyle(node);
+    if(!rect.width||!rect.height||style.visibility==='hidden')return;
+    if(node.hasAttribute('data-snow-occluder')){
+     occluders.push({node,radius:parseFloat(style.borderTopLeftRadius)||0});
+    }
     present.add(node);let bank=banks.get(node);
     const ledgeWidth=Math.max(1,rect.width*scaleX-12);
-    if(!bank||Math.abs(bank.width-ledgeWidth)>1){bank=createBank(ledgeWidth);banks.set(node,bank);}
-    bank.preview=node.dataset.snowSurface==='preview';
-    bank.scale=bank.preview?(width>600?2.05:1.2):width>600?1.8:1;
+    if(!bank||Math.abs(bank.width-ledgeWidth)>1){
+     bank=createBank(ledgeWidth);
+     bank.visibleDepth=bank.depth.slice();
+     banks.set(node,bank);
+    }
+    bank.wideSurface=Boolean(node.dataset.snowSurface);
+    bank.scale=bank.wideSurface?(width>600?2.05:1.2):width>600?1.8:1;
     bank.x=(rect.left-bounds.left)*scaleX+6;bank.y=(rect.top-bounds.top)*scaleY+.5;
    });
    for(const node of banks.keys())if(!present.has(node))banks.delete(node);
@@ -40,6 +50,8 @@ export function SnowSurfaces({field, paused}) {
    }
   }
   const manager={
+   getBounds() { return root.getBoundingClientRect(); },
+   getOccluders() { return occluders; },
    take(node,dt){
     if(pause.current||reduced.matches)return [];
     const bank=banks.get(node);if(!bank)return [];
@@ -80,10 +92,10 @@ export function SnowSurfaces({field, paused}) {
    for(const bank of [...banks.values()].sort((a,b)=>a.y-b.y)){
     if(x<bank.x||x>bank.x+bank.width)continue;
     const i=Math.min(bank.depth.length-1,Math.floor((x-bank.x)/bank.width*(bank.depth.length-1)));
-    const top=bank.y-bank.depth[i];
+    const top=bank.y-bank.visibleDepth[i];
     if(before<=top&&after>=top){
      const localX=x-bank.x;
-     if(bank.preview){
+     if(bank.wideSurface){
       // A cluster sticks across several samples instead of growing a row of spikes.
       const sampleWidth=bank.width/(bank.depth.length-1);
       const amount=1.05+size*.75;
@@ -139,20 +151,29 @@ export function SnowSurfaces({field, paused}) {
     }
    }else strokes.length=0;
    for(const bank of banks.values()){
-    if(!stopped)scatter(bank,settle(bank,dt));
-    const step=bank.width/(bank.depth.length-1);
+    if(!stopped){
+     scatter(bank,settle(bank,dt));
+     // Ease each landed clump into the visible drift while the bank tracks real volume.
+     const blend=1-Math.exp(-dt*(bank.wideSurface?6:9));
+     for(let i=0;i<bank.depth.length;i++){
+      const difference=bank.depth[i]-bank.visibleDepth[i];
+      bank.visibleDepth[i]+=Math.abs(difference)<.015?difference:difference*blend;
+     }
+    }
+    const depth=bank.visibleDepth;
+    const step=bank.width/(depth.length-1);
     // Rounded powder drifts, not a stroked polygon or an overflowing ledge.
     const outline=()=>{
      ctx.beginPath();ctx.moveTo(bank.x,bank.y);
-     for(let i=0;i<bank.depth.length-1;i++){
-      const x=bank.x+i*step, next=bank.depth[i+1];
-      ctx.quadraticCurveTo(x,bank.y-bank.depth[i],x+step*.5,bank.y-(bank.depth[i]+next)*.5);
+     for(let i=0;i<depth.length-1;i++){
+      const x=bank.x+i*step, next=depth[i+1];
+      ctx.quadraticCurveTo(x,bank.y-depth[i],x+step*.5,bank.y-(depth[i]+next)*.5);
      }
      ctx.lineTo(bank.x+bank.width,bank.y);
      // A slightly broken contact edge binds the powder to the underlying surface.
-     for(let i=bank.depth.length-1;i>=0;i--){
-      const u=i/(bank.depth.length-1);
-      ctx.lineTo(bank.x+i*step,bank.y+Math.min(bank.depth[i]*.22,.7)*Math.sin(u*31+bank.width));
+     for(let i=depth.length-1;i>=0;i--){
+      const u=i/(depth.length-1);
+      ctx.lineTo(bank.x+i*step,bank.y+Math.min(depth[i]*.22,.7)*Math.sin(u*31+bank.width));
      }ctx.closePath();
     };
     const shade=ctx.createLinearGradient(0,bank.y-7,0,bank.y+1);
@@ -162,14 +183,14 @@ export function SnowSurfaces({field, paused}) {
     outline();ctx.fillStyle=shade;ctx.fill();
     // Fine, stable granules give the surface a powder edge without frame-to-frame noise.
     ctx.save();outline();ctx.clip();
-    for(let i=0;i<bank.depth.length*3;i++){
+    for(let i=0;i<depth.length*3;i++){
      const u=(Math.sin(i*127.1+bank.width)*43758.5453)%1;
      const x=Math.abs(u)*bank.width;
-     const index=Math.min(bank.depth.length-1,Math.floor(x/step));
-     const depth=bank.depth[index];if(depth<.3)continue;
+     const index=Math.min(depth.length-1,Math.floor(x/step));
+     const sample=depth[index];if(sample<.3)continue;
      const fraction=Math.abs(Math.sin(i*73.7));
      ctx.globalAlpha=.14+fraction*.2;ctx.fillStyle=i%3?'#fffef4':'#7e9db2';
-     ctx.beginPath();ctx.ellipse(bank.x+x,bank.y-depth*fraction,.25+fraction*.35,.2+fraction*.25,0,0,Math.PI*2);ctx.fill();
+     ctx.beginPath();ctx.ellipse(bank.x+x,bank.y-sample*fraction,.25+fraction*.35,.2+fraction*.25,0,0,Math.PI*2);ctx.fill();
     }ctx.restore();ctx.globalAlpha=1;
    }
    ctx.fillStyle=night?'#dcebf4':'#f2f7fa';

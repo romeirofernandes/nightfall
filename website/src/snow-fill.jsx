@@ -21,6 +21,7 @@ export function SnowFill({paused, field}) {
     const ctx = el.getContext('2d');
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     let state = {fill: 0, phase: 'filling', elapsed: 0};
+    let visibleFill = 0;
     let hover = false, focus = false, raf = 0, last = 0;
     let w = 1, h = 1, spawn = 0, outlet = .5;
     const falling = [];
@@ -30,20 +31,20 @@ export function SnowFill({paused, field}) {
     const suspended = () => frozen.current || document.hidden || !!landing.querySelector('dialog[open]');
 
     function surface() {
-      const fullness = Math.min(1, state.fill * 5, (1 - state.fill) * 12);
+      const fullness = Math.min(1, visibleFill * 5, (1 - visibleFill) * 12);
       const slump = state.phase === 'draining' ? Math.sin(Math.PI * Math.min(1, state.elapsed / 3.6)) * 6 : 0;
       for (let i = 0; i < SAMPLE_COUNT; i++) {
         const u = i / (SAMPLE_COUNT - 1);
         const contour = Math.sin(u * 14) * .6 + Math.sin(u * 31 + 2) * .28;
         const sag = slump * Math.exp(-((u - outlet) ** 2) / .018);
-        edge[i] = Math.max(0, Math.min(h, h * (1 - state.fill) + fullness * (contour - drifts[i] + sag)));
+        edge[i] = Math.max(0, Math.min(h, h * (1 - visibleFill) + fullness * (contour - drifts[i] + sag)));
       }
     }
 
     function paint() {
       surface();
       ctx.clearRect(0, 0, w, h);
-      if (state.fill > 0) {
+      if (visibleFill > 0) {
         ctx.beginPath();
         ctx.moveTo(0, h);
         for (let i = 0; i < SAMPLE_COUNT; i++) ctx.lineTo(i * w / (SAMPLE_COUNT - 1), edge[i]);
@@ -176,10 +177,12 @@ export function SnowFill({paused, field}) {
         if (active || falling.length || before === 'draining') {
           for (let i = 0; i < SAMPLE_COUNT; i++) drifts[i] *= Math.exp(-dt * 1.1);
         }
+        const difference = state.fill - visibleFill;
+        visibleFill += Math.abs(difference) < .0005 ? difference : difference * (1 - Math.exp(-dt * 14));
         paint();
       }
       raf = 0;
-      if ((active || state.phase === 'draining' || falling.length || powder.length) && !reduced.matches) {
+      if ((active || state.phase === 'draining' || falling.length || powder.length || visibleFill !== state.fill) && !reduced.matches) {
         raf = requestAnimationFrame(run);
       }
     }
@@ -190,9 +193,10 @@ export function SnowFill({paused, field}) {
       if (reduced.matches) {
         if (active && !suspended() && state.phase === 'filling') {
           state = {...state, fill: Math.min(.92, state.fill + .012)};
+          visibleFill = state.fill;
           paint();
         }
-      } else if (!raf && (active || state.phase === 'draining' || falling.length || powder.length)) {
+      } else if (!raf && (active || state.phase === 'draining' || falling.length || powder.length || visibleFill !== state.fill)) {
         last = performance.now();
         raf = requestAnimationFrame(run);
       }
@@ -204,7 +208,7 @@ export function SnowFill({paused, field}) {
     const motionChanged = () => {
       cancelAnimationFrame(raf);
       raf = 0;
-      if (reduced.matches) { falling.length = 0; powder.length = 0; paint(); }
+      if (reduced.matches) { falling.length = 0; powder.length = 0; visibleFill = state.fill; paint(); }
       else updateActivity();
     };
     button.addEventListener('pointerenter', enter);

@@ -3,14 +3,27 @@ import {Snowflake,Minus,Square,X,Play,Pause,Wind,RotateCcw,ArrowUpRight,Music,Fo
 
 export function Contours({className=''}){return <svg className={'contour-map '+className} viewBox="0 0 1200 800" preserveAspectRatio="none" fill="none" aria-hidden="true"><g stroke="currentColor" strokeWidth=".7">{Array.from({length:19},(_,i)=><path key={i} d={`M${-180+i*18},${850-i*15} C${100+i*4},${500-i*25} ${800-i*30},${800-i*13} ${900-i*12},${420-i*18} S${1250-i*9},${60+i*3} ${1310-i*10},${-160+i*18}`}/>)}</g></svg>}
 
-export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false,atmosphere=false,surfaces=null,passageTheme}){
+export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=false,atmosphere=false,surfaces=null,passageTheme,surfaceFields,sweepTarget}){
  const canvas=useRef(null),config=useRef({density,wind,paused,obstacle,onCount,passageTheme});
  useEffect(()=>{config.current={density,wind,paused,obstacle,onCount,passageTheme};},[density,wind,paused,obstacle,onCount,passageTheme]);
  useEffect(()=>{
   const el=canvas.current,ctx=el.getContext('2d');let w=1,h=1,raf,last=0,t=0,frame=0,bank=Array(70).fill(1),lastObstacle=null,visible=true,mobile=false;
-  let stillPassage=null;
+  let stillPassage=null, stillScroll=null;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const flakes=Array.from({length:atmosphere?310:95},()=>({x:Math.random(),y:Math.random(),z:Math.random(),p:Math.random()*6.28}));
+  const touch=matchMedia('(hover: none), (pointer: coarse)');
+  const sweepArea=sweepTarget?.current;
+  let cursor=null, sweepElapsed=null, swept=false;
+  const rememberCursor=event=>{
+   if(event.pointerType!=='touch')cursor={x:event.clientX,y:event.clientY,at:performance.now()};
+  };
+  const clearCursor=()=>{cursor=null;};
+  sweepArea?.addEventListener('pointermove',rememberCursor,{passive:true});
+  sweepArea?.addEventListener('pointerleave',clearCursor);
+  const sweepObserver=sweepArea?new IntersectionObserver(([entry])=>{
+   if(entry.intersectionRatio>=.45&&touch.matches&&!reduced.matches&&!swept){sweepElapsed=0;swept=true;}
+  },{threshold:.45}):null;
+  if(sweepObserver)sweepObserver.observe(sweepArea);
+  const flakes=Array.from({length:surfaceFields?245:atmosphere?310:95},()=>({x:Math.random(),y:Math.random(),z:Math.random(),p:Math.random()*6.28}));
   const resize=()=>{w=el.clientWidth;h=el.clientHeight;mobile=(atmosphere||surfaces)&&w<=600;if(mobile&&flakes.length>90)flakes.length=90;const d=Math.min(devicePixelRatio||1,1.5);el.width=w*d;el.height=h*d;ctx.setTransform(d,0,0,d,0,0);stillPassage=null;};
   const ro=new ResizeObserver(resize);ro.observe(el);resize();
   const io=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting});io.observe(el);
@@ -18,9 +31,28 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
    raf=requestAnimationFrame(loop);if(now-last<32||!visible||document.hidden)return;
    const dt=Math.min((now-last)/1000,.05);last=now;const c=config.current;const stopped=c.paused||reduced.matches;
    const passage=c.passageTheme!==undefined;
-   if(passage&&stopped&&stillPassage===c)return;
+   if(passage&&stopped&&stillPassage===c&&(!surfaceFields||stillScroll===window.scrollY))return;
    stillPassage=passage&&stopped?c:null;
-   const target=passage?(w<=600?64:176):mobile?[30,60,90][c.density]:[65,145,310][c.density];
+   stillScroll=stillPassage?window.scrollY:null;
+   const target=surfaceFields?(w<=600?76:245):passage?(w<=600?32:88)*(c.density===0?1:2):mobile?[30,60,90][c.density]:[65,145,310][c.density];
+   const view=surfaceFields?el.getBoundingClientRect():null;
+   // Convert viewport snowfall into the local coordinates of each visible snow surface.
+   const sinks=view?surfaceFields.flatMap(field=>{
+    const layer=field.current;
+    const bounds=layer?.getBounds();
+    if(!bounds||bounds.bottom<=view.top||bounds.top>=view.bottom)return [];
+    return [{layer,x:view.left-bounds.left,y:view.top-bounds.top}];
+   }):[];
+   let gust=cursor&&now-cursor.at<170?cursor:null;
+   if(view&&!stopped&&sweepElapsed!==null){
+    sweepElapsed+=dt;
+    const progress=Math.min(1,sweepElapsed/1.65);
+    const bounds=sweepArea.getBoundingClientRect();
+    const across=progress*progress*(3-2*progress);
+    gust={x:bounds.left+bounds.width*(.04+.92*across),y:bounds.top+bounds.height*.64};
+    if(progress===1)sweepElapsed=null;
+   }
+   const driftDrag=Math.exp(-dt*4);
    if(!stopped){t+=dt;if(flakes.length<target)for(let i=0;i<3;i++)flakes.push({x:Math.random(),y:-.01,z:Math.random(),p:Math.random()*6.28});if(flakes.length>target)flakes.length=target;}
    let ob=c.obstacle;if(ob&&lastObstacle&&(Math.abs(ob.x-lastObstacle.x)+Math.abs(ob.y-lastObstacle.y)>.001))bank.fill(1);lastObstacle=ob;
    ctx.clearRect(0,0,w,h);
@@ -28,8 +60,23 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
    const count=Math.min(flakes.length,target);
    for(let i=0;i<count;i++){
     const f=flakes[i];
-    if(!stopped){const old=f.y;f.y+=(14+f.z*35)*dt/Math.max(h,1);f.x=(f.x+(c.wind+Math.sin(t*.7+f.p)*12)*dt/Math.max(w,1)+1)%1;
-     if(surfaces?.current?.land(f.x*w,old*h,f.y*h,f.z)){f.y=-.01;f.x=Math.random();}
+    if(!stopped){
+     const old=f.y;
+     if(view){
+      f.vx=(f.vx??0)*driftDrag; f.vy=(f.vy??0)*driftDrag;
+      if(gust){
+       const dx=f.x*w+view.left-gust.x, dy=f.y*h+view.top-gust.y;
+       const distance=Math.max(1,Math.hypot(dx,dy));
+       const push=Math.max(0,1-distance/(w<=600?70:108))**1.5*dt*1050;
+       f.vx+=dx/distance*push; f.vy+=dy/distance*push;
+      }
+     }
+     f.y+=(14+f.z*35+(f.vy??0))*dt/Math.max(h,1);
+     f.x=(f.x+(c.wind+Math.sin(t*.7+f.p)*12+(f.vx??0))*dt/Math.max(w,1)+1)%1;
+     if(surfaces?.current?.land(f.x*w,old*h,f.y*h,f.z)||
+        sinks.some(({layer,x,y})=>layer.land(f.x*w+x,old*h+y,f.y*h+y,f.z))){
+      f.y=-.01;f.x=Math.random();f.vx=0;f.vy=0;
+     }
      if(ob&&f.x>=ob.x&&f.x<ob.x+ob.width){const i=Math.min(69,Math.floor((f.x-ob.x)/ob.width*69));if(old<=ob.y-bank[i]/h&&f.y>=ob.y-bank[i]/h){bank[i]=Math.min(13,bank[i]+.6);f.y=-.01;f.x=Math.random();}}
      if(f.y>1.01){f.y=-.01;f.x=Math.random();}}
     const x=f.x*w, y=f.y*h, angle=Math.sin(t+f.p)*.3;
@@ -50,12 +97,32 @@ export function Snow({density=1,wind=12,paused=false,obstacle=null,onCount,flat=
     ctx.fill();
    }
    ctx.globalAlpha=1;
+   if(view){
+    // Keep the shared flakes moving and colliding while the artwork hides their passage.
+    ctx.save();
+    ctx.globalCompositeOperation='destination-out';
+    ctx.fillStyle='#000';
+    for(const {layer} of sinks){
+     for(const {node,radius} of layer.getOccluders()){
+      const rect=node.getBoundingClientRect();
+      if(rect.bottom<=view.top||rect.top>=view.bottom)continue;
+      ctx.beginPath();
+      ctx.roundRect(rect.left-view.left,rect.top-view.top,rect.width,rect.height,radius);
+      ctx.fill();
+     }
+    }
+    ctx.restore();
+   }
    if(ob){const copy=bank.slice();if(!stopped)bank=bank.map((v,i)=>v+(copy[Math.max(0,i-1)]+copy[Math.min(69,i+1)]-2*v)*dt);
     ctx.fillStyle=flat?'#e4ead6':'#e0edf4';ctx.beginPath();ctx.moveTo(ob.x*w,ob.y*h+1);bank.forEach((v,i)=>ctx.lineTo((ob.x+i*ob.width/69)*w,ob.y*h-v));ctx.lineTo((ob.x+ob.width)*w,ob.y*h+1);ctx.fill();}
    if(++frame%30===0)c.onCount?.(flakes.length);
   };raf=requestAnimationFrame(loop);
-  return()=>{cancelAnimationFrame(raf);ro.disconnect();io.disconnect();};
- },[flat,atmosphere,surfaces]);
+  return()=>{
+   cancelAnimationFrame(raf);ro.disconnect();io.disconnect();sweepObserver?.disconnect();
+   sweepArea?.removeEventListener('pointermove',rememberCursor);
+   sweepArea?.removeEventListener('pointerleave',clearCursor);
+  };
+ },[flat,atmosphere,surfaces,surfaceFields,sweepTarget]);
  return <canvas className="snow-canvas" ref={canvas} aria-hidden="true"/>;
 }
 

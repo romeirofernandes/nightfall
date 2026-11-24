@@ -8,7 +8,7 @@ import {SnowFill} from './snow-fill';
 import {SnowSurfaces} from './snow-surfaces';
 import {Celestial} from './celestial';
 import {useWinterTime} from './use-winter-time';
-import {detectInstallPlatform} from './install-platform';
+import {detectInstallPlatform, getWindowsDownloads} from './install-platform';
 import {useWinterScroll} from './use-winter-scroll';
 import './landing.css';
 
@@ -46,14 +46,17 @@ const platforms = {
     instruction: 'When it finishes, open Nightfall from your app launcher.',
     links: [['Linux requirements', repository + '/blob/main/distribution/README.md']],
   },
+  windows: {
+    name: 'Windows',
+    links: [['Windows requirements', repository + '/blob/main/distribution/README.md#windows'], ['GitHub Releases', RELEASE]],
+  },
 };
 
-const windowsSetup = repository + '/tree/windows-support#download-nightfall-for-windows-x64';
+const latestReleaseApi = 'https://api.github.com/repos/romeirofernandes/nightfall/releases/latest';
 
 function InstallAction({openInstaller, platform}) {
-  const label = {mac: 'Install on macOS', linux: 'Install on Linux', windows: 'Windows setup'}[platform] ?? 'View desktop downloads';
-
-  if (platform === 'mac' || platform === 'linux') {
+  const label = {mac: 'Install on macOS', linux: 'Install on Linux', windows: 'Get Nightfall for Windows'}[platform];
+  if (label) {
     return (
       <button data-snow-surface className="landing-button landing-primary" aria-haspopup="dialog" onClick={() => openInstaller(platform)}>
         <ArrowDownToLine aria-hidden="true" size={18}/>{label}
@@ -61,9 +64,31 @@ function InstallAction({openInstaller, platform}) {
     );
   }
   return (
-    <a data-snow-surface className="landing-button landing-primary" href={platform === 'windows' ? windowsSetup : RELEASE}>
-      {label}<ArrowUpRight aria-hidden="true" size={15}/>
+    <a data-snow-surface className="landing-button landing-primary" href={RELEASE}>
+      View desktop downloads<ArrowUpRight aria-hidden="true" size={15}/>
     </a>
+  );
+}
+
+function WindowsDownloads({release}) {
+  const {installer, portable} = release ?? {};
+  const status = release === null ? 'Checking GitHub for the Windows x64 download…'
+    : release === 'error' ? 'Couldn’t check the Windows download. Open GitHub Releases to check manually.'
+    : installer || portable ? 'Windows x64 downloads are available.'
+    : 'A Windows x64 download has yet to be published on GitHub.';
+
+  return (
+    <>
+      <p role="status">{status}</p>
+      {(installer || portable) && (
+        <div className="landing-help-links">
+          {installer && <a className="landing-button landing-primary" href={installer}><ArrowDownToLine aria-hidden="true" size={18}/>Download installer (.exe)</a>}
+          {portable && <a className={installer ? 'landing-link' : 'landing-button landing-primary'} href={portable}><ArrowDownToLine aria-hidden="true" size={18}/>Download portable ZIP</a>}
+        </div>
+      )}
+      {installer && <p>Run the installer, then open Nightfall from the Start menu.</p>}
+      {portable && <p>For the portable version, extract the ZIP and open <code>nightfall-renderer.exe</code>.</p>}
+    </>
   );
 }
 
@@ -128,6 +153,7 @@ export function Landing() {
   const foregroundThemes = seenThemes.includes(theme) ? seenThemes : [...seenThemes, theme];
   const [platform, setPlatform] = useState('mac');
   const [copyState, setCopyState] = useState('');
+  const [windowsRelease, setWindowsRelease] = useState(null);
   const install = platforms[platform];
   useWinterScroll(hero);
   useEffect(() => {
@@ -143,6 +169,17 @@ export function Landing() {
   }, []);
   function openInstaller(platform) {
     setPlatform(platform); setCopyState(''); dialog.current.showModal();
+    if (platform === 'windows') checkWindowsRelease();
+  }
+  async function checkWindowsRelease() {
+    setWindowsRelease(null);
+    try {
+      const response = await fetch(latestReleaseApi, {signal: AbortSignal.timeout(8000)});
+      if (!response.ok) throw new Error('GitHub release lookup failed');
+      setWindowsRelease(getWindowsDownloads(await response.json(), RELEASE));
+    } catch {
+      setWindowsRelease('error');
+    }
   }
   async function copyCommands() {
     try { await navigator.clipboard.writeText(install.command); setCopyState('copied'); }
@@ -240,6 +277,7 @@ export function Landing() {
           <h2 id="install-title">Install on {install.name}</h2>
           <form method="dialog"><button className="landing-button landing-close" aria-label="Close installation instructions"><X size={20} aria-hidden="true"/></button></form>
         </div>
+        {platform === 'windows' ? <WindowsDownloads release={windowsRelease}/> : <>
         <div className="landing-terminal">
           <div className="landing-terminal-bar">
             <span>{install.method}</span>
@@ -254,6 +292,7 @@ export function Landing() {
           {copyState === 'error' ? 'Select and copy the commands above.' : copyState === 'copied' ? 'Installation commands copied.' : ''}
         </span>
         <p>{install.instruction}</p>
+        </>}
         <div className="landing-help-links">
           {install.links.map(([label, href]) => <a className="landing-link" key={href} href={href}>{label}<ArrowUpRight aria-hidden="true" size={14}/></a>)}
         </div>

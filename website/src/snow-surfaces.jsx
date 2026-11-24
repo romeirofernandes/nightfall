@@ -7,7 +7,7 @@ export function SnowSurfaces({field, paused}) {
  useEffect(()=>{
   const el=canvas.current, root=el.parentElement, ctx=el.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const banks=new Map(), debris=[], strokes=[];
+  const banks=new Map(), spillMass=new WeakMap(), debris=[], strokes=[];
   let occluders=[];let width=1,height=1,raf,last=0,previous=null,gesture=null,suppressUntil=0,visible=false;
   function measure(){
    const bounds=root.getBoundingClientRect();width=root.clientWidth;height=root.clientHeight;
@@ -22,7 +22,8 @@ export function SnowSurfaces({field, paused}) {
      occluders.push({node,radius:parseFloat(style.borderTopLeftRadius)||0});
     }
     present.add(node);let bank=banks.get(node);
-    const ledgeWidth=Math.max(1,rect.width*scaleX-12);
+    const inset=node.dataset.snowSurface==='segmented'?1:6;
+    const ledgeWidth=Math.max(1,rect.width*scaleX-2*inset);
     if(!bank||Math.abs(bank.width-ledgeWidth)>1){
      bank=createBank(ledgeWidth);
      bank.visibleDepth=bank.depth.slice();
@@ -30,7 +31,7 @@ export function SnowSurfaces({field, paused}) {
     }
     bank.wideSurface=Boolean(node.dataset.snowSurface);
     bank.scale=bank.wideSurface?(width>600?2.05:1.2):width>600?1.8:1;
-    bank.x=(rect.left-bounds.left)*scaleX+6;bank.y=(rect.top-bounds.top)*scaleY+.5;
+    bank.x=(rect.left-bounds.left)*scaleX+inset;bank.y=(rect.top-bounds.top)*scaleY+.5;
    });
    for(const node of banks.keys())if(!present.has(node))banks.delete(node);
   }
@@ -54,29 +55,36 @@ export function SnowSurfaces({field, paused}) {
    getOccluders() { return occluders; },
    take(node,dt){
     if(pause.current||reduced.matches)return [];
-    const bank=banks.get(node);if(!bank)return [];
+    const bank=banks.get(node.closest('[data-snow-surface]'));if(!bank)return [];
     bank.releaseClock=(bank.releaseClock??0)+dt;
     if(bank.releaseClock<.22)return [];
     bank.releaseClock=0;
-    const center=Math.random()*bank.width, radius=12+Math.random()*14;
+    // A segmented control shares one bank. Sample only the ledge above the active segment.
+    const bounds=root.getBoundingClientRect(), rect=node.getBoundingClientRect();
+    const scaleX=width/Math.max(1,bounds.width);
+    const left=(rect.left-bounds.left)*scaleX-bank.x;
+    const right=left+rect.width*scaleX;
+    const start=Math.max(0,left), end=Math.min(bank.width,right);
+    const center=start+Math.random()*(end-start), radius=12+Math.random()*14;
     const pieces=[],step=bank.width/(bank.depth.length-1);
     bank.depth.forEach((depth,i)=>{
-     const distance=Math.abs(i*step-center);
+     const x=i*step;
+     if(x<start||x>end)return;
+     const distance=Math.abs(x-center);
      const falloff=Math.max(0,1-distance/radius);
      const amount=depth*falloff*.65;
      if(amount<=.025)return;
      bank.depth[i]-=amount;
-     pieces.push({x:6+i*step,amount,area:amount*step,depth});
+     pieces.push({x:x-left,amount,area:amount*step,depth});
     });return pieces;
    },
    spill(node,released,outlet){
     if(pause.current||reduced.matches||released<=0)return;
-    const bank=banks.get(node);if(!bank)return;
+    if(!banks.has(node.closest('[data-snow-surface]')))return;
     const rect=node.getBoundingClientRect(),bounds=root.getBoundingClientRect();
-    bank.spillMass=(bank.spillMass??0)+released;
-    const burst=bank.spillMass;
+    const burst=(spillMass.get(node)??0)+released;
+    spillMass.set(node,burst<.023?burst:0);
     if(burst<.023)return;
-    bank.spillMass=0;
     const count=Math.min(14,Math.round(burst*490));
     const source=rect.left-bounds.left+outlet*rect.width;
     for(let i=0;i<count&&debris.length<180;i++){
@@ -144,7 +152,8 @@ export function SnowSurfaces({field, paused}) {
    const night=root.closest('.landing')?.dataset.theme==='night';
    if(!stopped){
     for(const stroke of strokes.splice(0))for(const [node,bank] of banks){
-     if(node.dataset.snowFilling==='true')continue;
+     if(node.dataset.snowFilling==='true'||
+        (node.dataset.snowSurface==='segmented'&&node.querySelector('[data-snow-filling="true"]')))continue;
      const from={x:stroke.from.x-bank.x,y:stroke.from.y-bank.y};
      const to={x:stroke.to.x-bank.x,y:stroke.to.y-bank.y};
      scatter(bank,sweep(bank,from,to,stroke.radius),stroke.vx,stroke.vy);

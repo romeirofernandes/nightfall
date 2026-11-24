@@ -7,10 +7,11 @@ import {SnowFill} from './snow-fill';
 import {SnowSurfaces} from './snow-surfaces';
 import {Celestial} from './celestial';
 import {useWinterTime} from './use-winter-time';
+import {getWindowsDownloads} from './install-platform';
 import {useWinterScroll} from './use-winter-scroll';
 import './landing.css';
 
-const scenery = {day: '/media/winter/alpine-day.jpg', evening: '/media/winter/alpine-evening.jpg', night: '/media/winter/alpine-night.jpg'};
+const landscapePhases = ['morning', 'afternoon', 'evening', 'night'];
 const repository = 'https://github.com/romeirofernandes/nightfall';
 const winterFeatures = [
   {id: 'weather', title: 'Set the snowfall', description: 'Pick a flurry or a blizzard, then set the wind to suit your desktop.'},
@@ -60,10 +61,35 @@ const platforms = {
   },
 };
 
+
+const latestReleaseApi = 'https://api.github.com/repos/romeirofernandes/nightfall/releases/latest';
+
+function WindowsDownloads({release}) {
+  const {installer, portable} = release ?? {};
+  const status = release === null ? 'Checking GitHub for the Windows x64 download…'
+    : release === 'error' ? 'Couldn’t check the Windows download. Open GitHub Releases to check manually.'
+    : installer || portable ? 'Windows x64 downloads are available.'
+    : 'A Windows x64 download has yet to be published on GitHub.';
+
+  return (
+    <>
+      <p role="status">{status}</p>
+      {(installer || portable) && (
+        <div className="landing-windows-downloads">
+          {installer && <a className="landing-button landing-primary" href={installer}><ArrowDownToLine aria-hidden="true" size={18}/>Download installer (.exe)</a>}
+          {portable && <a className={installer ? 'landing-link' : 'landing-button landing-primary'} href={portable}><ArrowDownToLine aria-hidden="true" size={18}/>Download portable ZIP</a>}
+        </div>
+      )}
+      {installer && <p>Run the installer, then open Nightfall from the Start menu.</p>}
+      {portable && <p>For the portable version, extract the ZIP and open <code>nightfall-renderer.exe</code>.</p>}
+    </>
+  );
+}
+
 function GithubSnowLink({field}) {
   const label = <><Github aria-hidden="true" size={17}/>GitHub<ArrowUpRight aria-hidden="true" size={15}/></>;
   return (
-    <a data-snow-surface className="landing-button landing-secondary" href={repository}>
+    <a data-snow-surface className="landing-button landing-secondary snow-fill-control" href={repository}>
       <SnowFill field={field}/>
       <span className="snow-button-label">{label}</span>
       <span className="snow-button-label snow-button-label-filled" aria-hidden="true">{label}</span>
@@ -90,15 +116,20 @@ function WinterEnding({theme, themes, openInstaller, sweepTarget, field}) {
       </div>
       <section className="landing-shell winter-install-tray" ref={sweepTarget} aria-labelledby="get-nightfall">
         <h2 id="get-nightfall" tabIndex={-1}>Get Nightfall</h2>
-        <ul className="winter-platforms" aria-label="Installation platforms">
-          {Object.entries(platforms).map(([key, platform]) => (
-            <li key={key}>
-              <button className="winter-platform" aria-haspopup="dialog" aria-label={`Install on ${platform.name}`}
-                data-snow-surface onClick={() => openInstaller(key)}>
-                {platform.name}<ChevronRight size={16} aria-hidden="true"/>
-              </button>
-            </li>
-          ))}
+        <ul className="winter-platforms" aria-label="Installation platforms" data-snow-surface="segmented">
+          {Object.entries(platforms).map(([key, platform]) => {
+            const label = <>{platform.name}<ChevronRight size={16} aria-hidden="true"/></>;
+            return (
+              <li key={key}>
+                <button className="winter-platform snow-fill-control" aria-haspopup="dialog" aria-label={`Install on ${platform.name}`}
+                  onClick={() => openInstaller(key)}>
+                  <SnowFill field={field}/>
+                  <span className="snow-button-label">{label}</span>
+                  <span className="snow-button-label snow-button-label-filled" aria-hidden="true">{label}</span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </section>
       <footer className="winter-footer">
@@ -133,12 +164,17 @@ export function Landing() {
   const installSnowTarget = useRef(null);
   const landingSnowFields = useMemo(() => [snowField, previewSnowField, featureSnowField, footerSnowField], []);
   const {phase: theme, selectMode, position} = useWinterTime();
-  const sceneLight = theme === 'morning' || theme === 'afternoon' ? 'day' : theme;
+  const [visibleLandscape, setVisibleLandscape] = useState(theme);
+  const [loadedLandscapes, setLoadedLandscapes] = useState([]);
+  useEffect(() => {
+    if (loadedLandscapes.includes(theme)) setVisibleLandscape(theme);
+  }, [loadedLandscapes, theme]);
   const [seenThemes, setSeenThemes] = useState([theme]);
   useEffect(() => { setSeenThemes(previous => previous.includes(theme) ? previous : [...previous, theme]); }, [theme]);
-  const foregroundThemes = seenThemes.includes(theme) ? seenThemes : [...seenThemes, theme];
+  const endingThemes = seenThemes.includes(theme) ? seenThemes : [...seenThemes, theme];
   const [platform, setPlatform] = useState('mac');
   const [copyState, setCopyState] = useState('');
+  const [windowsRelease, setWindowsRelease] = useState(null);
   const install = platforms[platform];
   useWinterScroll(hero);
   useEffect(() => {
@@ -171,11 +207,44 @@ export function Landing() {
   function openInstaller(platform) {
     pressedBackdrop.current = false;
     setPlatform(platform); setCopyState(''); dialog.current.showModal();
+    if (platform === 'windows') checkWindowsRelease();
+  }
+  async function checkWindowsRelease() {
+    setWindowsRelease(null);
+    try {
+      const response = await fetch(latestReleaseApi, {signal: AbortSignal.timeout(8000)});
+      if (!response.ok) throw new Error('GitHub release lookup failed');
+      setWindowsRelease(getWindowsDownloads(await response.json(), RELEASE));
+    } catch {
+      setWindowsRelease('error');
+    }
   }
   async function copyCommands() {
     try { await navigator.clipboard.writeText(install.command); setCopyState('copied'); }
     catch { setCopyState('error'); }
   }
+  const installSteps = (
+    <ol className="landing-install-steps">
+      <li>
+        <h3>Run the commands</h3>
+        <p>{install.instruction}</p>
+        <div className="landing-terminal">
+          <pre tabIndex={0} aria-label={`${install.method} installation commands`}><code>{install.command}</code></pre>
+          <button className="landing-button landing-copy-button" onClick={copyCommands}>
+            {copyState === 'copied' ? <Check size={15} aria-hidden="true"/> : <Copy size={15} aria-hidden="true"/>}
+            {copyState === 'copied' ? 'Copied' : 'Copy commands'}
+          </button>
+        </div>
+        <span className="landing-status" role="status">
+          {copyState === 'error' ? 'Select and copy the commands above.' : copyState === 'copied' ? 'Installation commands copied.' : ''}
+        </span>
+      </li>
+      <li>
+        <h3>Open Nightfall</h3>
+        <p>{install.launch}</p>
+      </li>
+    </ol>
+  );
   return (
     <div className="landing" data-theme={theme} ref={hero}>
       <a className="landing-skip" href="#main-content">Skip to content</a>
@@ -187,11 +256,12 @@ export function Landing() {
         <section className="landing-hero hero" data-enter aria-labelledby="landing-title">
           <div className="winter-world hero__bg" aria-hidden="true">
             <div className="winter-distance">
-            {['day', 'evening', 'night'].map(light => <img key={light}
-              className={'winter-landscape winter-' + light}
-              data-active={light === sceneLight}
-              src={scenery[light]} width="1672" height="941"
-              fetchPriority={light === sceneLight ? 'high' : 'low'} alt=""/>)}
+              {landscapePhases.map(light => (
+                <img key={light} className="winter-landscape" data-active={light === visibleLandscape}
+                  src={`/media/winter/hero-${light}.webp`} alt="" width="1672" height="941" decoding="async"
+                  fetchPriority={light === visibleLandscape ? 'high' : 'low'}
+                  onLoad={() => setLoadedLandscapes(loaded => loaded.includes(light) ? loaded : [...loaded, light])}/>
+              ))}
             </div>
             <Celestial phase={theme} position={position}/>
           </div>
@@ -218,8 +288,11 @@ export function Landing() {
               <GithubSnowLink field={snowField}/>
             </div>
           </div>
-          <div className="winter-near winter-near-left" aria-hidden="true">{foregroundThemes.map(light => <img key={light} data-active={theme === light} ref={node => { if (node?.complete && node.naturalWidth) node.dataset.ready = 'true'; }} onLoad={event => { event.currentTarget.dataset.ready = 'true'; }} src={light === 'afternoon' ? '/media/winter/foreground-pines.png' : '/media/winter/foreground-' + light + '.png'} alt="" width="1672" height="941"/>)}</div>
-          <div className="winter-near winter-near-right" aria-hidden="true">{foregroundThemes.map(light => <img key={light} data-active={theme === light} ref={node => { if (node?.complete && node.naturalWidth) node.dataset.ready = 'true'; }} onLoad={event => { event.currentTarget.dataset.ready = 'true'; }} src={light === 'afternoon' ? '/media/winter/foreground-pines.png' : '/media/winter/foreground-' + light + '.png'} alt="" width="1672" height="941"/>)}</div>
+          {['left', 'right'].map(side => (
+            <div key={side} className={`winter-near winter-near-${side}`} aria-hidden="true">
+              <img src="/media/winter/hero-spruce.webp" alt="" width="1672" height="941" decoding="async"/>
+            </div>
+          ))}
           <div className="winter-passage-shade" aria-hidden="true"/>
           <a className="winter-scroll-cue" href="#winter-passage" aria-label="Explore the winter scene"><ArrowDown size={20} aria-hidden="true"/></a>
           <SnowSurfaces field={snowField}/>
@@ -267,7 +340,7 @@ export function Landing() {
           <SnowSurfaces field={featureSnowField}/>
         </div>
       </main>
-      <WinterEnding theme={theme} themes={foregroundThemes}
+      <WinterEnding theme={theme} themes={endingThemes}
         openInstaller={openInstaller} sweepTarget={installSnowTarget} field={footerSnowField}/>
       <dialog className="landing-dialog" ref={dialog} aria-labelledby="install-title"
         onPointerDown={event => { pressedBackdrop.current = isBackdropEvent(event); }}
@@ -283,26 +356,15 @@ export function Landing() {
             </button>
           </form>
         </header>
-        <ol className="landing-install-steps">
-          <li>
-            <h3>Run the commands</h3>
-            <p>{install.instruction}</p>
-            <div className="landing-terminal">
-              <pre tabIndex={0} aria-label={`${install.method} installation commands`}><code>{install.command}</code></pre>
-              <button className="landing-button landing-copy-button" onClick={copyCommands}>
-                {copyState === 'copied' ? <Check size={15} aria-hidden="true"/> : <Copy size={15} aria-hidden="true"/>}
-                {copyState === 'copied' ? 'Copied' : 'Copy commands'}
-              </button>
-            </div>
-            <span className="landing-status" role="status">
-              {copyState === 'error' ? 'Select and copy the commands above.' : copyState === 'copied' ? 'Installation commands copied.' : ''}
-            </span>
-          </li>
-          <li>
-            <h3>Open Nightfall</h3>
-            <p>{install.launch}</p>
-          </li>
-        </ol>
+        {platform === 'windows' ? (
+          <div className="landing-windows-install">
+            <WindowsDownloads release={windowsRelease}/>
+            <details>
+              <summary>Install with PowerShell</summary>
+              {installSteps}
+            </details>
+          </div>
+        ) : installSteps}
         <div className="landing-help-links">
           {install.links.map(([label, href]) => <a className="landing-link" key={href} href={href}>{label}<ArrowUpRight aria-hidden="true" size={14}/></a>)}
         </div>

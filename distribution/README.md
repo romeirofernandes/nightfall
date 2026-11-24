@@ -6,6 +6,8 @@ asset against SHA256SUMS before installing per user. Override the release with
 downloads; they are served from the same GitHub release, not a separate signature.
 It never installs system packages or enables autostart.
 
+## Linux
+
 Linux x86_64 / ARM64 dependencies:
 
 ```sh
@@ -20,16 +22,15 @@ sudo dnf install webkit2gtk4.1 gtk3 gtk-layer-shell librsvg2 libappindicator-gtk
 Linux x86_64 is built on Ubuntu 22.04; ARM64 on Ubuntu 24.04.
 Older glibc systems and musl distributions such as Alpine are not supported
 by these downloads. Building from source requires the listed native libraries.
-Hyprland is tested on the owner's laptop. Other layer-shell compositors are
-protocol-compatible but not independently tested. Composited X11 has an
-experimental overlay fallback that has not been runtime-tested. Native GNOME
-and KDE Wayland sessions lack layer-shell; settings can still open there.
+The overlay runs on Wayland compositors with layer-shell and on composited X11.
+The automated checks exercise headless Sway and X11. On uncomposited X11 and
+Wayland sessions without layer-shell, Nightfall opens settings without an overlay.
 Monitor additions require restart.
-Window ledges use `hyprctl`; other compositors show desktop snow only.
+On Hyprland, `hyprctl` supplies the window and panel ledges. Other compositors show ground snow.
 
 `nightfall disable` clears snow and releases pointer capture. `nightfall enable`
 re-enables it, starting the app when stopped. `nightfall toggle`, `status`, and
-`quit` control the current user's app through a private local Unix socket.
+`quit` control the current user's app through a private local socket.
 Commands against a stopped app return a nonzero status, except `enable`, which starts it.
 Run `nightfall` for terminal controls. Use arrows to select/change settings,
 `q` to close controls while snow continues, and `x` to stop Nightfall.
@@ -42,6 +43,24 @@ The Go CLI lives in `~/.local/bin`; the Linux renderer lives in
 `~/.local/lib/nightfall`. No autostart entry is created. To uninstall, quit and remove those installed
 files. Settings remain in `$XDG_CONFIG_HOME/app.nightfall.desktop` on Linux
 or `~/Library/Application Support/app.nightfall.desktop` on macOS.
+
+## Windows
+
+The portable x64 ZIP targets Windows 10 (1809 or later) and Windows 11 with
+[Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
+Extract both executables into the same folder. Open `nightfall-renderer.exe` for
+the tray app and settings. In PowerShell, use `.\nightfall.exe` for terminal
+controls or `.\nightfall.exe status` to check the running app.
+
+The snow fits each monitor's work area so the taskbar stays usable. It collects
+on the ground and on exposed top edges of visible windows. Snowball mode gives keyboard focus
+to the overlay under your pointer. Restart Nightfall after changing the monitor layout.
+Settings live in `%APPDATA%\app.nightfall.desktop`. The CLI uses a private
+socket at `%LOCALAPPDATA%\Nightfall.sock` on a local NTFS volume. Windows
+limits that socket path to 107 UTF-8 bytes. To remove Nightfall, quit from the
+tray and delete the extracted folder. Settings stay in AppData.
+
+The ZIP contains unsigned executables. Windows may show a SmartScreen prompt.
 
 ## Homebrew on macOS
 
@@ -71,16 +90,20 @@ NIGHTFALL_RENDERER="$PWD/../desktop/src-tauri/target/release/nightfall-renderer"
 
 ## Release
 
-Push a matching `vMAJOR.MINOR.PATCH` tag. The release workflow tests and builds
-Linux x64/ARM64 plus Apple Silicon and Intel Mac apps, verifies Mac signatures,
-and publishes all four archives with SHA256SUMS only after every build passes.
-The separate macOS dispatch workflow supports optional Developer ID signing.
+A push of a matching `vMAJOR.MINOR.PATCH` tag triggers publication. The release
+workflow builds Linux x64 and ARM64, Apple Silicon and Intel Mac, and Windows x64.
+It verifies Mac signatures, smoke-tests the Windows ZIP, and publishes all five
+archives with SHA256SUMS after every release job passes. Branch and PR runs build
+and test without uploading release archives.
+
+The separate macOS workflow supports optional Developer ID signing on a
+matching tag. It uploads its bundles to Actions for that tag.
 Ad-hoc releases require app-specific Gatekeeper approval; never disable it.
 The Homebrew cask is updated only after published asset hashes are available.
 
 ## Source layout
 
-- `cli/`: Go terminal controls and Unix socket client. Builds without GTK or cgo.
+- `cli/`: Go terminal controls and local socket client. Builds without GTK or cgo.
 - `desktop/`: Rust/Tauri renderer, native platform integration, and overlay assets.
 - `website/`: marketing site.
 - `distribution/`: installers, release notes, and platform details.

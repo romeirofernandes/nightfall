@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {TIME_PHASES, THEME_STORAGE_KEY, resolvePhase, celestialPosition} from './winter-time';
 
 function readMode() {
@@ -37,10 +37,10 @@ export function useWinterTime() {
     if (schemeMeta) schemeMeta.content = scheme;
     document.documentElement.style.colorScheme = scheme;
   }, [phase]);
-  function selectMode(next) {
+  const selectMode = useCallback(next => {
     if (next !== 'auto' && !TIME_PHASES.includes(next)) return;
     setMode(next); setNow(new Date());
     try { localStorage.setItem(THEME_STORAGE_KEY, next); } catch { /* Session state remains usable. */ }
-  }
+  }, []);
   return {mode, phase, selectMode, position: celestialPosition(mode, hour)};
 }

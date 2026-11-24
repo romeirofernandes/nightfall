@@ -24,8 +24,7 @@ export function useWinterScroll(root) {
       .to('.winter-scroll-cue',{autoAlpha:0,duration:.12,ease:'none'},0);
     passage.to('.winter-distance',{scale:1.08,yPercent:-3,duration:1,ease:'none'},0)
       .to('.winter-near-left',{xPercent:-16,yPercent:10,scale:1.12,duration:1,ease:'none'},0)
-      .to('.winter-near-right',{xPercent:16,yPercent:10,scale:1.12,duration:1,ease:'none'},0)
-      .fromTo('.winter-desktop-preview',{scale:.965},{scale:1,duration:.46,ease:'sine.out'},.36);
+      .to('.winter-near-right',{xPercent:16,yPercent:10,scale:1.12,duration:1,ease:'none'},0);
     // Reach the passage color before the sticky landscape gives way to the next section.
     passage.to('.winter-passage-shade',{opacity:1,duration:.82,ease:'sine.inOut'},.18)
       .fromTo('.winter-desktop-preview, .winter-passage > .snow-surfaces',{opacity:0},{opacity:1,duration:.34,ease:'sine.out'},.30);

@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"syscall"
 
 	"golang.org/x/term"
 )
@@ -29,10 +28,15 @@ func tui() error {
 		return err
 	}
 	defer term.Restore(fd, old)
+	restoreOutput, err := enableTerminalOutput()
+	if err != nil {
+		return err
+	}
+	defer restoreOutput()
 	fmt.Print("\x1b[?1049h\x1b[?25l")
 	defer fmt.Print("\x1b[?25h\x1b[?1049l")
 	signals := make(chan os.Signal, 2)
-	signal.Notify(signals, syscall.SIGWINCH, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(signals, terminalSignals()...)
 	defer signal.Stop(signals)
 	keys := make(chan string)
 	done := make(chan struct{})
@@ -102,7 +106,7 @@ func tui() error {
 		}
 		select {
 		case sig := <-signals:
-			if sig != syscall.SIGWINCH {
+			if !terminalResized(sig) {
 				return nil
 			}
 			continue

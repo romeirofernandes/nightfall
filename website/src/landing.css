@@ -1,3 +1,4 @@
+@font-face { font-family: Jua; src: url('/fonts/jua.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 @font-face { font-family: Figtree; src: url('/fonts/figtree.woff2') format('woff2'); font-weight: 300 900; font-display: swap; }
 /* Share a single interpolated palette across the scroll handoff. */
 @property --background { syntax: '<color>'; inherits: true; initial-value: #eef4f8; }
@@ -15,7 +16,8 @@
 @property --secondary-border { syntax: '<color>'; inherits: true; initial-value: #526b7880; }
 @property --footer-sky { syntax: '<color>'; inherits: true; initial-value: #719fd1; }
 @property --footer-snow { syntax: '<color>'; inherits: true; initial-value: #91adde; }
-@property --footer-ink { syntax: '<color>'; inherits: true; initial-value: #0a2634; }
+@property --install-ink { syntax: '<color>'; inherits: true; initial-value: #0a2634; }
+html:has(.landing) { scrollbar-width: thin; scrollbar-color: light-dark(#627e91, #7897ad) light-dark(transparent, #081827); }
 body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing {
   --background: #eef4f8; --sky: #b8dafe; --panel: #f7f9f7; --ink: #0a2634; --muted: #334e5b;
@@ -31,7 +33,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
   transition:
    --background 2600ms ease, --sky 2600ms ease, --sky-wash 2600ms ease,
    --passage-drift 2600ms ease, --passage-light 2600ms ease, --footer-snow 2600ms ease,
-   --footer-sky 2600ms ease, --footer-ink 240ms ease-in-out 660ms,
+   --footer-sky 2600ms ease, --install-ink 240ms ease-in-out 660ms,
    --button 2600ms ease, --button-hover 2600ms ease, --on-button 240ms ease-in-out 660ms,
    --secondary 2600ms ease, --secondary-hover 2600ms ease, --secondary-border 2600ms ease,
    --scene-ink 240ms ease-in-out 660ms, --scene-muted 240ms ease-in-out 660ms;
@@ -42,7 +44,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing button { font: inherit; color: inherit; cursor: pointer; }
 .landing a { color: inherit; text-decoration: none; }
 .landing :focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
-.landing-shell { width: min(1376px, calc(100% - clamp(40px, 9vw, 144px))); margin-inline: auto; }
+.landing-shell { width: min(1190px, calc(100% - clamp(40px, 9vw, 144px))); margin-inline: auto; }
 .landing > main { position: relative; isolation: isolate; z-index: 1; }
 .winter-snowfall { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: clip; }
 .winter-snowfall .snow-canvas { position: sticky; inset: 0 auto auto; display: block; width: 100%; height: 100dvh; }
@@ -51,7 +53,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 58%; }
 .winter-world::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky-wash) 0%, transparent 40%); opacity: .25; }
 .landing-header { min-height: 96px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
-.landing-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font: 400 28px/1 Prata, Georgia, serif; letter-spacing: -.04em; }
+.landing-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font: 400 28px/1 Jua, system-ui, sans-serif; letter-spacing: normal; }
 @media (prefers-reduced-motion: no-preference) {
  .landing-brand > svg { transform-origin: center; transition: transform 500ms cubic-bezier(.2, .75, .25, 1); }
  .landing-brand:is(:hover, :focus-visible) > svg { transform: rotate(60deg); }
@@ -61,12 +63,20 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing .landing-link:hover { text-decoration: underline; text-underline-offset: 5px; }
 .landing-icon-button { display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0; background: transparent; border: 1px solid transparent; border-radius: 50%; transition: background 180ms, transform 180ms; }
 .landing-icon-button:hover { background: #ffffff30; transform: translateY(-1px); }
-.landing-theme-toggle, .landing-theme-toggle:hover { transform: none; }
-.landing-theme-toggle svg { grid-area: 1 / 1; transition: opacity 320ms ease, transform 320ms ease; }
-.landing-theme-toggle svg[data-active="false"] { opacity: 0; transform: rotate(-38deg) scale(.82); }
-.landing-copy { position: relative; padding-top: clamp(32px, 5vh, 64px); text-align: center; }
-.landing-copy h1 { margin: 0; font: 400 clamp(64px, 6.65vw, 110px)/1.22 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
-.landing-copy h1 span { white-space: nowrap; }
+.landing .landing-theme-toggle {
+ color: var(--ink);
+ background: var(--field);
+ border-color: var(--field-border);
+ transform: none;
+}
+.landing .landing-theme-toggle:hover { background: var(--field-hover); }
+.landing-copy { position: relative; container-type: inline-size; padding-top: clamp(32px, 5vh, 64px); text-align: center; }
+.landing-copy h1 {
+ margin: 0;
+ font: 400 min(clamp(64px, 6.65vw, 110px), 8.3cqi)/1.22 Jua, system-ui, sans-serif;
+ letter-spacing: normal;
+ white-space: nowrap;
+}
 .landing-copy > p { margin: 18px 0 28px; color: var(--muted); font-size: clamp(18px, 1.8vw, 26px); line-height: 1.5; }
 .landing-header, .landing-copy h1, .winter-passage h2, .winter-features { color: var(--scene-ink); }
 .landing-copy > p, .winter-passage p, .winter-features p { color: var(--scene-muted); }
@@ -89,23 +99,93 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .landing-download { margin-top: 8px; color: var(--muted)!important; font-size: 13px; }
 .landing-skip { position: fixed; top: 12px; left: 12px; z-index: 10; padding: 10px 14px; border-radius: 8px; background: var(--panel); transform: translateY(-160%); }
 .landing-skip:focus { transform: none; }
-.landing-dialog { width: min(640px, calc(100% - 32px)); max-height: calc(100% - 32px); color: var(--ink); background: var(--panel); margin: auto; padding: clamp(18px, 4vw, 30px); border: 1px solid var(--field-border); border-radius: 16px; box-shadow: 0 24px 80px #001a2b50; }
-.landing-dialog::backdrop { background: #051423a8; backdrop-filter: blur(7px); }
-.landing-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
-.landing-dialog h2 { font: 400 clamp(24px, 5vw, 32px)/1.35 Prata, Georgia, serif; margin: 0; letter-spacing: -.03em; }
-.landing-close { width: 44px; min-height: 44px; padding: 0; flex-shrink: 0; }
-.landing-terminal { border: 1px solid var(--line); border-radius: 9px; background: var(--background); overflow: hidden; }
-.landing-terminal-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
-.landing-terminal-bar > span { color: var(--muted); font-size: 14px; }
-.landing-copy-button { min-height: 44px; padding: 8px 12px; }
-.landing-terminal pre { margin: 0; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.7 ui-monospace, monospace; }
-.landing-dialog p, .landing-status { color: var(--muted); font-size: 14px; }
+.landing-dialog {
+  --paper: light-dark(#fffcf5, #24211e);
+  --type: light-dark(#382820, #fff6e8);
+  --detail: light-dark(#68574a, #cbbfb0);
+  --rule: light-dark(#e4d2bd, #635144);
+  --command-sheet: light-dark(#f3e8d8, #191816);
+  --install-accent: light-dark(#22634a, #f1bd75);
+  --modal-pad: clamp(16px, 4vw, 34px);
+  width: min(620px, calc(100% - 28px));
+  max-height: calc(100% - 28px);
+  margin: auto;
+  padding: 0;
+  color: var(--type);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: 4px solid var(--install-accent);
+  border-radius: 6px;
+  box-shadow: 0 20px 64px #00121e55;
+}
+.landing-dialog::backdrop { background: #051423ad; }
+@media (prefers-reduced-motion: no-preference) {
+  .landing-dialog {
+    --dialog-duration: 180ms;
+    --dialog-easing: cubic-bezier(.23, 1, .32, 1);
+    opacity: 0;
+    transform: scale(.96);
+    transition:
+      opacity var(--dialog-duration) var(--dialog-easing),
+      transform var(--dialog-duration) var(--dialog-easing),
+      display var(--dialog-duration) allow-discrete,
+      overlay var(--dialog-duration) allow-discrete;
+  }
+  .landing-dialog[open] { --dialog-duration: 240ms; opacity: 1; transform: scale(1); }
+  .landing-dialog::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--dialog-duration) var(--dialog-easing),
+      display var(--dialog-duration) allow-discrete,
+      overlay var(--dialog-duration) allow-discrete;
+  }
+  .landing-dialog[open]::backdrop { opacity: 1; }
+  .landing-dialog:not([open]), .landing-dialog:not([open])::backdrop { pointer-events: none; }
+  @starting-style {
+    .landing-dialog[open] { opacity: 0; transform: scale(.96); }
+    .landing-dialog[open]::backdrop { opacity: 0; }
+  }
+}
+.landing-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 15px var(--modal-pad);
+  border-bottom: 1px solid var(--rule);
+}
+.landing-dialog h2 { margin: 0; font: 400 clamp(26px, 5vw, 38px)/1.12 Jua, system-ui, sans-serif; }
+.landing-dialog .landing-close:hover { background: var(--command-sheet); }
+.landing-dialog :focus-visible { outline-color: var(--install-accent); outline-offset: 2px; }
+.landing-install-steps { margin: 0; padding: 20px var(--modal-pad) 20px calc(var(--modal-pad) + 20px); }
+.landing-install-steps li { padding-inline-start: 4px; }
+.landing-install-steps li + li { margin-top: 20px; }
+.landing-install-steps li::marker { color: var(--install-accent); font-weight: 700; }
+.landing-install-steps h3 { margin: 0; font: 400 22px/1.2 Jua, system-ui, sans-serif; }
+.landing-install-steps p { margin: 5px 0 0; color: var(--detail); font-size: 15px; }
+.landing-terminal { margin-top: 12px; border-inline-start: 2px solid var(--rule); background: var(--command-sheet); }
+.landing-terminal pre { margin: 0; padding: 12px 14px 4px; white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.55 ui-monospace, monospace; }
+.landing-dialog .landing-copy-button {
+  min-height: 44px;
+  padding: 4px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--install-accent);
+  font-size: 14px;
+  font-weight: 650;
+  transform: none;
+}
+.landing-dialog .landing-copy-button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.landing-status { color: var(--detail); font-size: 14px; }
 .landing-status:empty { display: block; }
-.landing-help-links { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.landing-help-links { display: flex; flex-wrap: wrap; gap: 0 20px; padding: 0 var(--modal-pad); border-top: 1px solid var(--rule); }
+@media (max-width: 480px) {
+  .landing-dialog-header { padding-block: 10px; }
+  .landing-install-steps { padding-block: 14px; }
+  .landing-terminal pre { max-block-size: 10rem; overflow: auto; }
+}
 @media (min-aspect-ratio: 19/10) { .winter-landscape { object-position: center 52%; } }
 @media (max-width: 900px) {
-  .landing-copy h1 { font-size: clamp(58px, 8vw, 76px); }
-  .landing-copy h1 span { display: block; }
   .landing-copy { padding-top: 26px; }
   .winter-landscape { object-position: 60% center; }
 }
@@ -116,7 +196,6 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
   .landing-brand svg { width: 23px; }
   .landing-header-actions { gap: 4px; }
   .landing-copy { padding-top: 28px; }
-  .landing-copy h1 { font-size: clamp(39px, 11.5vw, 64px); line-height: 1.27; }
   .landing-copy > p { margin: 18px auto 24px; font-size: 17px; max-width: 25ch; }
   .landing-actions { gap: 10px; }
   .landing .landing-actions .landing-button { min-width: 0; min-height: 48px; padding-inline: 16px; font-size: 14px; }
@@ -207,16 +286,18 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  mask-image: linear-gradient(transparent, #000 29%, #000 73%, transparent);
 }
 .winter-passage-copy { position: relative; z-index: 3; padding-block: clamp(76px, 12vh, 120px) 42px; text-align: center; }
-.winter-passage h2 { margin: 0; font: 400 clamp(36px, 5vw, 70px)/1.18 Prata, Georgia, serif; letter-spacing: -.04em; text-wrap: balance; }
+.winter-passage h2 { margin: 0; font: 400 clamp(36px, 5vw, 70px)/1.18 Jua, system-ui, sans-serif; letter-spacing: normal; text-wrap: balance; }
 .winter-passage p { margin: 14px auto 0; max-width: 44ch; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55; text-wrap: pretty; }
-.winter-desktop-preview {
+.winter-image-frame {
  position: relative;
- width: min(100%, 1080px, max(720px, 110svh));
- margin: clamp(24px, 4vh, 42px) auto 0;
  overflow: hidden;
- border-radius: clamp(11px, 1.3vw, 17px);
+ border: 1px solid var(--field-border);
+ border-radius: 14px;
  background: var(--panel);
- box-shadow: 0 26px 58px -23px #08182782;
+}
+.winter-desktop-preview {
+ width: 100%;
+ margin: clamp(24px, 4vh, 42px) 0 0;
  pointer-events: auto;
 }
 .winter-desktop-preview img { display: block; width: 100%; height: auto; }
@@ -249,7 +330,7 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  position: relative;
  isolation: isolate;
  overflow: clip;
- padding-block: clamp(154px, 18vw, 225px) clamp(34px, 5vw, 67px);
+ padding-block: clamp(154px, 14.5vw, 255px) clamp(34px, 5vw, 67px);
 }
 .winter-finale { position: relative; isolation: isolate; }
 .winter-finale::before {
@@ -264,15 +345,13 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
 .winter-feature-lights {
  position: absolute;
  z-index: -1;
- inset: 13px 0 auto;
- width: min(100%, 1600px);
- margin-inline: auto;
+ inset: 13px -1% auto;
  pointer-events: none;
 }
 .winter-feature-lights img {
  display: block;
  width: 100%;
- height: auto;
+ height: min(16.93vw, 260px);
  filter: brightness(.88);
 }
 .winter-feature-bulb {
@@ -296,13 +375,13 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  0%, 4.6%, 100% { opacity: .14; scale: .97; }
  2.1% { opacity: .46; scale: 1.1; }
 }
-.winter-features-content { position: relative; z-index: 3; max-width: 1190px; }
+.winter-features-content { position: relative; z-index: 3; }
 .winter-features h2 {
  margin: 0;
  text-align: center;
  text-wrap: balance;
- font: 400 clamp(38px, 5.2vw, 72px)/1.18 Prata, Georgia, serif;
- letter-spacing: -.04em;
+ font: 400 clamp(38px, 5.2vw, 72px)/1.18 Jua, system-ui, sans-serif;
+ letter-spacing: normal;
 }
 .winter-feature-list {
  list-style: none;
@@ -312,61 +391,46 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  padding: 0;
  margin: clamp(36px, 6vw, 72px) 0 0;
 }
-.winter-feature-capture {
- position: relative;
- overflow: hidden;
- aspect-ratio: 1.8;
- border-radius: 12px;
- background: var(--panel);
- box-shadow: 0 18px 36px -24px #0818279c;
-}
-.winter-feature-capture::before,
-.winter-feature-capture::after {
+.winter-feature-capture { aspect-ratio: 1.8; }
+.winter-feature-capture::before {
  content: '';
  position: absolute;
  inset: 0;
-}
-.winter-feature-capture::before {
  background: var(--panel) url('/nightfall-desktop.webp') no-repeat;
  transition: transform 650ms cubic-bezier(.18, .75, .2, 1);
-}
-.winter-feature-capture::after {
- background: radial-gradient(ellipse at 45% 0, #ffd3856b, transparent 70%);
- opacity: .55;
- transition: opacity 550ms ease;
 }
 .winter-feature-capture[data-detail="weather"]::before { background-size: 232% auto; background-position: 62% 43%; }
 .winter-feature-capture[data-detail="ledges"]::before { background-size: 220% auto; background-position: 51% 15%; }
 .winter-feature-capture[data-detail="decorations"]::before { background-size: 186% auto; background-position: 2% 100%; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
- .winter-feature:hover .winter-feature-capture::before { transform: scale(1.045); }
- .winter-feature:hover .winter-feature-capture::after { opacity: .95; }
+ .winter-feature:hover .winter-feature-capture::before { transform: scale(1.03); }
 }
 .winter-feature h3 {
  margin: 19px 0 0;
- font: 400 clamp(21px, 2vw, 28px)/1.3 Prata, Georgia, serif;
+ font: 400 clamp(21px, 2vw, 28px)/1.3 Jua, system-ui, sans-serif;
  letter-spacing: -.025em;
 }
 .winter-feature p { margin: 8px 0 0; max-width: 32ch; font-size: 16px; text-wrap: pretty; }
 @media (max-width: 700px) {
  .winter-features { padding-block: 100px 34px; }
- .winter-feature-list { grid-template-columns: minmax(0, 1fr); gap: 38px; max-width: 430px; margin-inline: auto; }
- .winter-feature-lights { inset-inline: -16%; width: auto; }
+ .winter-feature-list { grid-template-columns: minmax(0, 1fr); gap: 38px; }
+ .winter-feature-lights { inset-inline: -16%; }
+ .winter-feature-lights img { height: auto; }
 }
 
 .landing[data-theme="morning"] { --footer-sky: #6c8fbe; --footer-snow: #7b98ce; }
 .landing[data-theme="evening"] { --footer-sky: #233e63; --footer-snow: #6b8bca; }
-.landing[data-theme="night"] { --footer-sky: #091b2e; --footer-snow: #436caa; --footer-ink: #fffdf2; }
+.landing[data-theme="night"] { --footer-sky: #091b2e; --footer-snow: #436caa; --install-ink: #fffdf2; }
 
-.winter-closing {
+.winter-ending {
  position: relative;
  isolation: isolate;
  display: grid;
  align-content: end;
  min-block-size: max(410px, 46vw);
  margin-block-start: calc(-1 * clamp(8px, 1.7vw, 24px));
- padding-block-end: clamp(48px, 4.5vw, 76px);
- color: var(--footer-ink);
+ row-gap: clamp(64px, 7vw, 112px);
+ padding-block-end: clamp(36px, 4vw, 68px);
  background: linear-gradient(transparent,
    color-mix(in srgb, var(--footer-sky) 55%, transparent) 21%,
    var(--footer-sky) 45%, var(--footer-snow));
@@ -395,31 +459,78 @@ body:has(.landing) { margin: 0; background: #eef4f8; }
  display: grid;
  justify-items: center;
  gap: 8px;
+ color: var(--install-ink);
  text-align: center;
 }
-.landing .winter-closing .landing-primary {
- color: #fffdf2;
- background: #0e362c;
- border-color: #0e362c;
- box-shadow: 0 5px 18px #081d3338;
+.winter-install-tray h2 {
+ margin: 0 0 8px;
+ font: 400 clamp(28px, 4vw, 48px)/1.18 Jua, system-ui, sans-serif;
 }
-.winter-closing .landing-primary::before { background: #1b5141; }
-.winter-closing :focus-visible { outline-color: currentColor; }
+.winter-platforms {
+ display: grid;
+ grid-template-columns: repeat(3, minmax(0, 1fr));
+ width: min(100%, 450px);
+ margin: 0;
+ padding: 3px;
+ list-style: none;
+ border: 1px solid #cedfec80;
+ border-radius: 12px;
+ background: #10283a;
+ color: #fff6e8;
+ box-shadow: 0 8px 24px #081d3340;
+}
+.winter-platforms li + li { border-inline-start: 1px solid #cedfec40; }
+.landing .winter-platform {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: clamp(3px, 1vw, 10px);
+ width: 100%;
+ min-height: 49px;
+ padding: 0 4px;
+ border: 0;
+ border-radius: 8px;
+ background: transparent;
+ font-weight: 650;
+ font-size: clamp(13px, 2.6vw, 16px);
+}
+.winter-platform svg { flex-shrink: 0; color: #f2cf8e; }
+.landing .winter-platform:hover { background: #26475d; }
+.winter-ending :focus-visible { outline-color: currentColor; }
+.landing #get-nightfall:focus { outline: none; }
+.winter-platform:focus-visible { outline-offset: -3px; }
+.winter-footer {
+ color: #0a2634;
+}
+.winter-footer-content {
+ display: grid;
+ justify-items: center;
+ gap: 6px;
+ text-align: center;
+}
+.winter-footer :focus-visible { outline-color: currentColor; }
 .landing-footer-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 clamp(14px, 2vw, 28px); }
 .landing-footer-links .landing-link { font-weight: 600; }
-.winter-install-tray p { margin: 0; font-size: 13px; font-weight: 500; }
-.winter-install-tray p a { text-decoration: underline; text-underline-offset: 3px; }
+.winter-credits { margin: 0; font-size: clamp(16px, 1.4vw, 18px); font-weight: 600; text-wrap: balance; }
+.winter-credits a {
+ text-decoration-line: underline;
+ text-decoration-style: wavy;
+ text-decoration-color: var(--credit-underline);
+ text-decoration-thickness: 2px;
+ text-underline-offset: 4px;
+}
+.winter-credits a:nth-of-type(1) { --credit-underline: #a51635; }
+.winter-credits a:nth-of-type(2) { --credit-underline: #006044; }
+.winter-credits a:nth-of-type(3) { --credit-underline: #814600; }
 
 @media (max-width: 840px) {
- .winter-closing {
+ .winter-ending {
   min-block-size: 0;
-  padding-block: max(132px, 38vw) 30px;
+  padding-block: max(116px, calc(38vw - 16px)) 46px;
   background: linear-gradient(transparent, var(--footer-sky) max(80px, 18vw), var(--footer-snow) max(155px, 42vw));
  }
  .winter-footer-art {
-  height: auto;
-  aspect-ratio: 2;
-  mask-image: linear-gradient(transparent, #0003 16%, #000 33%, #000 75%, transparent);
+  mask-image: linear-gradient(transparent, #0003 16%, #000 33%);
  }
 }
 @media (max-width: 360px) {

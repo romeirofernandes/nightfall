@@ -1,0 +1,55 @@
+package main
+
+import (
+	"bufio"
+	"errors"
+	"io"
+	"net"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"syscall"
+
+	"golang.org/x/sys/windows"
+)
+
+func controlPath() (string, error) {
+	base := os.Getenv("LOCALAPPDATA")
+	if base == "" {
+		return "", errors.New("LOCALAPPDATA is required")
+	}
+	return filepath.Join(base, "Nightfall.sock"), nil
+}
+
+func exchangeCommand(conn *net.UnixConn, command string) (string, error) {
+	if _, err := io.WriteString(conn, command+"\n"); err != nil {
+		return "", err
+	}
+	return bufio.NewReader(io.LimitReader(conn, 65536)).ReadString('\n')
+}
+
+func rendererCandidates(dir string) []string {
+	return []string{filepath.Join(dir, "nightfall-renderer.exe")}
+}
+
+func detachRenderer(cmd *exec.Cmd) {
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		CreationFlags: windows.DETACHED_PROCESS | windows.CREATE_NEW_PROCESS_GROUP,
+	}
+}
+
+func enableTerminalOutput() (func(), error) {
+	handle := windows.Handle(os.Stdout.Fd())
+	var mode uint32
+	if err := windows.GetConsoleMode(handle, &mode); err != nil {
+		return nil, err
+	}
+	if err := windows.SetConsoleMode(handle, mode|windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING); err != nil {
+		return nil, err
+	}
+	return func() { _ = windows.SetConsoleMode(handle, mode) }, nil
+}
+
+func terminalSignals() []os.Signal { return []os.Signal{os.Interrupt, syscall.SIGTERM} }
+
+func terminalResized(os.Signal) bool { return false }
